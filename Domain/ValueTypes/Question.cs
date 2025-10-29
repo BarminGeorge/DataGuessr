@@ -4,17 +4,16 @@ namespace Domain.ValueTypes;
 
 public record Question
 {
-    public IInput Input { get; }
+    public IQuestionType QuestionType { get; }
     public Answer RightAnswer { get; }
     public IReadOnlyList<Answer> AllAnswers => allAnswers.AsReadOnly();
 
     private readonly List<Answer> allAnswers = [];
 
-    public Question(IInput input, Answer rightAnswer)
+    public Question(IQuestionType questionType, Answer rightAnswer)
     {
-        Input = input;
+        QuestionType = questionType;
         RightAnswer = rightAnswer;
-        allAnswers.Add(rightAnswer);
     }
 
     public void AddAnswer(Answer answer) => allAnswers.Add(answer);

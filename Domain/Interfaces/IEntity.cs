@@ -1,6 +1,6 @@
 namespace Domain.Interfaces;
 
-internal interface IEntity<out T>
+internal interface IEntity<out TId>
 {
-    T Id { get; }
+    TId Id { get; }
 }

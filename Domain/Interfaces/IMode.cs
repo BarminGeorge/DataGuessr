@@ -6,5 +6,5 @@ public interface IMode
 {
     string Name { get; init; }
     string Description { get; init; }
-    InputType SupportedInputType { get; }
+    QuestionType SupportedQuestionType { get; }
 }

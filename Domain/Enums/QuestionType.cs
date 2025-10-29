@@ -1,6 +1,6 @@
 namespace Domain.Enums;
 
-public enum InputType
+public enum QuestionType
 {
     Image,
 }
