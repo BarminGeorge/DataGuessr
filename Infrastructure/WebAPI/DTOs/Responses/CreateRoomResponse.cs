@@ -7,16 +7,16 @@
     {
         public Guid RoomId { get; set; }
 
-        public string RoomCode { get; set; }
+        public required string RoomCode { get; set; }
 
-        public string ShareableUrl { get; set; }
+        public required string ShareableUrl { get; set; }
         // Готовая ссылка для копирования и отправки друзьям
 
         public DateTime ExpiresAt { get; set; }
         // Время жизни комнаты (например, 24 часа)
 
 
-        public string Message { get; set; }
+        public required string Message { get; set; }
         // Текст для UI: "Комната создана! Отправьте ссылку друзьям"
     }
 }

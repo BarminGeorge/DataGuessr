@@ -8,7 +8,7 @@ namespace DataGuessr.Infrastructure.WebAPI.DTOs.Requests
     public class CreateRoomRequest
     {
         [Required(ErrorMessage = "Настройки приватности обязательны")]
-        public string Privacy { get; set; } = "Private";
+        public required string Privacy { get; set; } = "Private";
         // "Private" - только по ссылке-приглашению
         // "Public" - видна в списке комнат
 

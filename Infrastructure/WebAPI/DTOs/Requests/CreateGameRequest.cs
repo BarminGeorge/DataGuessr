@@ -8,10 +8,10 @@ namespace DataGuessr.Infrastructure.WebAPI.DTOs.Requests
     public class CreateGameRequest
     {
         [Required(ErrorMessage = "RoomId обязателен")]
-        public string RoomId { get; set; }
+        public required string RoomId { get; set; }
 
         [Required(ErrorMessage = "Тип режима игры обязателен")]
-        public string ModeType { get; set; } = "DefaultMode";
+        public required string ModeType { get; set; } = "DefaultMode";
 
         [Range(1, 20, ErrorMessage = "Количество вопросов должно быть от 1 до 20")]
         public int QuestionCount { get; set; } = 5;
