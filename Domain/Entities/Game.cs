@@ -25,6 +25,8 @@ public class Game : IEntity<Guid>
     public void AddQuestion(Question question) => questions.Add(question);
     public void AddQuestions(IEnumerable<Question> question) => questions.AddRange(question);
 
+    public void AddQuestions(IEnumerable<Question> question) => questions.AddRange(question);
+
     public void StartGame()
     {
         if (Status is GameStatus.NotStarted)
