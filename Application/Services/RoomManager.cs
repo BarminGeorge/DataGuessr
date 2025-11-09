@@ -13,7 +13,7 @@ public class RoomManager(
         var room = new Room();
 
         await roomRepository.AddAsync(room);
-        logger.LogInformation("Room {RoomId} created by user {UserId}", room.Id, userId);
+        logger.LogInformation($"Room {room.Id} created by user {userId}");
         
         return room;
     }
@@ -23,7 +23,7 @@ public class RoomManager(
         var room = await roomRepository.GetByIdAsync(roomId);
         if (room == null)
         {
-            logger.LogWarning("Room {RoomId} not found", roomId);
+            logger.LogWarning($"Room {roomId} not found");
             return false;
         }
         
@@ -31,7 +31,7 @@ public class RoomManager(
         room.AddPlayer(player);
         await roomRepository.UpdateAsync(room);
         
-        logger.LogInformation("User {UserId} joined room {RoomId}", userId, roomId);
+        logger.LogInformation($"User {userId} joined room {roomId}");
         return true;
     }
 
@@ -44,7 +44,7 @@ public class RoomManager(
         var player = await playerRepository.GetPlayerByIdAsync(userId);
         room.RemovePlayer(player);
         
-        logger.LogInformation("User {UserId} left room {RoomId}", userId, roomId);
+        logger.LogInformation($"User {userId} left room {roomId}");
         return true;
     }
 

@@ -1,7 +1,7 @@
-using Application.Interface;
+using Application.Interfaces;
 using Domain.Entities;
 
-namespace Application.Service;
+namespace Application.Services;
 
 public class Aunteficator(IRepository repository)
 {

@@ -34,8 +34,7 @@ public class MatchStarter(IRoomRepository roomRepository, ILogger<MatchStarter> 
         room.AddGame(game);
         await roomRepository.UpdateAsync(room);
 
-        logger.LogInformation("Match {MatchId} started in room {RoomId} by user {UserId}", 
-            game.Id, roomId, startedByUserId);
+        logger.LogInformation($"Match {game.Id} started in room {roomId} by user {startedByUserId}");
 
         return game;
     }
