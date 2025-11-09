@@ -6,7 +6,7 @@ public interface IRoomRepository
 {
     Task<Room?> GetByIdAsync(Guid id);
     Task<IEnumerable<Room>> GetRoomsAsync();
-    Task<IEnumerable<Room>> GetWaitingPublicRoomsAsync();
+    Task<IEnumerable<Room>?> GetWaitingPublicRoomsAsync();
     Task AddAsync(Room room);
     Task UpdateAsync(Room room);
     Task RemoveAsync(Guid id);

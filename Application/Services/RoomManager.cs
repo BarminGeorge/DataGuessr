@@ -48,7 +48,7 @@ public class RoomManager(
         return true;
     }
 
-    public async Task<IEnumerable<Room>> GetAvailablePublicRoomsAsync() 
+    public async Task<IEnumerable<Room>?> GetAvailablePublicRoomsAsync()
         => await roomRepository.GetWaitingPublicRoomsAsync();
 
     public async Task<Room?> GetRoomByIdAsync(Guid roomId) 
