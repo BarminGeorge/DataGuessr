@@ -8,6 +8,7 @@ public class Room : IEntity<Guid>
     public Guid Id { get; }
     public IReadOnlyList<Game> Games => games.AsReadOnly();
     public HashSet<Player> Players => new();
+    public Guid Host { get; private set; }
 
     private readonly List<Game> games = [];
 
@@ -24,4 +25,9 @@ public class Room : IEntity<Guid>
     }
         
     public void AddPlayer(Player player) => Players.Add(player);
+
+    public void RemovePlayer(Player player)
+    {
+        throw new NotImplementedException();
+    }
 }
