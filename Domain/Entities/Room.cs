@@ -30,8 +30,8 @@ public class Room : IEntity<Guid>
     public IReadOnlyCollection<Game> Games => games.AsReadOnly();
     public IReadOnlyCollection<Player> Players => players;
 
-    private readonly List<Game> games = new();
-    private readonly HashSet<Player> players = new();
+    private readonly List<Game> games = [];
+    private readonly HashSet<Player> players = [];
 
     protected Room()
     {
