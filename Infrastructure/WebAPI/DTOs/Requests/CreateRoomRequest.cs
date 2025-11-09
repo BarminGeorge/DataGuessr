@@ -1,19 +1,17 @@
-﻿using System.ComponentModel.DataAnnotations;
+﻿using DataGuessr.Infrastructure.WebAPI.Enums;
+using System.ComponentModel.DataAnnotations;
 
 namespace DataGuessr.Infrastructure.WebAPI.DTOs.Requests
 {
     /// <summary>
     /// Запрос на создание новой комнаты
     /// </summary>
-    public class CreateRoomRequest
+    public record CreateRoomRequest(
+        [Required] RoomPrivacy Privacy = RoomPrivacy.Private,
+        [Range(2, 10)] int MaxPlayers = 6
+    )
+    // Данные создателя берутся из контекста авторизации
     {
-        [Required(ErrorMessage = "Настройки приватности обязательны")]
-        public required string Privacy { get; set; } = "Private";
-        // "Private" - только по ссылке-приглашению
-        // "Public" - видна в списке комнат
-
-        [Range(2, 10, ErrorMessage = "Максимальное количество игроков должно быть от 2 до 10")]
-        public int MaxPlayers { get; set; } = 6;
-        // Данные создателя берутся из контекста авторизации
-    }
+        public CreateRoomRequest() : this(RoomPrivacy.Private, 6) { }
+    };
 }

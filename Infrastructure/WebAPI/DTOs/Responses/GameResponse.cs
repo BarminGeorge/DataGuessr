@@ -1,16 +1,24 @@
-﻿namespace DataGuessr.Infrastructure.WebAPI.DTOs.Responses
+﻿using DataGuessr.Infrastructure.WebAPI.Enums;
+
+namespace DataGuessr.Infrastructure.WebAPI.DTOs.Responses
 {
     /// <summary>
     /// Ответ с информацией об игре
     /// </summary>
-    public class GameResponse
+    public record GameResponse(
+        Guid Id,
+        string RoomId,
+        string ModeType,
+        GameStatus Status,
+        int QuestionCount,
+        int CurrentQuestionIndex,
+        DateTime CreatedAt
+    )
     {
-        public Guid Id { get; set; }
-        public required string RoomId { get; set; }
-        public required string ModeType { get; set; }
-        public required string Status { get; set; } // "NotStarted", "InProgress", "Finished"
-        public int QuestionCount { get; set; }
-        public int CurrentQuestionIndex { get; set; }
-        public DateTime CreatedAt { get; set; }
+        // Пустой конструктор для десериализации
+        public GameResponse() : this(
+            Guid.Empty, "", "", GameStatus.NotStarted, 0, 0, DateTime.MinValue
+        )
+        { }
     }
 }

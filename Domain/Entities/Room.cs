@@ -6,8 +6,7 @@ namespace Domain.Entities;
 public class Room : IEntity<Guid>
 {
     public Guid Id { get; }
-    public string Code { get; } // Уникальный код для ссылки
-    public string Privacy { get; private set; }
+    public RoomPrivacy Privacy { get; private set; }
     public int MaxPlayers { get; private set; }
     public DateTime CreatedAt { get; }
     public Player Host { get; } // Создатель комнаты
@@ -16,10 +15,9 @@ public class Room : IEntity<Guid>
 
     private readonly List<Game> games = [];
 
-    public Room(string code, string privacy, int maxPlayers, Player host)
+    public Room(RoomPrivacy privacy, int maxPlayers, Player host)
     {
         Id = Guid.NewGuid();
-        Code = code;
         Privacy = privacy;
         MaxPlayers = maxPlayers;
         Host = host;
@@ -31,7 +29,7 @@ public class Room : IEntity<Guid>
 
     public void AddGame(Game game)
     {
-        if (games.Count > 0 && games[^1].Status != GameStatus.Finished)
+        if (games.Count > 0 && games[^1].Status is not GameStatus.Finished)
             throw new InvalidOperationException($"Нельзя начать новую игру. Последняя игра еще не окончена {games[^1].Status}");
 
         games.Add(game);
