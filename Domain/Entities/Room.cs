@@ -28,6 +28,8 @@ public class Room : IEntity<Guid>
 
     public void RemovePlayer(Player player)
     {
-        throw new NotImplementedException();
+        Players.Remove(player);
+        if (player.Id == Host)
+            Host = Players.ElementAt(0).Id;
     }
 }

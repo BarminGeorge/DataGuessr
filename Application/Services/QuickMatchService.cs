@@ -22,7 +22,7 @@ public class QuickMatchService(
             var joined = await roomManager.JoinRoomAsync(room.Id, userId);
             if (joined)
                 break;
-            logger.LogInformation("No suitable rooms found, creating new quick match for user {UserId}", userId);
+            logger.LogInformation($"No suitable rooms found, creating new quick match for user {userId}");
             return room;
         }
         
