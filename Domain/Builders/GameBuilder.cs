@@ -11,7 +11,7 @@ public static class GameBuilder
 
 public class GameModeSelector
 {
-    public Game WithMode<TMode>(TMode mode) where TMode : IMode 
+    public Game WithMode<TMode>(TMode mode) where TMode : IMode
         => new(mode);
     
     public Game WithDefaultMode() => new(new DefaultMode());
