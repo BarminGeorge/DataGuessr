@@ -1,4 +1,5 @@
 using System.ComponentModel.DataAnnotations;
+using Application.Extensions;
 using Application.Interfaces;
 using Application.Services;
 
@@ -22,7 +23,7 @@ public static class RoomEndpoints
     private static async Task<IResult> CreateRoom(CreateRoomRequest request, IRoomManager roomManager,
         HttpContext context)
     {
-        var userId = GetUserIdFromContext(context);
+        var userId = context.GetUserId();
         var room = await roomManager.CreateRoomAsync(userId, request.privacy, request.password, request.maxPlayers);
         return Results.Ok(room);
     }
@@ -37,31 +38,23 @@ public static class RoomEndpoints
     private static async Task<IResult> JoinRoom(Guid roomId, JoinRoomRequest request, IRoomManager roomManager,
         HttpContext context)
     {
-        var userId = GetUserIdFromContext(context);
+        var userId = context.GetUserId();
         var result = await roomManager.JoinRoomAsync(roomId, userId, request.password);
         return Results.Ok(result);
     }
 
     private static async Task<IResult> LeaveRoom(Guid roomId, IRoomManager roomManager, HttpContext context)
     {
-        var userId = GetUserIdFromContext(context);
+        var userId = context.GetUserId();
         var result = await roomManager.LeaveRoomAsync(roomId, userId);
         return Results.Ok(result);
     }
 
     private static async Task<IResult> FindQuickRoom(QuickRoomService roomService, HttpContext context)
     {
-        var userId = GetUserIdFromContext(context);
+        var userId = context.GetUserId();
         var room = await roomService.FindOrCreateQuickRoomAsync(userId);
         return Results.Ok(room);
-    }
-
-    private static Guid GetUserIdFromContext(HttpContext context)
-    {
-        var userIdClaim = context.User.FindFirst("userId");
-        if (userIdClaim != null && Guid.TryParse(userIdClaim.Value, out var userId))
-            return userId;
-        throw new UnauthorizedAccessException("User not authenticated");
     }
 }
 

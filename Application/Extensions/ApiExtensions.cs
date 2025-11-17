@@ -40,4 +40,12 @@ public static class ApiExtensions
         
         services.AddAuthorization();
     }
+    
+    public static Guid GetUserId(this HttpContext context)
+    {
+        var userIdClaim = context.User.FindFirst("userId");
+        if (userIdClaim != null && Guid.TryParse(userIdClaim.Value, out var userId))
+            return userId;
+        throw new UnauthorizedAccessException("User not authenticated");
+    }
 }

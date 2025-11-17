@@ -10,4 +10,6 @@ public interface IRoomRepository
     Task AddAsync(Room room);
     Task UpdateAsync(Room room);
     Task RemoveAsync(Guid id);
+    Task<Game> AddGameAsync(Game game);
+    Task<Game> UpdateGameAsync(Game game);
 }

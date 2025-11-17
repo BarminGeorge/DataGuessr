@@ -1,11 +1,12 @@
 using Application.Interfaces;
 using Domain.Builders;
 using Domain.Entities;
+using Domain.Interfaces;
 
 namespace Application.Services;
 
-public class MatchStarter(IRoomRepository roomRepository, ILogger<MatchStarter> logger)
-    : IGameStarter
+public class GameManager(IRoomRepository roomRepository, ILogger<GameManager> logger)
+    : IGameManager
 {
     public async Task<bool> CanStartGameAsync(Guid roomId, Guid userId)
     {
@@ -17,6 +18,12 @@ public class MatchStarter(IRoomRepository roomRepository, ILogger<MatchStarter> 
             return false;
 
         return room.Players.Count >= 2;
+    }
+
+    public async Task<Game> CreateNewGameAsync(Guid roomId, Guid startedByUserId, IMode gameMode)
+    {
+        var game = new Game(gameMode);
+        return await roomRepository.AddGameAsync(game);
     }
 
     public async Task<Game> StartNewGameAsync(Guid roomId, Guid startedByUserId)
