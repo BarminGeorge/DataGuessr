@@ -3,18 +3,18 @@ using Domain.Entities;
 
 namespace Application.Services;
 
-public class QuickMatchService(
+public class QuickRoomService(
     IRoomRepository roomRepository,
     IRoomManager roomManager,
-    ILogger<QuickMatchService> logger) : IQuickMatchService
+    ILogger<QuickRoomService> logger) : IQuickRoomService
 {
-    public async Task<Room> FindOrCreateQuickMatchAsync(Guid userId)
+    public async Task<Room> FindOrCreateQuickRoomAsync(Guid userId)
     {
         var availableRoom = await roomRepository.GetWaitingPublicRoomsAsync();
         
         if (availableRoom == null)
         {
-            availableRoom = [await roomManager.CreateRoomAsync(userId, RoomType.Public)];
+            availableRoom = [await roomManager.CreateRoomAsync(userId, RoomPrivacy.Public)];
         }
         
         foreach (var room in availableRoom)

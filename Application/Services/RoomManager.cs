@@ -8,7 +8,7 @@ public class RoomManager(
     ILogger<RoomManager> logger, 
     IPlayerRepository playerRepository) : IRoomManager
 {
-    public async Task<Room> CreateRoomAsync(Guid userId, RoomType type, string? password = null, int maxPlayers = 4)
+    public async Task<Room> CreateRoomAsync(Guid userId, RoomPrivacy privacy, string? password = null, int maxPlayers = 4)
     {
         var room = new Room();
 

@@ -1,4 +1,3 @@
-using System.ComponentModel.DataAnnotations;
 using System.IdentityModel.Tokens.Jwt;
 using System.Security.Claims;
 using System.Text;
@@ -9,19 +8,8 @@ using Microsoft.Extensions.Options;
 
 namespace Application.Services;
  
-public class UserService
+public class UserService(IJwtProvider provider, IUsersRepository usersRepository, IPasswordHasher passwordHasher)
 {
-    private readonly IPasswordHasher passwordHasher;
-    private readonly IUsersRepository usersRepository;
-    private readonly IJwtProvider jwtProvider;
-    
-    public UserService(IJwtProvider provider, IUsersRepository usersRepository, IPasswordHasher passwordHasher)
-    {
-        jwtProvider = provider;
-        this.passwordHasher = passwordHasher;
-        this.usersRepository = usersRepository;
-    }
-    
     public async Task Register(string userName, string password)
     {
         var hashedPassword = passwordHasher.Generate(password);
@@ -36,7 +24,7 @@ public class UserService
         if (!result)
             throw new ApplicationException("Invalid username or password");
         
-        var token = jwtProvider.GenerateToken(user);
+        var token = provider.GenerateToken(user);
         return token;
     }
 }
@@ -86,6 +74,3 @@ public class JwtOptions
     public string SecretKey { get; set; }
     public int ExpairsHours { get; set; }
 }
-
-public record RegisterUserRequest([Required] string Username, [Required] string Password);
-public record LoginUserRequest([Required] string Username, [Required] string Password);
