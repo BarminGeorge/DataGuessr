@@ -8,7 +8,7 @@ public static class GameEndpoints
 {
     public static IEndpointRouteBuilder MapGameEndpoints(this IEndpointRouteBuilder app)
     {
-        var group = app.MapGroup("games");
+        var group = app.MapGroup("rooms/{roomId:guid}/games");
 
         group.MapPost("", CreateGame);
         group.MapPost("start", StartGame);

@@ -1,3 +1,5 @@
+using Application.EndPoints;
+using Application.Interfaces;
 using Application.Services;
 using Microsoft.AspNetCore.CookiePolicy;
 
@@ -7,35 +9,38 @@ var configuration = builder.Configuration;
 
 services.Configure<JwtOptions>(configuration.GetSection(nameof(JwtOptions)));
 
-// Add services to the container.
-// Learn more about configuring Swagger/OpenAPI at https://aka.ms/aspnetcore/swashbuckle
-builder.Services.AddEndpointsApiExplorer();
-builder.Services.AddSwaggerGen();
+services.AddScoped<UserService>();
+services.AddScoped<IRoomManager, RoomManager>();
+services.AddScoped<IGameManager, GameManager>();
+services.AddScoped<IQuickRoomService, QuickRoomService>();
+
+services.AddEndpointsApiExplorer();
+services.AddSwaggerGen();
 
 var app = builder.Build();
 
-// Configure the HTTP request pipeline.
 if (app.Environment.IsDevelopment())
 {
     app.UseSwagger();
     app.UseSwaggerUI();
 }
 
-services.AddScoped<UserService>();
-
 app.UseHttpsRedirection();
-
-app.MapGet("/api", () => "Hello World!");
 
 app.UseCookiePolicy(new CookiePolicyOptions 
 {
     MinimumSameSitePolicy = SameSiteMode.Strict,
     HttpOnly = HttpOnlyPolicy.Always,
     Secure = CookieSecurePolicy.Always,
-}
-);
+});
 
 app.UseAuthentication();
 app.UseAuthorization();
+
+app.MapGet("/api", () => "Hello World!");
+app.MapUserEndpoints();
+app.MapRoomEndpoints();
+app.MapGameEndpoints();
+app.MapRoundEndpoints();
 
 app.Run();
