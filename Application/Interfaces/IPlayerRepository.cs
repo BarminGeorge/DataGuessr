@@ -2,4 +2,7 @@ using Domain.Entities;
 
 namespace Application.Interfaces;
 
-public interface IPlayerRepository: IUserRepository;
+public interface IPlayerRepository : IUsersRepository
+{
+    Task<Player> GetPlayerByIdAsync(Guid playerId);
+}
