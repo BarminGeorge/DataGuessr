@@ -1,6 +1,6 @@
-using System.ComponentModel.DataAnnotations;
 using Application.Extensions;
 using Application.Interfaces;
+using Application.Requests;
 using Application.Services;
 
 namespace Application.EndPoints;
@@ -57,7 +57,3 @@ public static class RoomEndpoints
         return Results.Ok(room);
     }
 }
-
-public record CreateRoomRequest([Required] RoomPrivacy privacy, string? password, int maxPlayers);
-
-public record JoinRoomRequest(string? password);

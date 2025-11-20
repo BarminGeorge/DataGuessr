@@ -1,14 +1,18 @@
 using Application.Interfaces;
+using Application.Notifications;
 using Domain.Builders;
 using Domain.Entities;
 using Domain.Interfaces;
 
 namespace Application.Services;
 
-public class GameManager(IRoomRepository roomRepository, ILogger<GameManager> logger)
+public class GameManager(
+    IRoomRepository roomRepository, 
+    INotificationService notificationService,
+    ILogger<GameManager> logger)
     : IGameManager
 {
-    public async Task<bool> CanStartGameAsync(Guid roomId, Guid userId)
+    private async Task<bool> CanStartGameAsync(Guid roomId, Guid userId)
     {
         var room = await roomRepository.GetByIdAsync(roomId);
         if (room == null) 

@@ -1,6 +1,6 @@
 using Application.Extensions;
 using Application.Interfaces;
-using Domain.Interfaces;
+using Application.Requests;
 
 namespace Application.EndPoints;
 
@@ -30,5 +30,3 @@ public static class GameEndpoints
         return Results.Ok(game);
     }
 }
-
-public record GameCreateRequest(IMode Mode);

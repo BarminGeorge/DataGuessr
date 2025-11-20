@@ -1,16 +1,17 @@
+using System.ComponentModel.DataAnnotations;
+using Application.Interfaces;
+using Domain.Interfaces;
 using Domain.ValueTypes;
 
-namespace Application.Interfaces
-{
-    public interface IRoundService
-    {
-        Task<RoundDto?> GetCurrentRoundAsync(Guid roomId, Guid gameId);
-        Task<AnswerResultDto> SubmitAnswerAsync(Guid roomId, Guid gameId, Guid roundId, Guid userId, Answer answer);
-        Task<RoundResultsDto> GetRoundResultsAsync(Guid roomId, Guid gameId, Guid roundId);
-        Task<GameLeaderboardDto> GetGameLeaderboardAsync(Guid roomId, Guid gameId);
-        Task<GameStatusDto> GetGameStatusAsync(Guid roomId, Guid gameId);
-    }
-}
+namespace Application.Requests;
+
+// TODO: прописать все реквесты и ответы, можно использовать те же маперы что и для уведомлений, дто убрать
+public record GameCreateRequest(IMode Mode);
+public record CreateRoomRequest([Required] RoomPrivacy privacy, string? password, int maxPlayers);
+public record JoinRoomRequest(string? password);
+public record SubmitAnswerRequest(Answer Answer);
+public record RegisterUserRequest([Required] string Username, [Required] string Password);
+public record LoginUserRequest([Required] string Username, [Required] string Password);
 
 public record RoundDto(
     Guid Id,
