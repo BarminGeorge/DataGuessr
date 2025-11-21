@@ -40,7 +40,5 @@ app.UseAuthorization();
 app.MapGet("/api", () => "Hello World!");
 app.MapUserEndpoints();
 app.MapRoomEndpoints();
-app.MapGameEndpoints();
-app.MapRoundEndpoints();
 
 app.Run();

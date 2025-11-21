@@ -1,4 +1,4 @@
-using Application.Requests;
+using Application.Dto;
 using Domain.ValueTypes;
 
 namespace Application.Interfaces

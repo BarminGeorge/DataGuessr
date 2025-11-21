@@ -18,13 +18,13 @@ public class RoomManager(
         return room;
     }
 
-    public async Task<bool> JoinRoomAsync(Guid roomId, Guid userId, string? password = null)
+    public async Task<Room?> JoinRoomAsync(Guid roomId, Guid userId, string? password = null)
     {
         var room = await roomRepository.GetByIdAsync(roomId);
         if (room == null)
         {
             logger.LogWarning($"Room {roomId} not found");
-            return false;
+            return room;
         }
         
         var player = await playerRepository.GetPlayerByIdAsync(userId);
@@ -32,7 +32,7 @@ public class RoomManager(
         await roomRepository.UpdateAsync(room);
         
         logger.LogInformation($"User {userId} joined room {roomId}");
-        return true;
+        return room;
     }
 
     public async Task<bool> LeaveRoomAsync(Guid roomId, Guid userId)
@@ -50,6 +50,12 @@ public class RoomManager(
 
     public async Task<IEnumerable<Room>?> GetAvailablePublicRoomsAsync()
         => await roomRepository.GetWaitingPublicRoomsAsync();
+
+    // TODO: нужно реализовать связь между соединением, id пользователя и комнаты. Выходим из команты при ошибке
+    public Task<bool> HandleUserError(string connectionId)
+    {
+        throw new NotImplementedException();
+    }
 
     public async Task<Room?> GetRoomByIdAsync(Guid roomId) 
         => await roomRepository.GetByIdAsync(roomId);

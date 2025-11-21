@@ -19,8 +19,8 @@ public class QuickRoomService(
         
         foreach (var room in availableRoom)
         {
-            var joined = await roomManager.JoinRoomAsync(room.Id, userId);
-            if (joined)
+            var result = await roomManager.JoinRoomAsync(room.Id, userId);
+            if (result == null)
                 break;
             logger.LogInformation($"No suitable rooms found, creating new quick match for user {userId}");
             return room;

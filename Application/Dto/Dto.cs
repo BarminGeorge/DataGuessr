@@ -1,17 +1,11 @@
-using System.ComponentModel.DataAnnotations;
-using Application.Interfaces;
-using Domain.Interfaces;
 using Domain.ValueTypes;
 
-namespace Application.Requests;
+namespace Application.Dto;
 
-// TODO: прописать все реквесты и ответы, можно использовать те же маперы что и для уведомлений, дто убрать
-public record GameCreateRequest(IMode Mode);
-public record CreateRoomRequest([Required] RoomPrivacy privacy, string? password, int maxPlayers);
-public record JoinRoomRequest(string? password);
-public record SubmitAnswerRequest(Answer Answer);
-public record RegisterUserRequest([Required] string Username, [Required] string Password);
-public record LoginUserRequest([Required] string Username, [Required] string Password);
+// TODO: переделать, убрать лишние
+public record RoomDto();
+
+public record GameDto();
 
 public record RoundDto(
     Guid Id,
