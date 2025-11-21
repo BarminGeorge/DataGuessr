@@ -5,7 +5,7 @@ using Domain.ValueTypes;
 
 namespace Application.Services;
 
-public class QuestionService(IQuestionRepository questionRepository) : IQuestionService
+public class QuestionService(IQuestionRepository questionRepository, IGameRepository gameRepository) : IQuestionService
 {
     public async Task<IEnumerable<Question>> GetAllQuestionsAsync(Game game)
     {
@@ -16,8 +16,8 @@ public class QuestionService(IQuestionRepository questionRepository) : IQuestion
         return await questionRepository.GetQuestionsAsync(count);
     }
 
-    public Task SubmitAnswerAsync(Guid questionId, Answer answer)
+    public async Task SubmitAnswerAsync(Guid questionId, Answer answer)
     {
-        throw new NotImplementedException();
+        await gameRepository.SaveAnswerAsync(questionId, answer);
     }
 }
