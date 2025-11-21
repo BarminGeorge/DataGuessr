@@ -12,7 +12,7 @@ public class RoomManager(
 {
     public async Task<ServiceResult<Room>> CreateRoomAsync(Guid userId, RoomPrivacy privacy, string? password = null, int maxPlayers = 4)
     {
-        var room = new Room();
+        var room = new Room(userId);
 
         await roomRepository.AddAsync(room);
         logger.LogInformation($"Room {room.Id} created by user {userId}");

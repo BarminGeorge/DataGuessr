@@ -12,9 +12,10 @@ public class Room : IEntity<Guid>
 
     private readonly List<Game> games = [];
 
-    public Room()
+    public Room(Guid hostId)
     {
         Id = Guid.NewGuid();
+        Host = hostId;
     }
     
     public void AddGame(Game game)
