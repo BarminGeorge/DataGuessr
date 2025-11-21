@@ -5,12 +5,12 @@ namespace Application.Interfaces;
 
 public interface IRoomManager
 {
-    Task<ServiceResult<Room>> CreateRoomAsync(Guid userId, RoomPrivacy privacy, string? password = null, int maxPlayers = 4);
-    Task<ServiceResult<Room>> JoinRoomAsync(Guid roomId, Guid userId, string? password = null);
-    Task<ServiceResult> LeaveRoomAsync(Guid roomId, Guid userId);
-    Task<IEnumerable<Room>?> GetAvailablePublicRoomsAsync();
-    Task<ServiceResult<Room>> FindOrCreateQuickRoomAsync(Guid userId);
-    Task<ServiceResult> HandleUserError(string connectionId);
+    Task<OperationResult<Room>> CreateRoomAsync(Guid userId, RoomPrivacy privacy, string? password = null, int maxPlayers = 4);
+    Task<OperationResult<Room>> JoinRoomAsync(Guid roomId, Guid userId, string? password = null);
+    Task<OperationResult> LeaveRoomAsync(Guid roomId, Guid userId);
+    Task<OperationResult<IEnumerable<Room>>> GetAvailablePublicRoomsAsync();
+    Task<OperationResult<Room>> FindOrCreateQuickRoomAsync(Guid userId);
+    Task<OperationResult> HandleUserError(string connectionId);
 }
 
 public enum RoomPrivacy

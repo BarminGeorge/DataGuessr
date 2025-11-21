@@ -7,13 +7,13 @@ namespace Application.Interfaces;
 
 public interface IGameManager
 {
-    Task<ServiceResult> StartNewGameAsync(Guid roomId, Guid startedByUserId);
-    Task<ServiceResult<Game>> CreateNewGameAsync(Guid roomId, 
+    Task<OperationResult> StartNewGameAsync(Guid roomId, Guid startedByUserId);
+    Task<OperationResult<Game>> CreateNewGameAsync(Guid roomId, 
         Guid createdByUserId, 
         GameMode mode, 
         int countQuestions, 
         TimeSpan QuestionDuration, 
         IEnumerable<Question> questions = null);
     
-    Task<ServiceResult> SubmitAnswerAsync(Guid roomId, Answer answer);
+    Task<OperationResult> SubmitAnswerAsync(Guid roomId, Guid gameId, Guid questionId, Answer answer);
 }

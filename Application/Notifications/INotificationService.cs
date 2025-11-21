@@ -1,6 +1,8 @@
+using Application.Result;
+
 namespace Application.Notifications;
 
 public interface INotificationService
 {
-    Task NotifyGameRoomAsync<T>(Guid roomId, T notification) where T : GameNotification;
+    Task<OperationResult> NotifyGameRoomAsync<T>(Guid roomId, T notification) where T : GameNotification;
 }

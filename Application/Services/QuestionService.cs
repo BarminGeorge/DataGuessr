@@ -1,5 +1,6 @@
 using Application.Interfaces;
 using Application.Interfaces.Infrastructure;
+using Application.Result;
 using Domain.Entities;
 using Domain.ValueTypes;
 
@@ -7,17 +8,23 @@ namespace Application.Services;
 
 public class QuestionService(IQuestionRepository questionRepository, IGameRepository gameRepository) : IQuestionService
 {
-    public async Task<IEnumerable<Question>> GetAllQuestionsAsync(Game game)
+    public async Task<OperationResult<IEnumerable<Question>>> GetAllQuestionsAsync(Game game)
     {
         if (game.Questions.Count > 0)
-            return game.Questions;
+            return OperationResult<IEnumerable<Question>>.Ok(game.Questions);
         
         var count = game.Questions.Count;
-        return await questionRepository.GetQuestionsAsync(count);
+        var getQuestionsResult =  await questionRepository.GetQuestionsAsync(count);
+        return getQuestionsResult.Success 
+            ? OperationResult<IEnumerable<Question>>.Ok(getQuestionsResult.ResultObj) 
+            : OperationResult<IEnumerable<Question>>.Error(getQuestionsResult.ErrorMsg);
     }
 
-    public async Task SubmitAnswerAsync(Guid questionId, Answer answer)
+    public async Task<OperationResult> SubmitAnswerAsync(Guid roomId, Guid gameId, Guid questionId, Answer answer)
     {
-        await gameRepository.SaveAnswerAsync(questionId, answer);
+        var saveAnswerResult = await gameRepository.SaveAnswerAsync(roomId, gameId, questionId, answer);
+        return saveAnswerResult.Success
+            ? OperationResult.Ok()
+            : OperationResult.Error(saveAnswerResult.ErrorMsg);
     }
 }

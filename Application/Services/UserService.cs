@@ -21,11 +21,11 @@ public class UserService(IJwtProvider provider, IUsersRepository usersRepository
     public async Task<string> Login(string userName, string password)
     {
         var user = await usersRepository.GetByName(userName);
-        var result = passwordHasher.Verify(password, user.PasswordHash);
+        var result = passwordHasher.Verify(password, user.ResultObj.PasswordHash);
         if (!result)
             throw new ApplicationException("Invalid username or password");
         
-        var token = provider.GenerateToken(user);
+        var token = provider.GenerateToken(user.ResultObj);
         return token;
     }
 }

@@ -1,16 +1,16 @@
+using Application.Result;
 using Domain.Entities;
 
 namespace Application.Interfaces.Infrastructure;
 
 public interface IRoomRepository
 {
-    Task<Room?> GetByIdAsync(Guid id);
-    Task<IEnumerable<Room>> GetRoomsAsync();
-    Task<IEnumerable<Room>?> GetWaitingPublicRoomsAsync();
-    Task AddAsync(Room room);
-    Task UpdateAsync(Room room);
-    Task RemoveAsync(Guid id);
-    Task<Game> AddGameAsync(Game game);
-    Task<Game> UpdateGameAsync(Game game);
-    Task<Game?> GetCurrentGameAsync(Guid roomId);
+    Task<OperationResult<Room>> GetByIdAsync(Guid id);
+    Task<OperationResult<IEnumerable<Room>>> GetRoomsAsync();
+    Task<OperationResult<IEnumerable<Room>>> GetWaitingPublicRoomsAsync();
+    Task<OperationResult> AddAsync(Room room);
+    Task<OperationResult> UpdateAsync(Room room);
+    Task<OperationResult> RemoveAsync(Guid id);
+    Task<OperationResult<Game>> AddGameAsync(Game game);
+    Task<OperationResult<Game>?> GetCurrentGameAsync(Guid roomId);
 }

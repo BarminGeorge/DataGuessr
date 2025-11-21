@@ -23,55 +23,74 @@ public class GameManager(
         return room.Host == userId;
     }
     
-    private async Task<bool> CanStartGameAsync(Guid roomId, Guid userId)
+    private async Task<OperationResult> CanStartGameAsync(Guid roomId, Guid userId)
     {
-        var room = await roomRepository.GetByIdAsync(roomId);
-        return IsOwnerRoom(room, userId) && room.Players.Count >= 2;
+        var getRoomResult = await roomRepository.GetByIdAsync(roomId);
+        if (!getRoomResult.Success)
+            return OperationResult.Error(getRoomResult.ErrorMsg);
+        var room = getRoomResult.ResultObj;
+
+        var canStart = IsOwnerRoom(room, userId) && room.Players.Count >= 2;
+        var errMessage = canStart ? "" : "You are not owner or players count less then 2";
+        return new OperationResult(canStart, errMessage);
     }
 
-    public async Task<ServiceResult> StartNewGameAsync(Guid roomId, Guid startedByUserId)
+    public async Task<OperationResult> StartNewGameAsync(Guid roomId, Guid startedByUserId)
     {
-        if (!await CanStartGameAsync(roomId, startedByUserId))
-            return ServiceResult.Error("Can't start new game");
+        var canStartGame = await CanStartGameAsync(roomId, startedByUserId);
+        if (!canStartGame.Success)
+            return OperationResult.Error($"Can't start new game: {canStartGame.ErrorMsg}");
+        
+        var getRoomResult = await roomRepository.GetByIdAsync(roomId);
+        if (!getRoomResult.Success) 
+            OperationResult.Error(getRoomResult.ErrorMsg);
 
-        var room = await roomRepository.GetByIdAsync(roomId);
-        if (room == null) 
-            ServiceResult.Error("Room not found");
+        var getGameResult = await roomRepository.GetCurrentGameAsync(roomId);
+        if (!getGameResult.Success)
+            OperationResult.Error(getGameResult.ErrorMsg);
 
-        var game = await roomRepository.GetCurrentGameAsync(roomId);
-        if (game == null)
-            ServiceResult.Error("Game not found");
+        var game = getGameResult.ResultObj;
         
         // TODO: оркестратор игры
         game.StartGame();
         
         logger.LogInformation($"Match {game.Id} started in room {roomId} by user {startedByUserId}");
 
-        return ServiceResult.Ok();
+        return OperationResult.Ok();
     }
 
-    public async Task<ServiceResult<Game>> CreateNewGameAsync(Guid roomId, 
+    public async Task<OperationResult<Game>> CreateNewGameAsync(Guid roomId, 
         Guid createdByUserId, 
         GameMode mode, 
         int countQuestions, 
         TimeSpan questionDuration,
         IEnumerable<Question>? questions = null)
     {
-        var room = await roomRepository.GetByIdAsync(roomId);
+        var getRoomResult = await roomRepository.GetByIdAsync(roomId);
+        if (!getRoomResult.Success)
+            return OperationResult<Game>.Error(getRoomResult.ErrorMsg);
+
+        var room = getRoomResult.ResultObj;
         if (!IsOwnerRoom(room, createdByUserId))
-            ServiceResult.Error("Can't create new game, you are not the owner");
+            OperationResult.Error("Can't create new game, you are not the owner");
         
         var game = new Game(mode, questions, questionDuration, countQuestions);
-        await roomRepository.AddGameAsync(game);
+        var addGameResult = await roomRepository.AddGameAsync(game);
+        if (!addGameResult.Success)
+            return OperationResult<Game>.Error(addGameResult.ErrorMsg);
         
         var notification = new NewGameNotification(game);
-        await notificationService.NotifyGameRoomAsync(roomId, notification);
-        
-        return ServiceResult<Game>.Ok(game);
+        var notifyResult = await notificationService.NotifyGameRoomAsync(roomId, notification);
+        return !notifyResult.Success 
+            ? OperationResult<Game>.Error(notifyResult.ErrorMsg) 
+            : OperationResult<Game>.Ok(game);
     }
 
-    public Task<ServiceResult> SubmitAnswerAsync(Guid roomId, Answer answer)
+    public async Task<OperationResult> SubmitAnswerAsync(Guid roomId, Guid gameId, Guid questionId, Answer answer)
     {
-        throw new NotImplementedException();
+        var submitResult = await questionService.SubmitAnswerAsync(roomId, gameId, questionId, answer);
+        return submitResult.Success 
+            ? OperationResult.Ok() 
+            : OperationResult.Error(submitResult.ErrorMsg);
     }
 }
