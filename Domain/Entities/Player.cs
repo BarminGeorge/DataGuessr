@@ -2,17 +2,21 @@ using Domain.ValueTypes;
 
 namespace Domain.Entities;
 
-public class Player : User
+public class Player : Entity
 {
-    public Score Score { get; set; }
-
-    protected Player()
-    {
-    }
+    public Guid UserId { get; private set; } // Ссылка на пользователя
+    public User User { get; private set; }   // Навигационное свойство
+    public Score Score { get; private set; }
 
     public Player(User user)
-        : base(user.Name, user.Login, user.PasswordHash, user.Avatar)
     {
+        UserId = user.Id;
+        User = user;
         Score = Score.Zero;
+    }
+
+    public void UpdateScore(Score newScore)
+    {
+        Score = newScore;
     }
 }
