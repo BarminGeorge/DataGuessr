@@ -1,4 +1,5 @@
 using Application.Interfaces;
+using Application.Interfaces.Infrastructure;
 using Application.Notifications;
 using Application.Result;
 using Domain.Entities;
@@ -10,19 +11,22 @@ namespace Application.Services;
 public class GameManager(
     IRoomRepository roomRepository, 
     INotificationService notificationService,
+    IQuestionService questionService,
     ILogger<GameManager> logger)
     : IGameManager
 {
-    private async Task<bool> CanStartGameAsync(Guid roomId, Guid userId)
+    private static bool IsOwnerRoom(Room? room, Guid userId)
     {
-        var room = await roomRepository.GetByIdAsync(roomId);
         if (room == null) 
             return false;
 
-        if (room.Host != userId) 
-            return false;
-
-        return room.Players.Count >= 2;
+        return room.Host == userId;
+    }
+    
+    private async Task<bool> CanStartGameAsync(Guid roomId, Guid userId)
+    {
+        var room = await roomRepository.GetByIdAsync(roomId);
+        return IsOwnerRoom(room, userId) && room.Players.Count >= 2;
     }
 
     public async Task<ServiceResult> StartNewGameAsync(Guid roomId, Guid startedByUserId)
@@ -53,7 +57,11 @@ public class GameManager(
         TimeSpan questionDuration,
         IEnumerable<Question>? questions = null)
     {
-        var game = new Game(mode, questions, questionDuration);
+        var room = await roomRepository.GetByIdAsync(roomId);
+        if (!IsOwnerRoom(room, createdByUserId))
+            ServiceResult.Error("Can't create new game, you are not the owner");
+        
+        var game = new Game(mode, questions, questionDuration, countQuestions);
         await roomRepository.AddGameAsync(game);
         
         var notification = new NewGameNotification(game);

@@ -19,17 +19,20 @@ public class Game : IEntity<Guid>
             return new List<Question>();
         }
     }
+    public int QuestionsCount { get; }
 
     public TimeSpan QuestionDuration { get; }
 
     private readonly List<Question>? questions;
 
-    public Game(GameMode mode, IEnumerable<Question> questions, TimeSpan questionDuration)
+    public Game(GameMode mode, IEnumerable<Question>? questions, TimeSpan questionDuration, int questionsCount)
     {
         Mode = mode;
         CurrentStatistic = new Statistic();
-        this.questions = questions.ToList();
+        
+        this.questions = questions != null ? questions.ToList() : [];
         QuestionDuration = questionDuration;
+        QuestionsCount = questionsCount;
         Id = Guid.NewGuid();
         Status = GameStatus.NotStarted;
     }

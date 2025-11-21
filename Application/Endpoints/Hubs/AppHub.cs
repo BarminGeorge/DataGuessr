@@ -1,7 +1,7 @@
 using Application.Interfaces;
 using Microsoft.AspNetCore.SignalR;
 
-namespace Application.Hubs;
+namespace Application.Endpoints.Hubs;
 
 public partial class AppHub(IGameManager gameManager, IRoomManager roomManager) 
     : Hub

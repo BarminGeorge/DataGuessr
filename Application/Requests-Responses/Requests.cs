@@ -5,21 +5,21 @@ using Domain.ValueTypes;
 
 namespace Application.Requests_Responses;
 
-public record CreateRoomRequest(Guid userId, [Required] RoomPrivacy privacy, string? password, int maxPlayers);
-public record JoinRoomRequest(Guid userId, Guid roomId, string? password);
-public record LeaveRoomRequest(Guid userId, Guid roomId);
-public record FindQuickRoomRequest(Guid userId);
+public record CreateRoomRequest(Guid UserId, [Required] RoomPrivacy Privacy, string? Password, int MaxPlayers);
+public record JoinRoomRequest(Guid UserId, Guid RoomId, string? Password);
+public record LeaveRoomRequest(Guid UserId, Guid RoomId);
+public record FindQuickRoomRequest(Guid UserId);
 
 public record RegisterUserRequest([Required] string Username, [Required] string Password);
 public record LoginUserRequest([Required] string Username, [Required] string Password);
 
 public record CreateGameRequest(
-    Guid userId, 
-    Guid roomId, 
-    GameMode mode, 
-    int countQuestions, 
+    Guid UserId, 
+    Guid RoomId, 
+    GameMode Mode, 
+    int CountQuestions, 
     TimeSpan QuestionDuration, 
-    IEnumerable<Question> questions = null);
+    IEnumerable<Question>? Questions = null);
 
-public record StartGameRequest(Guid userId, Guid roomId);
-public record SubmitAnswerRequest(Guid roomId, Answer Answer);
+public record StartGameRequest(Guid UserId, Guid RoomId);
+public record SubmitAnswerRequest(Guid RoomId, Answer Answer);

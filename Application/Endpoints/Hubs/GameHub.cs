@@ -2,19 +2,19 @@ using Application.Dto;
 using Application.Mappers;
 using Application.Requests_Responses;
 
-namespace Application.Hubs;
+namespace Application.Endpoints.Hubs;
 
 public partial class AppHub
 {
     public async Task<DataResponse<GameDto>> CreateGame(CreateGameRequest request)
     {
         var result = await gameManager.CreateNewGameAsync(
-            request.roomId, 
-            request.userId, 
-            request.mode, 
-            request.countQuestions, 
+            request.RoomId, 
+            request.UserId, 
+            request.Mode, 
+            request.CountQuestions, 
             request.QuestionDuration, 
-            request.questions);
+            request.Questions);
 
         return result.Success
             ? DataResponse<GameDto>.CreateSuccess(result.ResultObj.ToDto())
@@ -23,7 +23,7 @@ public partial class AppHub
 
     public async Task<EmptyResponse> StartGame(StartGameRequest request)
     {
-        var result = await gameManager.StartNewGameAsync(request.roomId, request.userId);
+        var result = await gameManager.StartNewGameAsync(request.RoomId, request.UserId);
         return result.Success
             ? EmptyResponse.CreateSuccess()
             : EmptyResponse.CreateFailure(result.ErrorMsg);
@@ -31,7 +31,7 @@ public partial class AppHub
 
     public async Task<EmptyResponse> SubmitAnswer(SubmitAnswerRequest request)
     {
-        var result = await gameManager.SubmitAnswerAsync(request.roomId, request.Answer);
+        var result = await gameManager.SubmitAnswerAsync(request.RoomId, request.Answer);
         return result.Success
             ? EmptyResponse.CreateSuccess()
             : EmptyResponse.CreateFailure(result.ErrorMsg);

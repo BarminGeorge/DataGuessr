@@ -1,6 +1,6 @@
-using Application.Hubs;
 using Application.Notifications;
 using Microsoft.AspNetCore.SignalR;
+using AppHub = Application.Endpoints.Hubs.AppHub;
 
 namespace Application.Services;
 
