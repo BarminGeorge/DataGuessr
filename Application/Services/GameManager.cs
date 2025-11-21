@@ -1,8 +1,9 @@
 using Application.Interfaces;
 using Application.Notifications;
-using Domain.Builders;
+using Application.Result;
 using Domain.Entities;
-using Domain.Interfaces;
+using Domain.Enums;
+using Domain.ValueTypes;
 
 namespace Application.Services;
 
@@ -24,29 +25,45 @@ public class GameManager(
         return room.Players.Count >= 2;
     }
 
-    public async Task<Game> CreateNewGameAsync(Guid roomId, Guid startedByUserId, IMode gameMode)
-    {
-        var game = new Game(gameMode);
-        return await roomRepository.AddGameAsync(game);
-    }
-
-    public async Task<Game> StartNewGameAsync(Guid roomId, Guid startedByUserId)
+    public async Task<ServiceResult> StartNewGameAsync(Guid roomId, Guid startedByUserId)
     {
         if (!await CanStartGameAsync(roomId, startedByUserId))
-        {
-            throw new InvalidOperationException("Cannot start match");
-        }
+            return ServiceResult.Error("Can't start new game");
 
         var room = await roomRepository.GetByIdAsync(roomId);
         if (room == null) 
-            throw new ArgumentException("Room not found");
+            ServiceResult.Error("Room not found");
 
-        var game = GameBuilder.Create().WithDefaultMode();
-        room.AddGame(game);
-        await roomRepository.UpdateAsync(room);
-
+        var game = await roomRepository.GetCurrentGameAsync(roomId);
+        if (game == null)
+            ServiceResult.Error("Game not found");
+        
+        // TODO: оркестратор игры
+        game.StartGame();
+        
         logger.LogInformation($"Match {game.Id} started in room {roomId} by user {startedByUserId}");
 
-        return game;
+        return ServiceResult.Ok();
+    }
+
+    public async Task<ServiceResult<Game>> CreateNewGameAsync(Guid roomId, 
+        Guid createdByUserId, 
+        GameMode mode, 
+        int countQuestions, 
+        TimeSpan questionDuration,
+        IEnumerable<Question>? questions = null)
+    {
+        var game = new Game(mode, questions, questionDuration);
+        await roomRepository.AddGameAsync(game);
+        
+        var notification = new NewGameNotification(game);
+        await notificationService.NotifyGameRoomAsync(roomId, notification);
+        
+        return ServiceResult<Game>.Ok(game);
+    }
+
+    public Task<ServiceResult> SubmitAnswerAsync(Guid roomId, Answer answer)
+    {
+        throw new NotImplementedException();
     }
 }

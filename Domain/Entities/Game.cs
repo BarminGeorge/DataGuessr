@@ -7,23 +7,34 @@ namespace Domain.Entities;
 public class Game : IEntity<Guid>
 {
     public Guid Id { get; }
-    public IMode Mode { get; }
+    public GameMode Mode { get; }
     public GameStatus Status { get; private set; }
     public Statistic CurrentStatistic { get; set; }
-    public IReadOnlyList<Question> Questions => questions.AsReadOnly();
+    public IReadOnlyList<Question> Questions
+    {
+        get
+        {
+            if (questions != null) 
+                return questions.AsReadOnly();
+            return new List<Question>();
+        }
+    }
 
-    private readonly List<Question> questions;
+    public TimeSpan QuestionDuration { get; }
 
-    public Game(IMode mode)
+    private readonly List<Question>? questions;
+
+    public Game(GameMode mode, IEnumerable<Question> questions, TimeSpan questionDuration)
     {
         Mode = mode;
         CurrentStatistic = new Statistic();
-        questions = [];
+        this.questions = questions.ToList();
+        QuestionDuration = questionDuration;
         Id = Guid.NewGuid();
         Status = GameStatus.NotStarted;
     }
-
-    public void AddQuestion(Question question) => questions.Add(question);
+    
+    public void AddQuestion(Question question) => questions?.Add(question);
 
     public void StartGame()
     {

@@ -12,4 +12,5 @@ public interface IRoomRepository
     Task RemoveAsync(Guid id);
     Task<Game> AddGameAsync(Game game);
     Task<Game> UpdateGameAsync(Game game);
+    Task<Game?> GetCurrentGameAsync(Guid roomId);
 }

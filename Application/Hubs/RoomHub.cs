@@ -1,3 +1,4 @@
+using Application.Dto;
 using Application.Mappers;
 using Application.Requests_Responses;
 
@@ -5,35 +6,55 @@ namespace Application.Hubs;
 
 public partial class AppHub
 {
-    public async Task<CreateRoomResponse> CreateRoom(CreateRoomRequest request)
+    public async Task<DataResponse<RoomDto>> CreateRoom(CreateRoomRequest request)
     {
-        var room = await roomManager.CreateRoomAsync(request.userId, request.privacy, request.password, request.maxPlayers);
+        var result = await roomManager.CreateRoomAsync(request.userId, request.privacy, request.password, request.maxPlayers);
         
-        var roomDto = room.ToDto();
-        var response = new CreateRoomResponse(true, roomDto);
-            
-        await Groups.AddToGroupAsync(Context.ConnectionId, $"room-{room.Id}");
+        if (result.Success)
+        {
+            await Groups.AddToGroupAsync(Context.ConnectionId, $"room-{result.ResultObj.Id}");
+            return DataResponse<RoomDto>.CreateSuccess(result.ResultObj.ToDto());
+        }
         
-        return response;
+        return DataResponse<RoomDto>.CreateFailure(result.ErrorMsg);
     }
 
-    public async Task<JoinRoomResponse> JoinRoom(JoinRoomRequest request)
+    public async Task<DataResponse<RoomDto>> JoinRoom(JoinRoomRequest request)
     {
         var result = await roomManager.JoinRoomAsync(request.userId, request.roomId, request.password);
-        var response = new JoinRoomResponse(true, result.ToDto());
-        if (response.Success)
+
+        if (result.Success)
+        {
             await Groups.AddToGroupAsync(Context.ConnectionId, $"room-{request.roomId}");
-        
-        return response;
+            return DataResponse<RoomDto>.CreateSuccess(result.ResultObj.ToDto());
+        }
+
+        return DataResponse<RoomDto>.CreateFailure(result.ErrorMsg);
     }
 
-    public async Task<LeaveRoomResponse> LeaveRoom(LeaveRoomRequest request)
+    public async Task<EmptyResponse> LeaveRoom(LeaveRoomRequest request)
     {
         var result = await roomManager.LeaveRoomAsync(request.userId, request.roomId);
-        var response = new LeaveRoomResponse(result);
-        if (result)
-            await Groups.RemoveFromGroupAsync(Context.ConnectionId, $"room-{request.roomId}");
         
-        return response;
+        if (result.Success)
+        {
+            await Groups.RemoveFromGroupAsync(Context.ConnectionId, $"room-{request.roomId}");
+            return EmptyResponse.CreateSuccess();
+        }
+        
+        return EmptyResponse.CreateFailure(result.ErrorMsg);
+    }
+
+    public async Task<DataResponse<RoomDto>> FindQuickRoom(FindQuickRoomRequest request)
+    {
+        var result = await roomManager.FindOrCreateQuickRoomAsync(request.userId);
+
+        if (result.Success)
+        {
+            await Groups.AddToGroupAsync(Context.ConnectionId, $"room-{result.ResultObj.Id}");
+            return DataResponse<RoomDto>.CreateSuccess(result.ResultObj.ToDto());
+        }
+
+        return DataResponse<RoomDto>.CreateFailure(result.ErrorMsg);
     }
 }

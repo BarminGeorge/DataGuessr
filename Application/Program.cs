@@ -12,7 +12,6 @@ services.Configure<JwtOptions>(configuration.GetSection(nameof(JwtOptions)));
 services.AddScoped<UserService>();
 services.AddScoped<IRoomManager, RoomManager>();
 services.AddScoped<IGameManager, GameManager>();
-services.AddScoped<IQuickRoomService, QuickRoomService>();
 
 services.AddEndpointsApiExplorer();
 services.AddSwaggerGen();
