@@ -20,7 +20,7 @@ public class GameManager(
         if (room == null) 
             return false;
 
-        return room.Host == userId;
+        return room.Owner == userId;
     }
     
     private async Task<OperationResult> CanStartGameAsync(Guid roomId, Guid userId)
@@ -88,9 +88,6 @@ public class GameManager(
 
     public async Task<OperationResult> SubmitAnswerAsync(Guid roomId, Guid gameId, Guid questionId, Answer answer)
     {
-        var submitResult = await questionService.SubmitAnswerAsync(roomId, gameId, questionId, answer);
-        return submitResult.Success 
-            ? OperationResult.Ok() 
-            : OperationResult.Error(submitResult.ErrorMsg);
+        return await questionService.SubmitAnswerAsync(roomId, gameId, questionId, answer);
     }
 }

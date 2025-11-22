@@ -8,14 +8,14 @@ public class Room : IEntity<Guid>
     public Guid Id { get; }
     public IReadOnlyList<Game> Games => games.AsReadOnly();
     public HashSet<Player> Players => new();
-    public Guid Host { get; private set; }
+    public Guid Owner { get; private set; }
 
     private readonly List<Game> games = [];
 
-    public Room(Guid hostId)
+    public Room(Guid ownerId)
     {
         Id = Guid.NewGuid();
-        Host = hostId;
+        Owner = ownerId;
     }
     
     public void AddGame(Game game)
@@ -30,7 +30,7 @@ public class Room : IEntity<Guid>
     public void RemovePlayer(Player player)
     {
         Players.Remove(player);
-        if (player.Id == Host)
-            Host = Players.ElementAt(0).Id;
+        if (player.Id == Owner)
+            Owner = Players.ElementAt(0).Id;
     }
 }

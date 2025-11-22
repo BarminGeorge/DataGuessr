@@ -92,10 +92,7 @@ public class RoomManager(
 
     public async Task<OperationResult<IEnumerable<Room>>> GetAvailablePublicRoomsAsync()
     {
-        var getWaitingRoomsResult = await roomRepository.GetWaitingPublicRoomsAsync();
-        return !getWaitingRoomsResult.Success 
-            ? OperationResult<IEnumerable<Room>>.Error(getWaitingRoomsResult.ErrorMsg) 
-            : OperationResult<IEnumerable<Room>>.Ok(getWaitingRoomsResult.ResultObj);
+        return await roomRepository.GetWaitingPublicRoomsAsync();
     }
 
     // TODO: нужно реализовать связь между соединением, id пользователя и комнаты. Выходим из команты при ошибке
