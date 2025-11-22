@@ -14,17 +14,11 @@ public class QuestionService(IQuestionRepository questionRepository, IGameReposi
             return OperationResult<IEnumerable<Question>>.Ok(game.Questions);
         
         var count = game.Questions.Count;
-        var getQuestionsResult =  await questionRepository.GetQuestionsAsync(count);
-        return getQuestionsResult.Success 
-            ? OperationResult<IEnumerable<Question>>.Ok(getQuestionsResult.ResultObj) 
-            : OperationResult<IEnumerable<Question>>.Error(getQuestionsResult.ErrorMsg);
+        return await questionRepository.GetQuestionsAsync(count);
     }
 
     public async Task<OperationResult> SubmitAnswerAsync(Guid roomId, Guid gameId, Guid questionId, Answer answer)
     {
-        var saveAnswerResult = await gameRepository.SaveAnswerAsync(roomId, gameId, questionId, answer);
-        return saveAnswerResult.Success
-            ? OperationResult.Ok()
-            : OperationResult.Error(saveAnswerResult.ErrorMsg);
+        return await gameRepository.SaveAnswerAsync(roomId, gameId, questionId, answer);
     }
 }

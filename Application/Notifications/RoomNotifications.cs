@@ -15,7 +15,7 @@ public record PlayerLeavedNotification(Guid PlayerId, Guid HostId)
 }
 
 public record NewGameNotification(Game Game)
-: GameNotification
+    : GameNotification
 {
     public override string MethodName => "NewGameAdded";
 }

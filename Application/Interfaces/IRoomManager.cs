@@ -10,7 +10,6 @@ public interface IRoomManager
     Task<OperationResult> LeaveRoomAsync(Guid roomId, Guid userId);
     Task<OperationResult<IEnumerable<Room>>> GetAvailablePublicRoomsAsync();
     Task<OperationResult<Room>> FindOrCreateQuickRoomAsync(Guid userId);
-    Task<OperationResult> HandleUserError(string connectionId);
 }
 
 public enum RoomPrivacy

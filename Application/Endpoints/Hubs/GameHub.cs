@@ -31,7 +31,7 @@ public partial class AppHub
 
     public async Task<EmptyResponse> SubmitAnswer(SubmitAnswerRequest request)
     {
-        var result = await gameManager.SubmitAnswerAsync(request.roomId, request.GameId, request.questionId, request.Answer);
+        var result = await gameManager.SubmitAnswerAsync(request.RoomId, request.GameId, request.QuestionId, request.Answer);
         return result.Success
             ? EmptyResponse.CreateSuccess()
             : EmptyResponse.CreateFailure(result.ErrorMsg);

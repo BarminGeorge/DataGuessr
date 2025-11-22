@@ -22,4 +22,4 @@ public record CreateGameRequest(
     IEnumerable<Question>? Questions = null);
 
 public record StartGameRequest(Guid UserId, Guid RoomId);
-public record SubmitAnswerRequest(Guid roomId, Guid GameId, Guid questionId, Answer Answer);
+public record SubmitAnswerRequest(Guid RoomId, Guid GameId, Guid QuestionId, Answer Answer);

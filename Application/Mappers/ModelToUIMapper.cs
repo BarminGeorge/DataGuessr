@@ -9,7 +9,7 @@ public static class ModelToUiMapper
     {
         return new RoomDto(
             room.Id, 
-            room.Host, 
+            room.Owner, 
             room.Players);
     }
 
