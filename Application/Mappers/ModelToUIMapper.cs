@@ -3,7 +3,7 @@ using Domain.Entities;
 
 namespace Application.Mappers;
 
-public static class Mapper
+public static class ModelToUiMapper
 {
     public static RoomDto ToDto(this Room room)
     {
