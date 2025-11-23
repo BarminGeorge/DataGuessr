@@ -6,24 +6,24 @@ namespace Domain.Entities;
 
 public class Game : IEntity<Guid>
 {
-    public Guid Id { get; }
-    public IMode Mode { get; }
+    public Guid Id { get; private set; }
+    public IMode Mode { get; private set; }
     public GameStatus Status { get; private set; }
-    public Statistic CurrentStatistic { get; set; }
+    public Statistic CurrentStatistic { get; private set; }
     public IReadOnlyList<Question> Questions => questions.AsReadOnly();
 
-    private readonly List<Question> questions;
+    private readonly List<Question> questions = [];
 
     public Game(IMode mode)
     {
+        Id = Guid.NewGuid();
         Mode = mode;
         CurrentStatistic = new Statistic();
-        questions = [];
-        Id = Guid.NewGuid();
         Status = GameStatus.NotStarted;
     }
 
     public void AddQuestion(Question question) => questions.Add(question);
+    public void AddQuestions(IEnumerable<Question> question) => questions.AddRange(question);
 
     public void StartGame()
     {
@@ -34,7 +34,7 @@ public class Game : IEntity<Guid>
 
     public void FinishGame()
     {
-        if  (Status is GameStatus.InProgress)
+        if (Status is GameStatus.InProgress)
             Status = GameStatus.Finished;
         throw new InvalidOperationException("Игра еще не началась или уже закончена");
     }

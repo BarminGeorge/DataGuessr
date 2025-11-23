@@ -2,17 +2,24 @@
 
 namespace Domain.Entities;
 
-
 public class User : IEntity<Guid>
 {
-    public Guid Id { get; }
+    public Guid Id { get; private set; }
     public string Name { get; set; }
-    public string Avatar { get; set; }
+    public string Login { get; set; }
+    public string PasswordHash { get; private set; }
+    public Avatar Avatar { get; set; }
 
-    public User(Guid id, string name, string avatar)
+    protected User()
     {
-        Id = id;
+    }
+
+    public User(string name, string login, string passwordHash, Avatar avatar)
+    {
+        Id = Guid.NewGuid();
         Name = name;
+        Login = login;
+        PasswordHash = passwordHash;
         Avatar = avatar;
     }
 }

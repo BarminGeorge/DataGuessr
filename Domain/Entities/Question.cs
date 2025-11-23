@@ -2,13 +2,19 @@ using Domain.Interfaces;
 
 namespace Domain.ValueTypes;
 
-public record Question
+//TODO update 
+public class Question : IEntity<Guid>
 {
+    public Guid Id { get; private set; }
     public IQuestionType QuestionType { get; }
-    public Answer RightAnswer { get; }
+    public Answer RightAnswer { get; private set; }
     public IReadOnlyList<Answer> AllAnswers => allAnswers.AsReadOnly();
 
     private readonly List<Answer> allAnswers = [];
+
+    protected Question()
+    {
+    }
 
     public Question(IQuestionType questionType, Answer rightAnswer)
     {
