@@ -14,7 +14,8 @@ public class UserService(IJwtProvider provider, IUsersRepository usersRepository
     public async Task Register(string userName, string password)
     {
         var hashedPassword = passwordHasher.GenerateAsync(password);
-        var user = new User(userName, hashedPassword);
+        // TODO логика с Avatar
+        var user = new User(userName, new Avatar("", ""), hashedPassword);
         await usersRepository.AddAsync(user);
     }
 

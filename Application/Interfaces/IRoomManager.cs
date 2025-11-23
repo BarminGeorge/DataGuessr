@@ -1,5 +1,6 @@
 using Application.Result;
 using Domain.Entities;
+using Domain.Enums;
 
 namespace Application.Interfaces;
 
@@ -10,10 +11,4 @@ public interface IRoomManager
     Task<OperationResult> LeaveRoomAsync(Guid roomId, Guid userId);
     Task<OperationResult<IEnumerable<Room>>> GetAvailablePublicRoomsAsync();
     Task<OperationResult<Room>> FindOrCreateQuickRoomAsync(Guid userId);
-}
-
-public enum RoomPrivacy
-{
-    Public,
-    Private
 }

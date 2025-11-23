@@ -1,7 +1,8 @@
 using System.ComponentModel.DataAnnotations;
-using Application.Interfaces;
+using Domain.Entities;
 using Domain.Enums;
 using Domain.ValueTypes;
+
 
 namespace Application.Requests_Responses;
 

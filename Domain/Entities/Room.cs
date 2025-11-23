@@ -11,6 +11,8 @@ public class Room : IEntity<Guid>
     public Guid Owner { get; private set; }
     public RoomPrivacy Privacy { get; private set; }
     public string Code { get; private set; } = string.Empty;
+
+    public string? Password { get; private set; } = null;
     public RoomStatus Status { get; private set; }
     private int _maxPlayers;
 
@@ -34,15 +36,14 @@ public class Room : IEntity<Guid>
     {
     }
 
-    public Room(Guid ownerId, RoomPrivacy privacy, string code, int maxPlayers)
+    public Room(Guid ownerId, RoomPrivacy privacy, int maxPlayers, string? password = null)
     {
         Id = Guid.NewGuid();
         Owner = ownerId;
         Privacy = privacy;
         Status = RoomStatus.Available;
-        Code = !string.IsNullOrWhiteSpace(code)
-            ? code
-            : throw new ArgumentException("При создании комнаты нужен код для подключения", nameof(code));
+        Password = password;
+        Code = "123456"; // TODO выдача кода для комнаты
         MaxPlayers = maxPlayers;
     }
 

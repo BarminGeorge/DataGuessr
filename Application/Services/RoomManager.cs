@@ -2,6 +2,7 @@ using Application.Interfaces;
 using Application.Interfaces.Infrastructure;
 using Application.Result;
 using Domain.Entities;
+using Domain.Enums;
 
 namespace Application.Services;
 
@@ -12,7 +13,7 @@ public class RoomManager(
 {
     public async Task<OperationResult<Room>> CreateRoomAsync(Guid userId, RoomPrivacy privacy, string? password = null, int maxPlayers = 4)
     {
-        var room = new Room(userId);
+        var room = new Room(userId, privacy, maxPlayers, password);
 
         var addRoomResult = await roomRepository.AddAsync(room);
         if (!addRoomResult.Success)

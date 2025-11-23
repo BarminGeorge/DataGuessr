@@ -1,4 +1,5 @@
 using Application.Result;
+using Domain.Entities;
 using Domain.ValueTypes;
 
 namespace Application.Interfaces.Infrastructure;
