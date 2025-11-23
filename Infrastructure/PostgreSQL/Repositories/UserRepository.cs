@@ -84,4 +84,15 @@ public class UserRepository : IUserRepository
         db.Users.RemoveRange(entities);
         await db.SaveChangesAsync(ct);
     }
+
+    public async Task AddAsync(User user, CancellationToken ct = default)
+    {
+        await SaveAsync(user);
+    }
+
+    public async Task<User?> GetByNameAsync(string userName, CancellationToken ct = default)
+    {
+        return await db.Users.AsNoTracking()
+            .FirstOrDefaultAsync(user => user.Name == userName, ct);
+    }
 }
