@@ -43,11 +43,11 @@ public class GameManager(
         
         var getRoomResult = await roomRepository.GetByIdAsync(roomId);
         if (!getRoomResult.Success) 
-            OperationResult.Error(getRoomResult.ErrorMsg);
+            return OperationResult.Error(getRoomResult.ErrorMsg);
 
         var getGameResult = await roomRepository.GetCurrentGameAsync(roomId);
         if (!getGameResult.Success)
-            OperationResult.Error(getGameResult.ErrorMsg);
+            return OperationResult.Error(getGameResult.ErrorMsg);
 
         var game = getGameResult.ResultObj;
         
