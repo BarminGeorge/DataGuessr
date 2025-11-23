@@ -9,6 +9,7 @@ using Domain.ValueTypes;
 namespace Application.Services;
 
 public class GameManager(
+    IОrchestratorService оrchestratorService,
     IRoomRepository roomRepository, 
     INotificationService notificationService,
     IQuestionService questionService,
@@ -51,11 +52,9 @@ public class GameManager(
 
         var game = getGameResult.ResultObj;
         
-        // TODO: оркестратор игры
-        game.StartGame();
-        
+        await оrchestratorService.RunGameCycle();
         logger.LogInformation($"Match {game.Id} started in room {roomId} by user {startedByUserId}");
-
+        
         return OperationResult.Ok();
     }
 
