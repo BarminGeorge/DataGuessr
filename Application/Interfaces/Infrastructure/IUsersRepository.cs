@@ -5,6 +5,6 @@ namespace Application.Interfaces.Infrastructure;
 
 public interface IUsersRepository
 {
-    Task<OperationResult> Add(User user);
-    Task<OperationResult<User>> GetByName(string userName);
+    Task<OperationResult> AddAsync(User user);
+    Task<OperationResult<User>> GetByNameAsync(string userName);
 }

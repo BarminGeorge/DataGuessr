@@ -49,7 +49,7 @@ public class ОrchestratorService(Game game,
             }
             await notificationService.NotifyGameRoomAsync(room.Id,     
                 new LeaderBoardNotifications(game.CurrentStatistic));
-        }
+        }   
         game.FinishGame();  
         return OperationResult.Ok();
     }

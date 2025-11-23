@@ -13,19 +13,19 @@ public class UserService(IJwtProvider provider, IUsersRepository usersRepository
 {
     public async Task Register(string userName, string password)
     {
-        var hashedPassword = passwordHasher.Generate(password);
+        var hashedPassword = passwordHasher.GenerateAsync(password);
         var user = new User(userName, hashedPassword);
-        await usersRepository.Add(user);
+        await usersRepository.AddAsync(user);
     }
 
     public async Task<string> Login(string userName, string password)
     {
-        var user = await usersRepository.GetByName(userName);
-        var result = passwordHasher.Verify(password, user.ResultObj.PasswordHash);
+        var user = await usersRepository.GetByNameAsync(userName);
+        var result = passwordHasher.VerifyAsync(password, user.ResultObj.PasswordHash);
         if (!result)
             throw new ApplicationException("Invalid username or password");
         
-        var token = provider.GenerateToken(user.ResultObj);
+        var token = provider.GenerateTokenAsync(user.ResultObj);
         return token;
     }
 }
@@ -33,12 +33,12 @@ public class UserService(IJwtProvider provider, IUsersRepository usersRepository
 // в инфраструктуру
 public class PasswordHasher : IPasswordHasher
 {
-    public string Generate(string password)
+    public string GenerateAsync(string password)
     {
         return BCrypt.Net.BCrypt.EnhancedHashPassword(password);
     }
 
-    public bool Verify(string password, string hashedPassword)
+    public bool VerifyAsync(string password, string hashedPassword)
     {
         return BCrypt.Net.BCrypt.EnhancedVerify(password, hashedPassword);
     }
@@ -49,7 +49,7 @@ public class JwtProvider(IOptions<JwtOptions> options) : IJwtProvider
 {
     private readonly JwtOptions options = options.Value;
 
-    public string GenerateToken(User user)
+    public string GenerateTokenAsync(User user)
     {
         // TODO: пока небезопасно храниться в appsettings.json, переделать
         
