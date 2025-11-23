@@ -6,12 +6,13 @@ namespace Application.Services;
 
 public class EvaluateService: IEvaluationService
 {
-    public Score CalculateScore(Answer answer, DateTime rightAnswer, GameMode mode)
+    public Func<Answer, DateTime, Score> CalculateScore(GameMode mode)
     {
-        var dif = Math.Abs((rightAnswer - answer.Date).TotalDays);
         return mode switch
         {
-            GameMode.DefaultMode => new Score((int)Math.Round(2222 * Math.Exp(-dif / 10000))),
+            GameMode.DefaultMode => 
+                (answer, rightAnswer)  => 
+                    new Score((int)Math.Round(2222 * Math.Exp(-1 * (Math.Abs((rightAnswer - answer.Date).TotalDays)) / 10000))),
             _ => throw new ArgumentException($"Для {mode} подсчет очков не реализован.")
         };
     }

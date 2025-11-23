@@ -5,5 +5,5 @@ namespace Application.Interfaces;
 
 public interface IEvaluationService
 {
-    Score CalculateScore(Answer answer, DateTime rightAnswer, GameMode mode);
+    Func<Answer, DateTime, Score> CalculateScore(GameMode mode);
 }
