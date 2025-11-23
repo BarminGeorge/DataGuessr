@@ -1,14 +1,23 @@
+using Domain.Interfaces;
 using Domain.ValueTypes;
 
 namespace Domain.Entities;
 
-public class Player : User
+public class Player : IEntity<Guid>
 {
-    public Score Score { get; set; }
+    public Guid Id { get; private set; }
+    public User User { get; private set; }
+    public Score Score { get; private set; }
 
-    public Player(Guid id, string name, string avatar) 
-        : base(name, avatar)
+    public Player(User user)
     {
+        Id = user.Id;
+        User = user;
         Score = Score.Zero;
+    }
+
+    public void UpdateScore(Score newScore)
+    {
+        Score = newScore;
     }
 }

@@ -1,13 +1,11 @@
 using Domain.Interfaces;
+using Domain.ValueTypes;
 
-namespace Domain.ValueTypes;
+namespace Domain.Entities;
 
-public record Question(Answer RightAnswer, string Formulation) : IEntity<Guid>
+public class Question(Answer rightAnswer, string formulation) : IEntity<Guid>
 {
     public Guid Id { get; } = Guid.NewGuid();
-    public IReadOnlyList<Answer> AllAnswers => allAnswers.AsReadOnly();
-
-    private readonly List<Answer> allAnswers = [];
-
-    public void AddAnswer(Answer answer) => allAnswers.Add(answer);
+    public Answer RightAnswer { get; } = rightAnswer;
+    public string Formulation { get; } = formulation;
 }
