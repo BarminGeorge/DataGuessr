@@ -1,4 +1,4 @@
-using Domain.Common;
+п»їusing Domain.Common;
 using Domain.Entities;
 using Infrastructure.Interfaces;
 using Microsoft.EntityFrameworkCore;
@@ -18,7 +18,7 @@ public class UserRepository : IUserRepository
     {
         try
         {
-            // Проверяем уникальность имени и логина
+            // РџСЂРѕРІРµСЂСЏРµРј СѓРЅРёРєР°Р»СЊРЅРѕСЃС‚СЊ РёРјРµРЅРё Рё Р»РѕРіРёРЅР°
             var existingUser = await db.Users
                 .AsNoTracking()
                 .FirstOrDefaultAsync(u => u.Name == user.Name || u.Login == user.Login, ct);
@@ -26,9 +26,9 @@ public class UserRepository : IUserRepository
             if (existingUser != null)
             {
                 if (existingUser.Name == user.Name)
-                    return OperationResult.Error($"Пользователь с именем '{user.Name}' уже существует");
+                    return OperationResult.Error($"РџРѕР»СЊР·РѕРІР°С‚РµР»СЊ СЃ РёРјРµРЅРµРј '{user.Name}' СѓР¶Рµ СЃСѓС‰РµСЃС‚РІСѓРµС‚");
                 else
-                    return OperationResult.Error($"Пользователь с логином '{user.Login}' уже существует");
+                    return OperationResult.Error($"РџРѕР»СЊР·РѕРІР°С‚РµР»СЊ СЃ Р»РѕРіРёРЅРѕРј '{user.Login}' СѓР¶Рµ СЃСѓС‰РµСЃС‚РІСѓРµС‚");
             }
 
             await db.Users.AddAsync(user, ct);
@@ -38,15 +38,15 @@ public class UserRepository : IUserRepository
         }
         catch (OperationCanceledException)
         {
-            return OperationResult.Error("Операция была отменена");
+            return OperationResult.Error("РћРїРµСЂР°С†РёСЏ Р±С‹Р»Р° РѕС‚РјРµРЅРµРЅР°");
         }
         catch (DbUpdateException ex)
         {
-            return OperationResult.Error($"Ошибка при сохранении пользователя: {ex.Message}");
+            return OperationResult.Error($"РћС€РёР±РєР° РїСЂРё СЃРѕС…СЂР°РЅРµРЅРёРё РїРѕР»СЊР·РѕРІР°С‚РµР»СЏ: {ex.Message}");
         }
         catch (Exception ex)
         {
-            return OperationResult.Error($"Неожиданная ошибка: {ex.Message}");
+            return OperationResult.Error($"РќРµРѕР¶РёРґР°РЅРЅР°СЏ РѕС€РёР±РєР°: {ex.Message}");
         }
     }
 
@@ -60,15 +60,15 @@ public class UserRepository : IUserRepository
 
             return user != null
                 ? OperationResult<User>.Ok(user)
-                : OperationResult<User>.Error($"Пользователь с именем '{userName}' не найден");
+                : OperationResult<User>.Error($"РџРѕР»СЊР·РѕРІР°С‚РµР»СЊ СЃ РёРјРµРЅРµРј '{userName}' РЅРµ РЅР°Р№РґРµРЅ");
         }
         catch (OperationCanceledException)
         {
-            return OperationResult<User>.Error("Операция была отменена");
+            return OperationResult<User>.Error("РћРїРµСЂР°С†РёСЏ Р±С‹Р»Р° РѕС‚РјРµРЅРµРЅР°");
         }
         catch (Exception ex)
         {
-            return OperationResult<User>.Error($"Ошибка при поиске пользователя: {ex.Message}");
+            return OperationResult<User>.Error($"РћС€РёР±РєР° РїСЂРё РїРѕРёСЃРєРµ РїРѕР»СЊР·РѕРІР°С‚РµР»СЏ: {ex.Message}");
         }
     }
 }

@@ -1,4 +1,4 @@
-using Domain.Interfaces;
+п»їusing Domain.Interfaces;
 using Domain.ValueTypes;
 
 namespace Domain.Entities;
@@ -13,7 +13,7 @@ public class Player : IEntity<Guid>
     public Score Score { get; private set; }
     public bool IsGuest => UserId == null;
 
-    // Конструктор для авторизованного игрока
+    // РљРѕРЅСЃС‚СЂСѓРєС‚РѕСЂ РґР»СЏ Р°РІС‚РѕСЂРёР·РѕРІР°РЅРЅРѕРіРѕ РёРіСЂРѕРєР°
     public Player(Guid userId, Guid roomId)
     {
         Id = Guid.NewGuid();
@@ -24,7 +24,7 @@ public class Player : IEntity<Guid>
         RoomId = roomId;
     }
 
-    // Конструктор для гостя
+    // РљРѕРЅСЃС‚СЂСѓРєС‚РѕСЂ РґР»СЏ РіРѕСЃС‚СЏ
     public Player(string guestName, Guid guestAvatar, Guid roomId)
     {
         Id = Guid.NewGuid();
