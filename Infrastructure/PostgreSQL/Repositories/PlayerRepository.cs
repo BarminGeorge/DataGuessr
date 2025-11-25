@@ -8,26 +8,24 @@ namespace Infrastructure.PostgreSQL.Repositories;
 
 public class PlayerRepository : IPlayerRepository
 {
-    private readonly AppDbContext _db;
+    private readonly AppDbContext db;
 
     public PlayerRepository(AppDbContext db)
     {
-        _db = db ?? throw new ArgumentNullException(nameof(db));
+        this.db = db ?? throw new ArgumentNullException(nameof(db));
     }
 
     public async Task<OperationResult<Player>> GetPlayerByIdAsync(Guid playerId, CancellationToken ct = default)
     {
         try
         {
-            var player = await _db.Players
+            var player = await db.Players
                 .AsNoTracking()
-                .Include(p => p.User)
                 .FirstOrDefaultAsync(p => p.Id == playerId, ct);
 
-            if (player == null)
-                return OperationResult<Player>.Error($"Игрок с ID '{playerId}' не найден");
-
-            return OperationResult<Player>.Ok(player);
+            return player != null
+                ? OperationResult<Player>.Ok(player)
+                : OperationResult<Player>.Error($"Игрок с ID '{playerId}' не найден");
         }
         catch (OperationCanceledException)
         {
@@ -39,20 +37,29 @@ public class PlayerRepository : IPlayerRepository
         }
     }
 
-    public async Task<OperationResult<Player>> CreatePlayerAsync(User user, CancellationToken ct = default)
+    public async Task<OperationResult<Player>> CreateAuthorizedPlayerAsync(Guid userId, Guid roomId, CancellationToken ct = default)
     {
         try
         {
-            var existingPlayer = await _db.Players
-                .AsNoTracking()
-                .FirstOrDefaultAsync(p => p.Id == user.Id, ct);
+            // Проверяем существует ли пользователь
+            var userExists = await db.Users.AnyAsync(u => u.Id == userId, ct);
+            if (!userExists)
+                return OperationResult<Player>.Error($"Пользователь с ID '{userId}' не найден");
 
-            if (existingPlayer != null)
-                return OperationResult<Player>.Error($"Игрок для пользователя '{user.Name}' уже существует");
+            // Проверяем существует ли комната
+            var roomExists = await db.Rooms.AnyAsync(r => r.Id == roomId, ct);
+            if (!roomExists)
+                return OperationResult<Player>.Error($"Комната с ID '{roomId}' не найдена");
 
-            var player = new Player(user);
-            await _db.Players.AddAsync(player, ct);
-            await _db.SaveChangesAsync(ct);
+            // Проверяем нет ли уже игрока для этого пользователя в этой комнате
+            var existingPlayer = await db.Players
+                .AnyAsync(p => p.UserId == userId && p.RoomId == roomId, ct);
+            if (existingPlayer)
+                return OperationResult<Player>.Error("Игрок для этого пользователя уже существует в данной комнате");
+
+            var player = new Player(userId, roomId);
+            await db.Players.AddAsync(player, ct);
+            await db.SaveChangesAsync(ct);
 
             return OperationResult<Player>.Ok(player);
         }
@@ -70,19 +77,52 @@ public class PlayerRepository : IPlayerRepository
         }
     }
 
+    public async Task<OperationResult<Player>> CreateGuestPlayerAsync(string guestName, Guid guestAvatarId, Guid roomId, CancellationToken ct = default)
+    {
+        try
+        {
+            // Проверяем существует ли комната
+            var roomExists = await db.Rooms.AnyAsync(r => r.Id == roomId, ct);
+            if (!roomExists)
+                return OperationResult<Player>.Error($"Комната с ID '{roomId}' не найдена");
+
+            var avatarExists = await db.Avatars.AnyAsync(r => r.Id == guestAvatarId, ct);
+            if (!avatarExists)
+                return OperationResult<Player>.Error($"Аватар с ID '{guestAvatarId}' не найден");
+
+            var player = new Player(guestName, guestAvatarId, roomId);
+            await db.Players.AddAsync(player, ct);
+            await db.SaveChangesAsync(ct);
+
+            return OperationResult<Player>.Ok(player);
+        }
+        catch (OperationCanceledException)
+        {
+            return OperationResult<Player>.Error("Операция была отменена");
+        }
+        catch (DbUpdateException ex)
+        {
+            return OperationResult<Player>.Error($"Ошибка при создании гостя: {ex.Message}");
+        }
+        catch (Exception ex)
+        {
+            return OperationResult<Player>.Error($"Неожиданная ошибка: {ex.Message}");
+        }
+    }
+
     public async Task<OperationResult> UpdatePlayerScoreAsync(Guid playerId, Score newScore, CancellationToken ct = default)
     {
         try
         {
-            var player = await _db.Players
+            var player = await db.Players
                 .FirstOrDefaultAsync(p => p.Id == playerId, ct);
 
             if (player == null)
                 return OperationResult.Error($"Игрок с ID '{playerId}' не найден");
 
             player.UpdateScore(newScore);
-            _db.Players.Update(player);
-            await _db.SaveChangesAsync(ct);
+            db.Players.Update(player);
+            await db.SaveChangesAsync(ct);
 
             return OperationResult.Ok();
         }
@@ -104,14 +144,14 @@ public class PlayerRepository : IPlayerRepository
     {
         try
         {
-            var player = await _db.Players
+            var player = await db.Players
                 .FirstOrDefaultAsync(p => p.Id == playerId, ct);
 
             if (player == null)
                 return OperationResult.Error($"Игрок с ID '{playerId}' не найден");
 
-            _db.Players.Remove(player);
-            await _db.SaveChangesAsync(ct);
+            db.Players.Remove(player);
+            await db.SaveChangesAsync(ct);
 
             return OperationResult.Ok();
         }
@@ -126,6 +166,49 @@ public class PlayerRepository : IPlayerRepository
         catch (Exception ex)
         {
             return OperationResult.Error($"Неожиданная ошибка: {ex.Message}");
+        }
+    }
+
+    public async Task<OperationResult<Player>> GetPlayerByUserIdAndRoomAsync(Guid userId, Guid roomId, CancellationToken ct = default)
+    {
+        try
+        {
+            var player = await db.Players
+                .AsNoTracking()
+                .FirstOrDefaultAsync(p => p.UserId == userId && p.RoomId == roomId, ct);
+
+            return player != null
+                ? OperationResult<Player>.Ok(player)
+                : OperationResult<Player>.Error($"Игрок для пользователя '{userId}' в комнате '{roomId}' не найден");
+        }
+        catch (OperationCanceledException)
+        {
+            return OperationResult<Player>.Error("Операция была отменена");
+        }
+        catch (Exception ex)
+        {
+            return OperationResult<Player>.Error($"Ошибка при поиске игрока: {ex.Message}");
+        }
+    }
+
+    public async Task<OperationResult<List<Player>>> GetPlayersByRoomAsync(Guid roomId, CancellationToken ct = default)
+    {
+        try
+        {
+            var players = await db.Players
+                .AsNoTracking()
+                .Where(p => p.RoomId == roomId)
+                .ToListAsync(ct);
+
+            return OperationResult<List<Player>>.Ok(players);
+        }
+        catch (OperationCanceledException)
+        {
+            return OperationResult<List<Player>>.Error("Операция была отменена");
+        }
+        catch (Exception ex)
+        {
+            return OperationResult<List<Player>>.Error($"Ошибка при получении игроков комнаты: {ex.Message}");
         }
     }
 }
