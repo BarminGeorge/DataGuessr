@@ -18,17 +18,14 @@ public class UserRepository : IUserRepository
     {
         try
         {
-            // Проверяем уникальность имени и логина
+            // Проверяем уникальность логина
             var existingUser = await db.Users
                 .AsNoTracking()
-                .FirstOrDefaultAsync(u => u.Name == user.Name || u.Login == user.Login, ct);
+                .FirstOrDefaultAsync(u => u.Login == user.Login, ct);
 
             if (existingUser != null)
             {
-                if (existingUser.Name == user.Name)
-                    return OperationResult.Error($"Пользователь с именем '{user.Name}' уже существует");
-                else
-                    return OperationResult.Error($"Пользователь с логином '{user.Login}' уже существует");
+                return OperationResult.Error($"Пользователь с логином '{user.Login}' уже существует");
             }
 
             await db.Users.AddAsync(user, ct);
