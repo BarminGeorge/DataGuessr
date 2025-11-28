@@ -1,5 +1,6 @@
 using Application.Interfaces;
 using Application.Interfaces.Infrastructure;
+using Application.Notifications;
 using Application.Result;
 using Domain.Entities;
 using Domain.Enums;
@@ -9,10 +10,11 @@ namespace Application.Services;
 public class RoomManager(
     IRoomRepository roomRepository, 
     ILogger<RoomManager> logger, 
+    INotificationService notificationService,
     IPlayerRepository playerRepository) : IRoomManager
 {
     public async Task<OperationResult<Room>> CreateRoomAsync(Guid userId, RoomPrivacy privacy, CancellationToken ct,
-        string? password = null, int maxPlayers = 4)
+        string? password = null, int maxPlayers = 15)
     {
         var room = new Room(userId, privacy, maxPlayers, password);
 
@@ -25,7 +27,7 @@ public class RoomManager(
         return OperationResult<Room>.Ok(room);
     }
 
-    public async Task<OperationResult<Room>> JoinRoomAsync(Guid roomId, Guid userId, CancellationToken ct,string? password = null)
+    public async Task<OperationResult<Room>> JoinRoomAsync(Guid roomId, Guid userId, CancellationToken ct, string? password = null)
     {
         var getRoomResult = await roomRepository.GetByIdAsync(roomId, ct);
         if (!getRoomResult.Success)
@@ -39,6 +41,10 @@ public class RoomManager(
         
         var player = getPlayerResult.ResultObj;
         room.AddPlayer(player);
+
+        var notification = new NewPlayerNotification(player.Id, player.User.PlayerName);
+        await notificationService.NotifyGameRoomAsync(roomId, notification)
+            .WithRetry(3, TimeSpan.FromSeconds(0.2));
         
         var updateResult = await roomRepository.UpdateAsync(room, ct);
         if (!updateResult.Success)
@@ -63,9 +69,15 @@ public class RoomManager(
         var player = getPlayerResult.ResultObj;
         
         room.RemovePlayer(player);
-        
-        logger.LogInformation($"User {userId} left room {roomId}");
-        return OperationResult.Ok();
+        if (room.Players.Count > 0)
+        {
+            var notification = new PlayerLeavedNotification(userId, room.Owner);
+            await notificationService.NotifyGameRoomAsync(roomId, notification)
+                .WithRetry(3, TimeSpan.FromSeconds(0.2));
+            return await roomRepository.UpdateAsync(room, ct);
+        }
+
+        return await roomRepository.RemoveAsync(roomId, ct);
     }
     
     public async Task<OperationResult<Room>> FindOrCreateQuickRoomAsync(Guid userId, CancellationToken ct)

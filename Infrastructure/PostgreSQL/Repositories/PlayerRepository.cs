@@ -1,8 +1,8 @@
 ﻿using Domain.Entities;
 using Domain.Common;
 using Domain.ValueTypes;
+using Infrastructure.Interfaces;
 using Microsoft.EntityFrameworkCore;
-using Application.Interfaces.Infrastructure;
 
 namespace Infrastructure.PostgreSQL.Repositories;
 

@@ -1,7 +1,5 @@
 namespace Application.Notifications;
 
-// TODO: прописать frontend-backend сущности для передачи (нужны здесь в аргументах),
-// для конвертации написать мапперы
 public record NewQuestionNotification(Guid QuestionId, string Formulation, string ImageUrl, DateTime EndTime, int DurationSeconds)
     : GameNotification
 {

@@ -26,8 +26,7 @@ public class GameCoreService(
             return OperationResult.Error(questionsRes.ErrorMsg);
         
         if (questionsRes.ResultObj is null)
-            return OperationResult.Error(
-                $"В репозиторий игры {game.Id} не были добавлены вопросы");
+            return OperationResult.Error($"В репозиторий игры {game.Id} не были добавлены вопросы");
         
         var questions = questionsRes.ResultObj.ToList();
         game.CurrentStatistic = new Statistic();
@@ -51,7 +50,7 @@ public class GameCoreService(
                 await gameRepository.SaveStatisticAsync(game.CurrentStatistic, token);
             }
             await notificationService.NotifyGameRoomAsync(room.Id,     
-                new LeaderBoardNotifications(game.CurrentStatistic));
+                new StatisticNotification(game.CurrentStatistic));
         }   
         game.FinishGame();  
         return OperationResult.Ok();

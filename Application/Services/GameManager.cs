@@ -80,7 +80,9 @@ public class GameManager(
             return OperationResult<Game>.Error(addGameResult.ErrorMsg);
         
         var notification = new NewGameNotification(game);
-        var notifyResult = await notificationService.NotifyGameRoomAsync(roomId, notification);
+        var notifyResult = await notificationService.NotifyGameRoomAsync(roomId, notification)
+            .WithRetry(3,TimeSpan.FromSeconds(0.2));
+        
         return !notifyResult.Success 
             ? OperationResult<Game>.Error(notifyResult.ErrorMsg) 
             : OperationResult<Game>.Ok(game);

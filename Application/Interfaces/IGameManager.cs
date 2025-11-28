@@ -14,7 +14,7 @@ public interface IGameManager
         int countQuestions, 
         TimeSpan QuestionDuration, 
         CancellationToken ct,
-        IEnumerable<Question> questions = null);
+        IEnumerable<Question>? questions = null);
     
     Task<OperationResult> SubmitAnswerAsync(Guid roomId, Guid gameId, Guid questionId, Answer answer, CancellationToken ct);
 }

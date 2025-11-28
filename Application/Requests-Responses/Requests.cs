@@ -10,9 +10,10 @@ public record JoinRoomRequest(Guid UserId, Guid RoomId, string? Password);
 public record LeaveRoomRequest(Guid UserId, Guid RoomId);
 public record FindQuickRoomRequest(Guid UserId);
 
-public record RegisterUserRequest([Required] string Username, [Required] string Password, IFormFile Avatar);
+public record RegisterUserRequest([Required] string Login, [Required] string Password, [Required] string PlayerName, IFormFile Avatar);
 public record LoginUserRequest([Required] string Username, [Required] string Password);
 public record UpdateUserRequest(Guid UserId, IFormFile Avatar, string Username);
+public record CreateGuestRequest(string Username, IFormFile Avatar);
 
 public record CreateGameRequest(
     Guid UserId, 

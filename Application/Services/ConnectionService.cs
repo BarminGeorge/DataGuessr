@@ -6,9 +6,9 @@ namespace Application.Services;
 
 public class ConnectionService(IConnectionRepository connectionRepository) : IConnectionService
 {
-    public async Task<OperationResult> AddConnection(string connectionId, Guid userId, Guid roomId, CancellationToken ct)
+    public async Task<OperationResult> AddConnection(string connectionId, Guid playerId, Guid roomId, CancellationToken ct)
     {
-        return await connectionRepository.AddConnectionAsync(connectionId, userId, roomId, ct);
+        return await connectionRepository.AddConnectionAsync(connectionId, playerId, roomId, ct);
     }
 
     public async Task<OperationResult> RemoveConnection(string connectionId)
@@ -16,8 +16,8 @@ public class ConnectionService(IConnectionRepository connectionRepository) : ICo
         return await connectionRepository.RemoveConnectionAsync(connectionId);
     }
 
-    public async Task<OperationResult<(Guid userId, Guid roomId)>> GetUserByConnection(string connectionId)
+    public async Task<OperationResult<(Guid playerId, Guid roomId)>> GetPlayerByConnection(string connectionId)
     {
-        return await connectionRepository.GetUserByConnectionIdAsync(connectionId);
+        return await connectionRepository.GetPlayerByConnectionIdAsync(connectionId);
     }
 }

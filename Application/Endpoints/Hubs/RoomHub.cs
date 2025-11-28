@@ -12,7 +12,8 @@ public partial class AppHub
         
         if (result.Success)
         {
-            await Groups.AddToGroupAsync(Context.ConnectionId, $"room-{result.ResultObj.Id}");
+            await connectionService.AddConnection(Context.ConnectionId, request.UserId, result.ResultObj.Id, ct);
+            await Groups.AddToGroupAsync(Context.ConnectionId, $"room-{result.ResultObj.Id}", ct);
             return DataResponse<RoomDto>.CreateSuccess(result.ResultObj.ToDto());
         }
         
@@ -25,7 +26,8 @@ public partial class AppHub
 
         if (result.Success)
         {
-            await Groups.AddToGroupAsync(Context.ConnectionId, $"room-{request.RoomId}");
+            await connectionService.AddConnection(Context.ConnectionId, request.UserId, request.RoomId, ct);
+            await Groups.AddToGroupAsync(Context.ConnectionId, $"room-{request.RoomId}", ct);
             return DataResponse<RoomDto>.CreateSuccess(result.ResultObj.ToDto());
         }
 
@@ -38,7 +40,8 @@ public partial class AppHub
         
         if (result.Success)
         {
-            await Groups.RemoveFromGroupAsync(Context.ConnectionId, $"room-{request.RoomId}");
+            await connectionService.RemoveConnection(Context.ConnectionId);
+            await Groups.RemoveFromGroupAsync(Context.ConnectionId, $"room-{request.RoomId}", ct);
             return EmptyResponse.CreateSuccess();
         }
         
@@ -51,7 +54,8 @@ public partial class AppHub
 
         if (result.Success)
         {
-            await Groups.AddToGroupAsync(Context.ConnectionId, $"room-{result.ResultObj.Id}");
+            await connectionService.AddConnection(Context.ConnectionId, request.UserId, result.ResultObj.Id, ct);
+            await Groups.AddToGroupAsync(Context.ConnectionId, $"room-{result.ResultObj.Id}", ct);
             return DataResponse<RoomDto>.CreateSuccess(result.ResultObj.ToDto());
         }
 

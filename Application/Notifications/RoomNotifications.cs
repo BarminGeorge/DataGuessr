@@ -8,7 +8,7 @@ public record NewPlayerNotification(Guid PlayerId, string PlayerName)
     public override string MethodName => "NewPlayerEntered";
 }
 
-public record PlayerLeavedNotification(Guid PlayerId, Guid HostId)
+public record PlayerLeavedNotification(Guid PlayerId, Guid OwnerId)
     : GameNotification
 {
     public override string MethodName => "PlayerLeaved";

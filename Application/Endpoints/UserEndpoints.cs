@@ -10,13 +10,14 @@ public static class UserEndpoints
         app.MapPost("register", Register);
         app.MapPost("login", Login);
         app.MapPost("{id:guid}/userUpdate", UpdateUser);
+        app.MapPost("guest", CreateGuest);
         
         return app;
     }
 
     private static async Task<IResult> Register(RegisterUserRequest request, UserService userService, CancellationToken ct)
     {
-        await userService.Register(request.Username, request.Password, request.Avatar, ct);
+        await userService.Register(request.PlayerName, request.Password, request.PlayerName, request.Avatar, ct);
         return Results.Ok();
     }
 
@@ -32,6 +33,14 @@ public static class UserEndpoints
         var result = await userService.UpdateUser(request.UserId, request.Username, request.Avatar, ct);
         return result.Success 
             ? Results.Ok() 
+            : Results.BadRequest(result.ErrorMsg);
+    }
+
+    private static async Task<IResult> CreateGuest(CreateGuestRequest request, UserService userService, CancellationToken ct)
+    {
+        var result = await userService.CreateGuest(request.Username, request.Avatar, ct);
+        return result.Success
+            ? Results.Ok(result.ResultObj)
             : Results.BadRequest(result.ErrorMsg);
     }
 }
