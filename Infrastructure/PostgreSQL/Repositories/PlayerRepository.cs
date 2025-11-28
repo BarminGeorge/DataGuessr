@@ -78,37 +78,6 @@ public class PlayerRepository : IPlayerRepository
         }
     }
 
-
-    public async Task<OperationResult> UpdatePlayerScoreAsync(Guid playerId, Score newScore, CancellationToken ct = default)
-    {
-        try
-        {
-            var player = await db.Players
-                .FirstOrDefaultAsync(p => p.Id == playerId, ct);
-
-            if (player == null)
-                return OperationResult.Error($"Игрок с ID '{playerId}' не найден");
-
-            player.UpdateScore(newScore);
-            db.Players.Update(player);
-            await db.SaveChangesAsync(ct);
-
-            return OperationResult.Ok();
-        }
-        catch (OperationCanceledException)
-        {
-            return OperationResult.Error("Операция была отменена");
-        }
-        catch (DbUpdateException ex)
-        {
-            return OperationResult.Error($"Ошибка при обновлении счета: {ex.Message}");
-        }
-        catch (Exception ex)
-        {
-            return OperationResult.Error($"Неожиданная ошибка: {ex.Message}");
-        }
-    }
-
     public async Task<OperationResult> DeletePlayerAsync(Guid playerId, CancellationToken ct = default)
     {
         try
