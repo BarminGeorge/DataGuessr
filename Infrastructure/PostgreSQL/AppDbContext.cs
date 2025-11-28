@@ -39,30 +39,25 @@ public class AppDbContext : DbContext
         modelBuilder.Entity<Player>(entity =>
         {
             entity.ToTable("players");
-
             entity.HasKey(p => p.Id);
 
-            entity.Property(p => p.Score)
-                .HasConversion(
-                    score => score.score,
-                    value => new Score(value)
-                )
-                .IsRequired();
+            entity.Property(p => p.UserId).IsRequired();
+            entity.Property(p => p.RoomId).IsRequired();
 
-            entity.Property(p => p.RoomId)
-                .IsRequired();
-
+            // Связь с User
             entity.HasOne<User>()
                 .WithMany()
                 .HasForeignKey(p => p.UserId)
                 .IsRequired()
                 .OnDelete(DeleteBehavior.Cascade);
 
+            // Уникальность: один игрок на пользователя в комнате
             entity.HasIndex(p => new { p.UserId, p.RoomId }).IsUnique();
 
-            entity.HasKey(p => p.Id);
-            entity.Property(p => p.Id).ValueGeneratedNever();
+            entity.HasIndex(p => p.UserId);
+            entity.HasIndex(p => p.RoomId);
         });
+
 
         modelBuilder.Entity<Room>(entity =>
         {
@@ -102,46 +97,35 @@ public class AppDbContext : DbContext
             entity.Property(g => g.QuestionsCount).IsRequired();
             entity.Property(g => g.QuestionDuration).IsRequired();
 
-            entity.Property(g => g.StatisticJson)
-                .IsRequired(false)
-                .HasColumnType("jsonb"); // PostgreSQL
+            entity.OwnsOne(g => g.CurrentStatistic);
 
-            // Связь с Room
             entity.HasOne<Room>()
                 .WithMany(r => r.Games)
                 .HasForeignKey(g => g.RoomId)
                 .OnDelete(DeleteBehavior.Cascade);
 
-            // ← Связь Game ↔ Question через JOIN-таблицу
             entity.HasMany(g => g.Questions)
                 .WithMany()
                 .UsingEntity<Dictionary<string, object>>(
-                    "game_questions", // Имя JOIN-таблицы
-                                      // Конфигурация FK на Question
+                    "game_questions",
                     j => j
                         .HasOne<Question>()
                         .WithMany()
                         .HasForeignKey("question_id")
                         .OnDelete(DeleteBehavior.Cascade),
-                    // Конфигурация FK на Game
                     j => j
                         .HasOne<Game>()
                         .WithMany()
                         .HasForeignKey("game_id")
                         .OnDelete(DeleteBehavior.Cascade),
-                    // Конфигурация первичного ключа JOIN-таблицы
                     j =>
                     {
                         j.HasKey("game_id", "question_id");
                         j.ToTable("game_questions");
-                        j.HasIndex("game_id");
-                        j.HasIndex("question_id");
                     }
                 );
-
-            entity.HasIndex(g => g.RoomId);
-            entity.HasIndex(g => g.Status);
         });
+
 
         modelBuilder.Entity<Question>(entity =>
         {

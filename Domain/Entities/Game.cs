@@ -1,13 +1,11 @@
 using Domain.Enums;
 using Domain.Interfaces;
 using Domain.ValueTypes;
-using Newtonsoft.Json;
 
 namespace Domain.Entities;
 
 public class Game : IEntity<Guid>
 {
-    // EF Core требует сеттеры
     public Guid Id { get; private set; }
     public Guid RoomId { get; private set; }
 
@@ -16,13 +14,10 @@ public class Game : IEntity<Guid>
     public int QuestionsCount { get; private set; }
     public TimeSpan QuestionDuration { get; private set; }
 
-    // Сериализованная статистика (JSON)
-    public string? StatisticJson { get; private set; }
+    public Statistic? CurrentStatistic { get; set; }
 
-    // Навигационное свойство для EF Core
     public virtual ICollection<Question> Questions { get; private set; } = new List<Question>();
 
-    // Конструктор для EF Core
     protected Game() { }
 
     public Game(
@@ -37,7 +32,7 @@ public class Game : IEntity<Guid>
         Status = GameStatus.NotStarted;
         QuestionDuration = questionDuration;
         QuestionsCount = questionsCount;
-        StatisticJson = null;
+        CurrentStatistic = null;
     }
 
     public void StartGame()
@@ -54,20 +49,5 @@ public class Game : IEntity<Guid>
             throw new InvalidOperationException("Игра еще не началась или уже закончена");
 
         Status = GameStatus.Finished;
-    }
-
-    //Метод для СОХРАНЕНИЯ статистики
-    public void SetStatistic(Statistic statistic)
-    {
-        StatisticJson = JsonConvert.SerializeObject(statistic);
-    }
-
-    //Метод для ПОЛУЧЕНИЯ статистики
-    public Statistic? GetStatistic()
-    {
-        if (string.IsNullOrEmpty(StatisticJson))
-            return null;
-
-        return JsonConvert.DeserializeObject<Statistic>(StatisticJson);
     }
 }
