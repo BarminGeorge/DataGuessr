@@ -37,7 +37,7 @@ public class PlayerRepository : IPlayerRepository
         }
     }
 
-    public async Task<OperationResult<Player>> CreateAuthorizedPlayerAsync(Guid userId, Guid roomId, CancellationToken ct = default)
+    public async Task<OperationResult<Player>> CreatePlayerAsync(Guid userId, Guid roomId, CancellationToken ct = default)
     {
         try
         {
@@ -46,18 +46,19 @@ public class PlayerRepository : IPlayerRepository
             if (!userExists)
                 return OperationResult<Player>.Error($"Пользователь с ID '{userId}' не найден");
 
-            // Проверяем существует ли комната
+            // Проверяем комнату
             var roomExists = await db.Rooms.AnyAsync(r => r.Id == roomId, ct);
             if (!roomExists)
                 return OperationResult<Player>.Error($"Комната с ID '{roomId}' не найдена");
 
-            // Проверяем нет ли уже игрока для этого пользователя в этой комнате
-            var existingPlayer = await db.Players
-                .AnyAsync(p => p.UserId == userId && p.RoomId == roomId, ct);
-            if (existingPlayer)
+            // Проверяем нет ли уже игрока
+            var playerExists = await db.Players.AnyAsync(p => p.UserId == userId && p.RoomId == roomId, ct);
+            if (playerExists)
                 return OperationResult<Player>.Error("Игрок для этого пользователя уже существует в данной комнате");
 
+            // Создаём Player
             var player = new Player(userId, roomId);
+
             await db.Players.AddAsync(player, ct);
             await db.SaveChangesAsync(ct);
 
@@ -77,38 +78,6 @@ public class PlayerRepository : IPlayerRepository
         }
     }
 
-    public async Task<OperationResult<Player>> CreateGuestPlayerAsync(string guestName, Guid guestAvatarId, Guid roomId, CancellationToken ct = default)
-    {
-        try
-        {
-            // Проверяем существует ли комната
-            var roomExists = await db.Rooms.AnyAsync(r => r.Id == roomId, ct);
-            if (!roomExists)
-                return OperationResult<Player>.Error($"Комната с ID '{roomId}' не найдена");
-
-            var avatarExists = await db.Avatars.AnyAsync(r => r.Id == guestAvatarId, ct);
-            if (!avatarExists)
-                return OperationResult<Player>.Error($"Аватар с ID '{guestAvatarId}' не найден");
-
-            var player = new Player(guestName, guestAvatarId, roomId);
-            await db.Players.AddAsync(player, ct);
-            await db.SaveChangesAsync(ct);
-
-            return OperationResult<Player>.Ok(player);
-        }
-        catch (OperationCanceledException)
-        {
-            return OperationResult<Player>.Error("Операция была отменена");
-        }
-        catch (DbUpdateException ex)
-        {
-            return OperationResult<Player>.Error($"Ошибка при создании гостя: {ex.Message}");
-        }
-        catch (Exception ex)
-        {
-            return OperationResult<Player>.Error($"Неожиданная ошибка: {ex.Message}");
-        }
-    }
 
     public async Task<OperationResult> UpdatePlayerScoreAsync(Guid playerId, Score newScore, CancellationToken ct = default)
     {

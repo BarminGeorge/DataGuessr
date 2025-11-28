@@ -18,14 +18,15 @@ public class UserRepository : IUserRepository
     {
         try
         {
-            // Проверяем уникальность логина
-            var existingUser = await db.Users
-                .AsNoTracking()
-                .FirstOrDefaultAsync(u => u.Login == user.Login, ct);
-
-            if (existingUser != null)
+            // Проверяем уникальность логина ТОЛЬКО если Login указан (для гостей может быть null)
+            if (!string.IsNullOrEmpty(user.Login))
             {
-                return OperationResult.Error($"Пользователь с логином '{user.Login}' уже существует");
+                var existingUser = await db.Users
+                    .AsNoTracking()
+                    .FirstOrDefaultAsync(u => u.Login == user.Login, ct);
+
+                if (existingUser != null)
+                    return OperationResult.Error($"Пользователь с логином '{user.Login}' уже существует");
             }
 
             await db.Users.AddAsync(user, ct);
@@ -46,6 +47,7 @@ public class UserRepository : IUserRepository
             return OperationResult.Error($"Неожиданная ошибка: {ex.Message}");
         }
     }
+
 
     public async Task<OperationResult<User>> GetByNameAsync(string userName, CancellationToken ct = default)
     {
