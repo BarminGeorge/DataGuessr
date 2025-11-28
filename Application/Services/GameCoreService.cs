@@ -7,19 +7,21 @@ using Domain.ValueTypes;
 
 namespace Application.Services;
 
-public class ОrchestratorService(Game game,
+public class GameCoreService(
+    Game game,
     Room room,
     INotificationService notificationService,
     IGameRepository gameRepository,
     IQuestionService questionService,
-    IEvaluationService evaluationService): IОrchestratorService
+    IEvaluationService evaluationService)
+    : IGameCoreService
 {
     
-    public async Task<OperationResult> RunGameCycle()
+    public async Task<OperationResult> RunGameCycle(CancellationToken token)
     {
         game.StartGame();
         var questionsRes = await questionService
-            .GetAllQuestionsAsync(game);
+            .GetAllQuestionsAsync(game, token);
         if (!questionsRes.Success)
             return OperationResult.Error(questionsRes.ErrorMsg);
         
@@ -34,18 +36,19 @@ public class ОrchestratorService(Game game,
             await notificationService.NotifyGameRoomAsync(room.Id, 
                 new NewQuestionNotification(question.Id,
                                             question.Formulation,
+                                            question.ImageUrl,
                                             DateTime.Now + game.QuestionDuration,
                                             game.QuestionDuration.Seconds));
             await Task.Delay(game.QuestionDuration);
             await notificationService.NotifyGameRoomAsync(room.Id,
                 new QuestionClosedNotification(question.Id, question.RightAnswer.Date));
-            var rawAnswer 
-                = await gameRepository.LoadAnswersAsync(question.Id);
+            var rawAnswer = await gameRepository.LoadAnswersAsync(question.Id, token);
+            // TODO: ошибки
             if (rawAnswer.ResultObj is not null)
             {
                 game.CurrentStatistic.Update(rawAnswer.ResultObj, question.RightAnswer.Date, 
                     evaluationService.CalculateScore(game.Mode));
-                await gameRepository.SaveStatisticAsync(game.CurrentStatistic);
+                await gameRepository.SaveStatisticAsync(game.CurrentStatistic, token);
             }
             await notificationService.NotifyGameRoomAsync(room.Id,     
                 new LeaderBoardNotifications(game.CurrentStatistic));

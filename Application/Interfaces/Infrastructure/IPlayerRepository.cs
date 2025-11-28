@@ -5,5 +5,5 @@ namespace Application.Interfaces.Infrastructure;
 
 public interface IPlayerRepository : IUsersRepository
 {
-    Task<OperationResult<Player>> GetPlayerByIdAsync(Guid playerId);
+    Task<OperationResult<Player>> GetPlayerByIdAsync(Guid playerId, CancellationToken ct);
 }

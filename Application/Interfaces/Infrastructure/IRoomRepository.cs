@@ -5,12 +5,11 @@ namespace Application.Interfaces.Infrastructure;
 
 public interface IRoomRepository
 {
-    Task<OperationResult<Room>> GetByIdAsync(Guid id);
-    Task<OperationResult<IEnumerable<Room>>> GetRoomsAsync();
-    Task<OperationResult<IEnumerable<Room>>> GetWaitingPublicRoomsAsync();
-    Task<OperationResult> AddAsync(Room room);
-    Task<OperationResult> UpdateAsync(Room room);
-    Task<OperationResult> RemoveAsync(Guid id);
-    Task<OperationResult<Game>> AddGameAsync(Game game);
-    Task<OperationResult<Game>?> GetCurrentGameAsync(Guid roomId);
+    Task<OperationResult<Room>> GetByIdAsync(Guid id, CancellationToken ct);
+    Task<OperationResult<IEnumerable<Room>>> GetWaitingPublicRoomsAsync(CancellationToken ct);
+    Task<OperationResult> AddAsync(Room room, CancellationToken ct);
+    Task<OperationResult> UpdateAsync(Room room, CancellationToken ct);
+    Task<OperationResult> RemoveAsync(Guid id, CancellationToken ct);
+    Task<OperationResult<Game>> AddGameAsync(Game game, CancellationToken ct);
+    Task<OperationResult<Game>?> GetCurrentGameAsync(Guid roomId, CancellationToken ct);
 }

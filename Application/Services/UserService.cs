@@ -1,33 +1,43 @@
 using System.IdentityModel.Tokens.Jwt;
 using System.Security.Claims;
 using System.Text;
-using Application.Interfaces;
 using Application.Interfaces.Infrastructure;
+using Application.Result;
 using Domain.Entities;
 using Microsoft.IdentityModel.Tokens;
 using Microsoft.Extensions.Options;
 
 namespace Application.Services;
  
-public class UserService(IJwtProvider provider, IUsersRepository usersRepository, IPasswordHasher passwordHasher)
+public class UserService(
+    IJwtProvider provider, 
+    IUsersRepository usersRepository, 
+    IPasswordHasher passwordHasher)
 {
-    public async Task Register(string userName, string password)
+    public async Task Register(string userName, string password, IFormFile image, CancellationToken ct)
     {
         var hashedPassword = passwordHasher.GenerateAsync(password);
-        // TODO логика с Avatar
-        var user = new User(userName, new Avatar("", ""), hashedPassword);
-        await usersRepository.AddAsync(user);
+        var result = await usersRepository.SaveUserAvatar(image, ct).WithRetry(3, TimeSpan.FromSeconds(0.2));
+        var avatar = result.ResultObj;
+        var user = new User(userName, userName, avatar.Id, hashedPassword);
+        await usersRepository.AddAsync(user, ct);
     }
 
-    public async Task<string> Login(string userName, string password)
+    public async Task<string> Login(string login, string password, CancellationToken ct)
     {
-        var user = await usersRepository.GetByNameAsync(userName);
+        var user = await usersRepository.GetByLoginAsync(login, ct);
         var result = passwordHasher.VerifyAsync(password, user.ResultObj.PasswordHash);
         if (!result)
             throw new ApplicationException("Invalid username or password");
         
         var token = provider.GenerateTokenAsync(user.ResultObj);
         return token;
+    }
+    
+    public async Task<OperationResult> UpdateUser(Guid userId, string userName, IFormFile avatar,  CancellationToken ct)
+    {
+        return await OperationResult.TryAsync(() => usersRepository.UpdateUser(userId, avatar, userName, ct))
+            .WithRetry(maxRetries: 3, TimeSpan.FromSeconds(0.2));
     }
 }
 

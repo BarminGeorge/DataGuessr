@@ -6,9 +6,9 @@ namespace Application.Endpoints.Hubs;
 
 public partial class AppHub
 {
-    public async Task<DataResponse<RoomDto>> CreateRoom(CreateRoomRequest request)
+    public async Task<DataResponse<RoomDto>> CreateRoom(CreateRoomRequest request, CancellationToken ct = default)
     {
-        var result = await roomManager.CreateRoomAsync(request.UserId, request.Privacy, request.Password, request.MaxPlayers);
+        var result = await roomManager.CreateRoomAsync(request.UserId, request.Privacy, ct, request.Password, request.MaxPlayers);
         
         if (result.Success)
         {
@@ -19,9 +19,9 @@ public partial class AppHub
         return DataResponse<RoomDto>.CreateFailure(result.ErrorMsg);
     }
 
-    public async Task<DataResponse<RoomDto>> JoinRoom(JoinRoomRequest request)
+    public async Task<DataResponse<RoomDto>> JoinRoom(JoinRoomRequest request, CancellationToken ct = default)
     {
-        var result = await roomManager.JoinRoomAsync(request.UserId, request.RoomId, request.Password);
+        var result = await roomManager.JoinRoomAsync(request.UserId, request.RoomId, ct, request.Password);
 
         if (result.Success)
         {
@@ -32,9 +32,9 @@ public partial class AppHub
         return DataResponse<RoomDto>.CreateFailure(result.ErrorMsg);
     }
 
-    public async Task<EmptyResponse> LeaveRoom(LeaveRoomRequest request)
+    public async Task<EmptyResponse> LeaveRoom(LeaveRoomRequest request, CancellationToken ct = default)
     {
-        var result = await roomManager.LeaveRoomAsync(request.UserId, request.RoomId);
+        var result = await roomManager.LeaveRoomAsync(request.UserId, request.RoomId, ct);
         
         if (result.Success)
         {
@@ -45,9 +45,9 @@ public partial class AppHub
         return EmptyResponse.CreateFailure(result.ErrorMsg);
     }
 
-    public async Task<DataResponse<RoomDto>> FindQuickRoom(FindQuickRoomRequest request)
+    public async Task<DataResponse<RoomDto>> FindQuickRoom(FindQuickRoomRequest request, CancellationToken ct = default)
     {
-        var result = await roomManager.FindOrCreateQuickRoomAsync(request.UserId);
+        var result = await roomManager.FindOrCreateQuickRoomAsync(request.UserId, ct);
 
         if (result.Success)
         {

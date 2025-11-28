@@ -9,20 +9,29 @@ public static class UserEndpoints
     {
         app.MapPost("register", Register);
         app.MapPost("login", Login);
+        app.MapPost("{id:guid}/userUpdate", UpdateUser);
         
         return app;
     }
 
-    private static async Task<IResult> Register(RegisterUserRequest request, UserService userService)
+    private static async Task<IResult> Register(RegisterUserRequest request, UserService userService, CancellationToken ct)
     {
-        await userService.Register(request.Username, request.Password);
+        await userService.Register(request.Username, request.Password, request.Avatar, ct);
         return Results.Ok();
     }
 
-    private static async Task<IResult> Login(LoginUserRequest request, UserService userService, HttpContext context)
+    private static async Task<IResult> Login(LoginUserRequest request, UserService userService, HttpContext context, CancellationToken ct)
     {
-        var token = await userService.Login(request.Username, request.Password);
+        var token = await userService.Login(request.Username, request.Password, ct);
         context.Response.Cookies.Append("", token);
         return Results.Ok(token);
+    }
+
+    private static async Task<IResult> UpdateUser(UpdateUserRequest request, UserService userService, CancellationToken ct)
+    {
+        var result = await userService.UpdateUser(request.UserId, request.Username, request.Avatar, ct);
+        return result.Success 
+            ? Results.Ok() 
+            : Results.BadRequest(result.ErrorMsg);
     }
 }

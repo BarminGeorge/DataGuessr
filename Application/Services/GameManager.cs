@@ -9,14 +9,14 @@ using Domain.ValueTypes;
 namespace Application.Services;
 
 public class GameManager(
-    IОrchestratorService оrchestratorService,
+    IGameCoreService gameCoreService,
     IRoomRepository roomRepository, 
     INotificationService notificationService,
     IQuestionService questionService,
     ILogger<GameManager> logger)
     : IGameManager
 {
-    private static bool IsOwnerRoom(Room? room, Guid userId)
+    private static bool IsOwnerRoom(Room? room, Guid userId, CancellationToken ct)
     {
         if (room == null) 
             return false;
@@ -24,35 +24,35 @@ public class GameManager(
         return room.Owner == userId;
     }
     
-    private async Task<OperationResult> CanStartGameAsync(Guid roomId, Guid userId)
+    private async Task<OperationResult> CanStartGameAsync(Guid roomId, Guid userId,  CancellationToken ct)
     {
-        var getRoomResult = await roomRepository.GetByIdAsync(roomId);
+        var getRoomResult = await roomRepository.GetByIdAsync(roomId, ct);
         if (!getRoomResult.Success)
             return OperationResult.Error(getRoomResult.ErrorMsg);
         var room = getRoomResult.ResultObj;
 
-        var canStart = IsOwnerRoom(room, userId) && room.Players.Count >= 2;
+        var canStart = IsOwnerRoom(room, userId, ct) && room.Players.Count >= 2;
         var errMessage = canStart ? "" : "You are not owner or players count less then 2";
         return new OperationResult(canStart, errMessage);
     }
 
-    public async Task<OperationResult> StartNewGameAsync(Guid roomId, Guid startedByUserId)
+    public async Task<OperationResult> StartNewGameAsync(Guid roomId, Guid startedByUserId, CancellationToken ct)
     {
-        var canStartGame = await CanStartGameAsync(roomId, startedByUserId);
+        var canStartGame = await CanStartGameAsync(roomId, startedByUserId, ct);
         if (!canStartGame.Success)
             return OperationResult.Error($"Can't start new game: {canStartGame.ErrorMsg}");
         
-        var getRoomResult = await roomRepository.GetByIdAsync(roomId);
+        var getRoomResult = await roomRepository.GetByIdAsync(roomId, ct);
         if (!getRoomResult.Success) 
             return OperationResult.Error(getRoomResult.ErrorMsg);
 
-        var getGameResult = await roomRepository.GetCurrentGameAsync(roomId);
+        var getGameResult = await roomRepository.GetCurrentGameAsync(roomId, ct);
         if (!getGameResult.Success)
             return OperationResult.Error(getGameResult.ErrorMsg);
 
         var game = getGameResult.ResultObj;
         
-        await оrchestratorService.RunGameCycle();
+        await gameCoreService.RunGameCycle(ct);
         logger.LogInformation($"Match {game.Id} started in room {roomId} by user {startedByUserId}");
         
         return OperationResult.Ok();
@@ -63,18 +63,19 @@ public class GameManager(
         GameMode mode, 
         int countQuestions, 
         TimeSpan questionDuration,
+        CancellationToken ct,
         IEnumerable<Question>? questions = null)
     {
-        var getRoomResult = await roomRepository.GetByIdAsync(roomId);
+        var getRoomResult = await roomRepository.GetByIdAsync(roomId, ct);
         if (!getRoomResult.Success)
             return OperationResult<Game>.Error(getRoomResult.ErrorMsg);
 
         var room = getRoomResult.ResultObj;
-        if (!IsOwnerRoom(room, createdByUserId))
+        if (!IsOwnerRoom(room, createdByUserId, ct))
             OperationResult.Error("Can't create new game, you are not the owner");
         
         var game = new Game(mode, questions, questionDuration, countQuestions);
-        var addGameResult = await roomRepository.AddGameAsync(game);
+        var addGameResult = await roomRepository.AddGameAsync(game, ct);
         if (!addGameResult.Success)
             return OperationResult<Game>.Error(addGameResult.ErrorMsg);
         
@@ -85,8 +86,8 @@ public class GameManager(
             : OperationResult<Game>.Ok(game);
     }
 
-    public async Task<OperationResult> SubmitAnswerAsync(Guid roomId, Guid gameId, Guid questionId, Answer answer)
+    public async Task<OperationResult> SubmitAnswerAsync(Guid roomId, Guid gameId, Guid questionId, Answer answer,  CancellationToken ct)
     {
-        return await questionService.SubmitAnswerAsync(roomId, gameId, questionId, answer);
+        return await questionService.SubmitAnswerAsync(roomId, gameId, questionId, answer, ct);
     }
 }

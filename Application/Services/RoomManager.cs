@@ -11,11 +11,12 @@ public class RoomManager(
     ILogger<RoomManager> logger, 
     IPlayerRepository playerRepository) : IRoomManager
 {
-    public async Task<OperationResult<Room>> CreateRoomAsync(Guid userId, RoomPrivacy privacy, string? password = null, int maxPlayers = 4)
+    public async Task<OperationResult<Room>> CreateRoomAsync(Guid userId, RoomPrivacy privacy, CancellationToken ct,
+        string? password = null, int maxPlayers = 4)
     {
         var room = new Room(userId, privacy, maxPlayers, password);
 
-        var addRoomResult = await roomRepository.AddAsync(room);
+        var addRoomResult = await roomRepository.AddAsync(room, ct);
         if (!addRoomResult.Success)
             return OperationResult<Room>.Error(addRoomResult.ErrorMsg);
         
@@ -24,22 +25,22 @@ public class RoomManager(
         return OperationResult<Room>.Ok(room);
     }
 
-    public async Task<OperationResult<Room>> JoinRoomAsync(Guid roomId, Guid userId, string? password = null)
+    public async Task<OperationResult<Room>> JoinRoomAsync(Guid roomId, Guid userId, CancellationToken ct,string? password = null)
     {
-        var getRoomResult = await roomRepository.GetByIdAsync(roomId);
+        var getRoomResult = await roomRepository.GetByIdAsync(roomId, ct);
         if (!getRoomResult.Success)
             return OperationResult<Room>.Error(getRoomResult.ErrorMsg);
 
         var room = getRoomResult.ResultObj;
         
-        var getPlayerResult = await playerRepository.GetPlayerByIdAsync(userId);
+        var getPlayerResult = await playerRepository.GetPlayerByIdAsync(userId, ct);
         if (!getPlayerResult.Success)
             return OperationResult<Room>.Error(getPlayerResult.ErrorMsg);
         
         var player = getPlayerResult.ResultObj;
         room.AddPlayer(player);
         
-        var updateResult = await roomRepository.UpdateAsync(room);
+        var updateResult = await roomRepository.UpdateAsync(room, ct);
         if (!updateResult.Success)
             return OperationResult<Room>.Error(updateResult.ErrorMsg);
         
@@ -47,32 +48,33 @@ public class RoomManager(
         return OperationResult<Room>.Ok(room);
     }
 
-    public async Task<OperationResult> LeaveRoomAsync(Guid roomId, Guid userId)
+    public async Task<OperationResult> LeaveRoomAsync(Guid roomId, Guid userId, CancellationToken ct)
     {
-        var getRoomResult = await roomRepository.GetByIdAsync(roomId);
+        var getRoomResult = await roomRepository.GetByIdAsync(roomId, ct);
         if (!getRoomResult.Success) 
             return OperationResult.Error(getRoomResult.ErrorMsg);
         
-        var room =  getRoomResult.ResultObj;
+        var room = getRoomResult.ResultObj;
         
-        var getPlayerResult = await playerRepository.GetPlayerByIdAsync(userId);
+        var getPlayerResult = await playerRepository.GetPlayerByIdAsync(userId, ct);
         if (!getPlayerResult.Success)
             return OperationResult.Error(getPlayerResult.ErrorMsg);
         
         var player = getPlayerResult.ResultObj;
         
         room.RemovePlayer(player);
+        
         logger.LogInformation($"User {userId} left room {roomId}");
         return OperationResult.Ok();
     }
     
-    public async Task<OperationResult<Room>> FindOrCreateQuickRoomAsync(Guid userId)
+    public async Task<OperationResult<Room>> FindOrCreateQuickRoomAsync(Guid userId, CancellationToken ct)
     {
-        var availableRoomResult = await roomRepository.GetWaitingPublicRoomsAsync();
+        var availableRoomResult = await roomRepository.GetWaitingPublicRoomsAsync(ct);
         var rooms =  availableRoomResult.ResultObj;
         if (!availableRoomResult.Success)
         {
-            var creatingResult = await CreateRoomAsync(userId, RoomPrivacy.Public);
+            var creatingResult = await CreateRoomAsync(userId, RoomPrivacy.Public, ct);
             if (!creatingResult.Success)
                 return OperationResult<Room>.Error(creatingResult.ErrorMsg);
             
@@ -81,7 +83,7 @@ public class RoomManager(
         
         foreach (var room in rooms)
         {
-            var joinRoomResult = await JoinRoomAsync(room.Id, userId);
+            var joinRoomResult = await JoinRoomAsync(room.Id, userId, ct);
             if (!joinRoomResult.Success)
                 break;
             logger.LogInformation($"No suitable rooms found, creating new quick match for user {userId}");
@@ -91,8 +93,8 @@ public class RoomManager(
         return OperationResult<Room>.Error("No suitable rooms found");
     }
 
-    public async Task<OperationResult<IEnumerable<Room>>> GetAvailablePublicRoomsAsync()
+    public async Task<OperationResult<IEnumerable<Room>>> GetAvailablePublicRoomsAsync(CancellationToken ct)
     {
-        return await roomRepository.GetWaitingPublicRoomsAsync();
+        return await roomRepository.GetWaitingPublicRoomsAsync(ct);
     }
 }

@@ -6,9 +6,9 @@ namespace Application.Services;
 
 public class ConnectionService(IConnectionRepository connectionRepository) : IConnectionService
 {
-    public async Task<OperationResult> AddConnection(string connectionId, Guid userId, Guid roomId)
+    public async Task<OperationResult> AddConnection(string connectionId, Guid userId, Guid roomId, CancellationToken ct)
     {
-        return await connectionRepository.AddConnectionAsync(connectionId, userId, roomId);
+        return await connectionRepository.AddConnectionAsync(connectionId, userId, roomId, ct);
     }
 
     public async Task<OperationResult> RemoveConnection(string connectionId)
