@@ -19,3 +19,9 @@ public record NewGameNotification(Game Game)
 {
     public override string MethodName => "NewGameAdded";
 }
+
+public record ReturnToRoomNotification(Room Room)
+    : GameNotification
+{
+    public override string MethodName => "ReturnToRoom";
+}

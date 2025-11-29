@@ -17,4 +17,5 @@ public interface IGameManager
         IEnumerable<Question>? questions = null);
     
     Task<OperationResult> SubmitAnswerAsync(Guid roomId, Guid gameId, Guid questionId, Answer answer, CancellationToken ct);
+    Task<OperationResult<Room>> FinishGameAsync(Guid userId, Guid roomId, CancellationToken ct);
 }

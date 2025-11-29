@@ -37,4 +37,14 @@ public partial class AppHub
             ? EmptyResponse.CreateSuccess()
             : EmptyResponse.CreateFailure(result.ErrorMsg);
     }
+
+    public async Task<DataResponse<RoomDto>> FinishGame(FinishGameRequest request, CancellationToken ct = default)
+    {
+        var result = await gameManager.FinishGameAsync(request.userId, request.roomId, ct);
+        return result.Success
+            ? DataResponse<RoomDto>.CreateSuccess(result.ResultObj.ToDto())
+            : DataResponse<RoomDto>.CreateFailure(result.ErrorMsg);
+    }
 }
+
+public record FinishGameRequest(Guid userId, Guid roomId);

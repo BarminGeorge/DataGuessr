@@ -17,20 +17,20 @@ public static class UserEndpoints
 
     private static async Task<IResult> Register(RegisterUserRequest request, UserService userService, CancellationToken ct)
     {
-        await userService.Register(request.PlayerName, request.Password, request.PlayerName, request.Avatar, ct);
+        await userService.Register(request.Login, request.Password, request.PlayerName, request.Avatar, ct);
         return Results.Ok();
     }
 
     private static async Task<IResult> Login(LoginUserRequest request, UserService userService, HttpContext context, CancellationToken ct)
     {
-        var token = await userService.Login(request.Username, request.Password, ct);
+        var token = await userService.Login(request.Login, request.Password, ct);
         context.Response.Cookies.Append("", token);
         return Results.Ok(token);
     }
 
     private static async Task<IResult> UpdateUser(UpdateUserRequest request, UserService userService, CancellationToken ct)
     {
-        var result = await userService.UpdateUser(request.UserId, request.Username, request.Avatar, ct);
+        var result = await userService.UpdateUser(request.UserId, request.PlayerName, request.Avatar, ct);
         return result.Success 
             ? Results.Ok() 
             : Results.BadRequest(result.ErrorMsg);
@@ -38,7 +38,7 @@ public static class UserEndpoints
 
     private static async Task<IResult> CreateGuest(CreateGuestRequest request, UserService userService, CancellationToken ct)
     {
-        var result = await userService.CreateGuest(request.Username, request.Avatar, ct);
+        var result = await userService.CreateGuest(request.PlayerName, request.Avatar, ct);
         return result.Success
             ? Results.Ok(result.ResultObj)
             : Results.BadRequest(result.ErrorMsg);

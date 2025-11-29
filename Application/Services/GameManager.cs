@@ -16,7 +16,7 @@ public class GameManager(
     ILogger<GameManager> logger)
     : IGameManager
 {
-    private static bool IsOwnerRoom(Room? room, Guid userId, CancellationToken ct)
+    private static bool IsOwnerRoom(Room? room, Guid userId)
     {
         if (room == null) 
             return false;
@@ -31,7 +31,7 @@ public class GameManager(
             return OperationResult.Error(getRoomResult.ErrorMsg);
         var room = getRoomResult.ResultObj;
 
-        var canStart = IsOwnerRoom(room, userId, ct) && room.Players.Count >= 2;
+        var canStart = IsOwnerRoom(room, userId) && room.Players.Count >= 2;
         var errMessage = canStart ? "" : "You are not owner or players count less then 2";
         return new OperationResult(canStart, errMessage);
     }
@@ -71,13 +71,18 @@ public class GameManager(
             return OperationResult<Game>.Error(getRoomResult.ErrorMsg);
 
         var room = getRoomResult.ResultObj;
-        if (!IsOwnerRoom(room, createdByUserId, ct))
+        if (!IsOwnerRoom(room, createdByUserId))
             OperationResult.Error("Can't create new game, you are not the owner");
         
         var game = new Game(mode, questions, questionDuration, countQuestions);
         var addGameResult = await roomRepository.AddGameAsync(game, ct);
         if (!addGameResult.Success)
             return OperationResult<Game>.Error(addGameResult.ErrorMsg);
+        
+        room.AddGame(game);
+        var resultUpdate = await roomRepository.UpdateAsync(room, ct);
+        if (!resultUpdate.Success)
+            return OperationResult<Game>.Error(resultUpdate.ErrorMsg);
         
         var notification = new NewGameNotification(game);
         var notifyResult = await notificationService.NotifyGameRoomAsync(roomId, notification)
@@ -88,8 +93,26 @@ public class GameManager(
             : OperationResult<Game>.Ok(game);
     }
 
-    public async Task<OperationResult> SubmitAnswerAsync(Guid roomId, Guid gameId, Guid questionId, Answer answer,  CancellationToken ct)
+    public async Task<OperationResult> SubmitAnswerAsync(Guid roomId, Guid gameId, Guid questionId, Answer answer, CancellationToken ct)
     {
         return await questionService.SubmitAnswerAsync(roomId, gameId, questionId, answer, ct);
+    }
+
+    public async Task<OperationResult<Room>> FinishGameAsync(Guid userId, Guid roomId, CancellationToken ct)
+    {
+        var getRoomResult = await roomRepository.GetByIdAsync(roomId, ct);
+        if (!getRoomResult.Success)
+            return OperationResult<Room>.Error(getRoomResult.ErrorMsg);
+
+        if (!IsOwnerRoom(getRoomResult.ResultObj, userId))
+            return OperationResult<Room>.Error("Чтобы закончить игру нужно быть её создателем");
+
+        var notification = new ReturnToRoomNotification(getRoomResult.ResultObj);
+        var notifyResult = await notificationService.NotifyGameRoomAsync(roomId, notification)
+            .WithRetry(3, TimeSpan.FromSeconds(0.2));
+        if (!notifyResult.Success)
+            return OperationResult<Room>.Error(notifyResult.ErrorMsg);
+        
+        return OperationResult<Room>.Ok(getRoomResult.ResultObj);
     }
 }
