@@ -1,8 +1,8 @@
 ﻿using Domain.Entities;
 using Domain.Common;
 using Domain.ValueTypes;
+using Infrastructure.Interfaces;
 using Microsoft.EntityFrameworkCore;
-using Application.Interfaces.Infrastructure;
 
 namespace Infrastructure.PostgreSQL.Repositories;
 
@@ -48,7 +48,7 @@ public class PlayerRepository : IPlayerRepository
                 .FirstOrDefaultAsync(p => p.Id == user.Id, ct);
 
             if (existingPlayer != null)
-                return OperationResult<Player>.Error($"Игрок для пользователя '{user.Name}' уже существует");
+                return OperationResult<Player>.Error($"Игрок для пользователя '{user.PlayerName}' уже существует");
 
             var player = new Player(user);
             await _db.Players.AddAsync(player, ct);

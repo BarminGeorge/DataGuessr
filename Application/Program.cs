@@ -1,5 +1,5 @@
+using Application.DI;
 using Application.EndPoints;
-using Application.Interfaces;
 using Application.Services;
 using Microsoft.AspNetCore.CookiePolicy;
 
@@ -9,9 +9,7 @@ var configuration = builder.Configuration;
 
 services.Configure<JwtOptions>(configuration.GetSection(nameof(JwtOptions)));
 
-services.AddScoped<UserService>();
-services.AddScoped<IRoomManager, RoomManager>();
-services.AddScoped<IGameManager, GameManager>();
+services.AddApplication();
 
 services.AddEndpointsApiExplorer();
 services.AddSwaggerGen();

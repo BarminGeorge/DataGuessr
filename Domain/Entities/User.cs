@@ -6,14 +6,27 @@ namespace Domain.Entities;
 public class User : IEntity<Guid>
 {
     public Guid Id { get; }
-    public string Name { get; set; }
-    public Avatar Avatar { get; set; }
-    public string PasswordHash { get; set; }
-    public User(string name, Avatar avatar, string passwordHash)
+    public Guid AvatarId { get; init; }
+    public string PlayerName { get; }
+    public string Login { get; }
+    public bool IsGuest { get; }
+    
+    public string PasswordHash { get; init; }
+    
+    public User(string login, string playerName, Guid avatarId, string passwordHash)
     {
         Id = Guid.NewGuid();
-        Name = name;
+        Login = login;
+        PlayerName = playerName;
         PasswordHash = passwordHash;
-        Avatar = avatar;
+        AvatarId = avatarId;
+    }
+
+    public User(string playerName, Guid avatarId)
+    {
+        Id = Guid.NewGuid();
+        Login = playerName;
+        AvatarId = avatarId;
+        IsGuest = true;
     }
 }

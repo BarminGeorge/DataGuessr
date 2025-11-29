@@ -10,7 +10,8 @@ public static class ModelToUiMapper
         return new RoomDto(
             room.Id, 
             room.Owner, 
-            room.Players);
+            room.Players,
+            room.ClosedAt);
     }
 
     public static GameDto ToDto(this Game game)

@@ -93,6 +93,6 @@ public class UserRepository : IUserRepository
     public async Task<User?> GetByNameAsync(string userName, CancellationToken ct = default)
     {
         return await db.Users.AsNoTracking()
-            .FirstOrDefaultAsync(user => user.Name == userName, ct);
+            .FirstOrDefaultAsync(user => user.PlayerName == userName, ct);
     }
 }

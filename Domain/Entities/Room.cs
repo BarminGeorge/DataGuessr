@@ -10,15 +10,15 @@ public class Room : IEntity<Guid>
     public HashSet<Player> Players => new();
     public Guid Owner { get; private set; }
     public RoomPrivacy Privacy { get; private set; }
-    public string Code { get; private set; } = string.Empty;
-
+    public DateTime ClosedAt { get; }
+    
     public string? Password { get; private set; } = null;
     public RoomStatus Status { get; private set; }
-    private int _maxPlayers;
+    private int maxPlayers;
 
     public int MaxPlayers
     {
-        get => _maxPlayers;
+        get => maxPlayers;
         set
         {
             if (Status == RoomStatus.Archived)
@@ -26,7 +26,7 @@ public class Room : IEntity<Guid>
             if (HasOngoingGame())
                 throw new InvalidOperationException("В комнате сейчас идет игра, нельзя изменять настройки комнаты");
             ArgumentOutOfRangeException.ThrowIfNegativeOrZero(value);
-            _maxPlayers = value;
+            maxPlayers = value;
         }
     }
     private readonly List<Game> games = [];
@@ -43,8 +43,8 @@ public class Room : IEntity<Guid>
         Privacy = privacy;
         Status = RoomStatus.Available;
         Password = password;
-        Code = "123456"; // TODO выдача кода для комнаты
         MaxPlayers = maxPlayers;
+        ClosedAt = DateTime.Now + TimeSpan.FromDays(1);
     }
 
     public void AddGame(Game game)
@@ -62,12 +62,6 @@ public class Room : IEntity<Guid>
     {
         if (Status == RoomStatus.Archived)
             throw new InvalidOperationException("Комната архивирована");
-
-        ArgumentNullException.ThrowIfNull(player);
-
-        if (players.Contains(player))
-            return;
-
         if (players.Count >= MaxPlayers)
             throw new InvalidOperationException("Комната заполнена");
 
