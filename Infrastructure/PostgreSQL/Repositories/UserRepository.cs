@@ -55,7 +55,7 @@ public class UserRepository : IUserRepository
         {
             var user = await db.Users
                 .AsNoTracking()
-                .FirstOrDefaultAsync(u => u.Name == userName, ct);
+                .FirstOrDefaultAsync(u => u.PlayerName == userName, ct);
 
             return user != null
                 ? OperationResult<User>.Ok(user)

@@ -23,9 +23,17 @@ public class AppDbContext : DbContext
             entity.ToTable("users");
             entity.HasKey(u => u.Id);
 
-            entity.Property(u => u.Name).IsRequired().HasMaxLength(100);
-            entity.Property(u => u.Login).HasMaxLength(50);
-            entity.Property(u => u.PasswordHash).HasMaxLength(255);
+            entity.Property(u => u.PlayerName)
+                .IsRequired()
+                .HasMaxLength(100);
+
+            entity.Property(u => u.Login)
+                .HasMaxLength(50)
+                .IsRequired(false); 
+
+            entity.Property(u => u.PasswordHash)
+                .HasMaxLength(255)
+                .IsRequired(false);
 
             entity.HasOne<Avatar>()
                 .WithMany()
@@ -33,8 +41,14 @@ public class AppDbContext : DbContext
                 .IsRequired(false)
                 .OnDelete(DeleteBehavior.SetNull);
 
-            entity.HasIndex(u => u.Login).IsUnique().HasFilter(null); // если Nullable<Login>
+            // Уникальный индекс на Login, но только для не-null значений
+            entity.HasIndex(u => u.Login)
+                .IsUnique()
+                .HasFilter("\"login\" IS NOT NULL");
+
+            entity.HasIndex(u => u.PlayerName);
         });
+
 
         modelBuilder.Entity<Player>(entity =>
         {
@@ -63,28 +77,35 @@ public class AppDbContext : DbContext
         {
             entity.ToTable("rooms");
             entity.HasKey(r => r.Id);
-            entity.Property(r => r.Code).HasMaxLength(16).IsRequired(false);
-            entity.Property(r => r.Password).HasMaxLength(128).IsRequired(false);
-            entity.Property(r => r.MaxPlayers).IsRequired();
-            entity.Property(r => r.Status).IsRequired();
-            entity.Property(r => r.Privacy).IsRequired();
 
             entity.Property(r => r.Owner).IsRequired();
+            entity.Property(r => r.Privacy).IsRequired();
+            entity.Property(r => r.Status).IsRequired();
+            entity.Property(r => r.MaxPlayers).IsRequired();
 
-            // Связь: Room 1 - * Player
+            entity.Property(r => r.Password)
+                .HasMaxLength(128)
+                .IsRequired(false);
+
+            entity.Property(r => r.ClosedAt)
+                .IsRequired();
+
+            // Связь: Room 1 - * Players
             entity.HasMany(r => r.Players)
                 .WithOne()
                 .HasForeignKey(p => p.RoomId)
                 .OnDelete(DeleteBehavior.Cascade);
 
-            // Связь: Room 1 - * Game
+            // Связь: Room 1 - * Games
             entity.HasMany(r => r.Games)
                 .WithOne()
                 .HasForeignKey(g => g.RoomId)
                 .OnDelete(DeleteBehavior.Cascade);
 
-            entity.HasIndex(r => r.Code).IsUnique();
+            entity.HasIndex(r => r.Status);
+            entity.HasIndex(r => r.ClosedAt);
         });
+
 
         modelBuilder.Entity<Game>(entity =>
         {

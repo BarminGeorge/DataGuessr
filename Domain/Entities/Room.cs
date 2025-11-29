@@ -13,35 +13,31 @@ public class Room : IEntity<Guid>
 
     public Guid Owner { get; private set; }
     public RoomPrivacy Privacy { get; private set; }
-    public string Code { get; private set; } = string.Empty;
     public string? Password { get; private set; }
     public RoomStatus Status { get; private set; }
     public int MaxPlayers { get; private set; }
 
+    public DateTime ClosedAt { get; private set; }
+
     // Конструктор для EF Core
     protected Room() { }
 
-    public Room(Guid ownerId, RoomPrivacy privacy, int maxPlayers, string? password = null)
+    public Room(
+        Guid ownerId,
+        RoomPrivacy privacy,
+        int maxPlayers,
+        string? password = null,
+        TimeSpan? duration = null)
     {
         Id = Guid.NewGuid();
         Owner = ownerId;
         Privacy = privacy;
         Status = RoomStatus.Available;
         Password = password;
-        Code = GenerateCode();
         MaxPlayers = maxPlayers;
+
+        ClosedAt = DateTime.UtcNow + (duration ?? TimeSpan.FromDays(1));
     }
 
-    public Game? CurrentGame() => Games.LastOrDefault();
-
-    public bool HasOngoingGame()
-    {
-        var currentGame = CurrentGame();
-        return currentGame?.Status == GameStatus.InProgress;
-    }
-
-    public bool IsFull() => Players.Count >= MaxPlayers;
-
-    // Генерация кода комнаты
-    private static string GenerateCode() => Guid.NewGuid().ToString("N")[..6];
+    public bool IsExpired => DateTime.UtcNow > ClosedAt;
 }
