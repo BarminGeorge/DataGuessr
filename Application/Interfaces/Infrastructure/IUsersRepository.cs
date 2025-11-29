@@ -7,7 +7,6 @@ public interface IUsersRepository
 {
     Task<OperationResult> AddAsync(User user, CancellationToken ct);
     Task<OperationResult<User>> GetByLoginAsync(string login, CancellationToken ct);
-    public Task<OperationResult> UpdateUser(Guid userId, Guid avatarId, string playerName, CancellationToken ct);
-    public Task<OperationResult<Avatar>> SaveUserAvatar(IFormFile avatar, CancellationToken ct);
+    public Task<OperationResult> UpdateUserAsync(Guid userId, Guid avatarId, string playerName, CancellationToken ct);
     Task<OperationResult<string>> GetPlayerNameByIdAsync(Guid playerId, CancellationToken ct);
 }

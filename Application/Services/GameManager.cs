@@ -13,6 +13,7 @@ public class GameManager(
     IRoomRepository roomRepository, 
     INotificationService notificationService,
     IQuestionService questionService,
+    IGameRepository gameRepository,
     ILogger<GameManager> logger)
     : IGameManager
 {
@@ -46,7 +47,7 @@ public class GameManager(
         if (!getRoomResult.Success) 
             return OperationResult.Error(getRoomResult.ErrorMsg);
 
-        var getGameResult = await roomRepository.GetCurrentGameAsync(roomId, ct);
+        var getGameResult = await gameRepository.GetCurrentGameAsync(roomId, ct);
         if (!getGameResult.Success)
             return OperationResult.Error(getGameResult.ErrorMsg);
 
@@ -78,7 +79,7 @@ public class GameManager(
         if (questions != null)
             game.AddQuestions(questions);
         
-        var addGameResult = await roomRepository.AddGameAsync(game, ct);
+        var addGameResult = await gameRepository.AddGameAsync(game, ct);
         if (!addGameResult.Success)
             return OperationResult<Game>.Error(addGameResult.ErrorMsg);
         
