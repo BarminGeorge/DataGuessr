@@ -35,7 +35,7 @@ public class UserService(
         return token;
     }
     
-    public async Task<OperationResult> UpdateUser(Guid userId, string userName, IFormFile avatar,  CancellationToken ct)
+    public async Task<OperationResult> UpdateUser(Guid userId, string PlayerName, IFormFile avatar,  CancellationToken ct)
     {
         var operation = () => usersRepository.SaveUserAvatar(avatar, ct);
         var avatarResult = await operation.WithRetry(3, TimeSpan.FromSeconds(0.2));
@@ -43,7 +43,7 @@ public class UserService(
             return OperationResult.Error(avatarResult.ErrorMsg);
 
         return await OperationResult.TryAsync(() =>
-            usersRepository.UpdateUser(userId, avatarResult.ResultObj.Id, userName, ct));
+            usersRepository.UpdateUser(userId, avatarResult.ResultObj.Id, PlayerName, ct));
     }
 
     public async Task<OperationResult<User>> CreateGuest(string playerName, IFormFile image, CancellationToken ct)

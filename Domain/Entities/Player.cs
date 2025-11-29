@@ -1,23 +1,19 @@
-using Domain.Interfaces;
-using Domain.ValueTypes;
+﻿using Domain.Interfaces;
 
 namespace Domain.Entities;
 
 public class Player : IEntity<Guid>
 {
     public Guid Id { get; private set; }
-    public User User { get; private set; }
-    public Score Score { get; private set; }
+    public Guid UserId { get; private set; }
+    public Guid RoomId { get; private set; }
 
-    public Player(User user)
-    {
-        Id = user.Id;
-        User = user;
-        Score = Score.Zero;
-    }
+    protected Player() { }
 
-    public void UpdateScore(Score newScore)
+    public Player(Guid userId, Guid roomId)
     {
-        Score = newScore;
+        Id = Guid.NewGuid();
+        UserId = userId;
+        RoomId = roomId;
     }
 }

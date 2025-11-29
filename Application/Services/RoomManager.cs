@@ -11,7 +11,8 @@ public class RoomManager(
     IRoomRepository roomRepository, 
     ILogger<RoomManager> logger, 
     INotificationService notificationService,
-    IPlayerRepository playerRepository) : IRoomManager
+    IPlayerRepository playerRepository,
+    IUsersRepository usersRepository) : IRoomManager
 {
     public async Task<OperationResult<Room>> CreateRoomAsync(Guid userId, RoomPrivacy privacy, CancellationToken ct,
         string? password = null, int maxPlayers = 15)
@@ -42,7 +43,11 @@ public class RoomManager(
         var player = getPlayerResult.ResultObj;
         room.AddPlayer(player);
 
-        var notification = new NewPlayerNotification(player.Id, player.User.PlayerName);
+        var playerNameResult = await usersRepository.GetPlayerNameByIdAsync(userId, ct);
+        if (!playerNameResult.Success)
+            return OperationResult<Room>.Error(playerNameResult.ErrorMsg);
+        
+        var notification = new NewPlayerNotification(player.Id, playerNameResult.ResultObj);
         var operation = () => notificationService.NotifyGameRoomAsync(roomId, notification);
         var notifyResult = await operation.WithRetry(delay: TimeSpan.FromSeconds(0.15));
         if (!notifyResult.Success)

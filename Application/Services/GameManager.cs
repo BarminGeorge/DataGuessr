@@ -74,7 +74,10 @@ public class GameManager(
         if (!IsOwnerRoom(room, createdByUserId))
             OperationResult.Error("Can't create new game, you are not the owner");
         
-        var game = new Game(mode, questions, questionDuration, countQuestions);
+        var game = new Game(roomId, mode, questionDuration, countQuestions);
+        if (questions != null)
+            game.AddQuestions(questions);
+        
         var addGameResult = await roomRepository.AddGameAsync(game, ct);
         if (!addGameResult.Success)
             return OperationResult<Game>.Error(addGameResult.ErrorMsg);
