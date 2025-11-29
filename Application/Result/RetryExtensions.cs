@@ -2,41 +2,53 @@ namespace Application.Result;
 
 public static class OperationResultRetryExtensions
 {
-    public static async Task<OperationResult<T>> WithRetry<T>(this Task<OperationResult<T>> task, 
+    public static async Task<OperationResult<TData>> WithRetry<TData>(
+        this Func<Task<OperationResult<TData>>> operation,
         int maxRetries = 3,
-        TimeSpan delay = default,
-        Func<OperationResult<T>, bool>? shouldRetry = null)
+        TimeSpan delay = default)
     {
-        var result = await task;
-        
-        for (var attempt = 1; attempt <= maxRetries && ShouldRetry(result, shouldRetry); attempt++)
+        var result = OperationResult<TData>.Error("No results found");
+
+        for (var attempt = 1; attempt <= maxRetries; attempt++)
         {
-            await Task.Delay(delay * attempt);
-            result = await task;
+            try
+            {
+                result = await operation();
+                return result;
+            }
+            catch (Exception ex)
+            {
+                result = OperationResult<TData>.Error(ex.ToString());
+                if (attempt < maxRetries)
+                    await Task.Delay(delay);
+            }
         }
-        
+
         return result;
     }
-    
-    public static async Task<OperationResult> WithRetry(this Task<OperationResult> task,
+
+    public static async Task<OperationResult> WithRetry(
+        this Func<Task<OperationResult>> operation,
         int maxRetries = 3,
-        TimeSpan delay = default,
-        Func<OperationResult, bool>? shouldRetry = null)
+        TimeSpan delay = default)
     {
-        var result = await task;
-        
-        for (var attempt = 1; attempt <= maxRetries && ShouldRetry(result, shouldRetry); attempt++)
+        var result = OperationResult.Error("No results found");
+
+        for (var attempt = 1; attempt <= maxRetries; attempt++)
         {
-            await Task.Delay(delay * attempt);
-            result = await task;
+            try
+            {
+                result = await operation();
+                return result;
+            }
+            catch (Exception ex)
+            {
+                result = OperationResult.Error(ex.ToString());
+                if (attempt < maxRetries)
+                    await Task.Delay(delay);
+            }
         }
-        
+
         return result;
     }
-    
-    private static bool ShouldRetry<T>(OperationResult<T> result, Func<OperationResult<T>, bool>? shouldRetry) =>
-        !result.Success && (shouldRetry?.Invoke(result) ?? true);
-    
-    private static bool ShouldRetry(OperationResult result, Func<OperationResult, bool>? shouldRetry) =>
-        !result.Success && (shouldRetry?.Invoke(result) ?? true);
 }

@@ -17,7 +17,8 @@ public class UserService(
     public async Task Register(string login, string password, string playerName, IFormFile image, CancellationToken ct)
     {
         var hashedPassword = passwordHasher.GenerateAsync(password);
-        var result = await usersRepository.SaveUserAvatar(image, ct).WithRetry(3, TimeSpan.FromSeconds(0.2));
+        var operation = () => usersRepository.SaveUserAvatar(image, ct);
+        var result = await operation.WithRetry(3, TimeSpan.FromSeconds(0.15));
         var avatar = result.ResultObj;
         var user = new User(login, playerName, avatar.Id, hashedPassword);
         await usersRepository.AddAsync(user, ct);
@@ -36,7 +37,8 @@ public class UserService(
     
     public async Task<OperationResult> UpdateUser(Guid userId, string userName, IFormFile avatar,  CancellationToken ct)
     {
-        var avatarResult = await usersRepository.SaveUserAvatar(avatar, ct).WithRetry(3, TimeSpan.FromSeconds(0.2));
+        var operation = () => usersRepository.SaveUserAvatar(avatar, ct);
+        var avatarResult = await operation.WithRetry(3, TimeSpan.FromSeconds(0.2));
         if (!avatarResult.Success)
             return OperationResult.Error(avatarResult.ErrorMsg);
 
@@ -46,7 +48,11 @@ public class UserService(
 
     public async Task<OperationResult<User>> CreateGuest(string playerName, IFormFile image, CancellationToken ct)
     {
-        var result = await usersRepository.SaveUserAvatar(image, ct).WithRetry(3, TimeSpan.FromSeconds(0.2));
+        var operation = () => usersRepository.SaveUserAvatar(image, ct);
+        var result = await operation.WithRetry(3, TimeSpan.FromSeconds(0.2));
+        if (!result.Success)
+            return OperationResult<User>.Error(result.ErrorMsg);
+        
         var avatar = result.ResultObj;
         var user = new User(playerName, avatar.Id);
         await usersRepository.AddAsync(user, ct);

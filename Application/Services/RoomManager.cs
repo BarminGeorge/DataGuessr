@@ -43,8 +43,10 @@ public class RoomManager(
         room.AddPlayer(player);
 
         var notification = new NewPlayerNotification(player.Id, player.User.PlayerName);
-        await notificationService.NotifyGameRoomAsync(roomId, notification)
-            .WithRetry(3, TimeSpan.FromSeconds(0.2));
+        var operation = () => notificationService.NotifyGameRoomAsync(roomId, notification);
+        var notifyResult = await operation.WithRetry(delay: TimeSpan.FromSeconds(0.15));
+        if (!notifyResult.Success)
+            return OperationResult<Room>.Error(notifyResult.ErrorMsg);
         
         var updateResult = await roomRepository.UpdateAsync(room, ct);
         if (!updateResult.Success)
@@ -72,8 +74,11 @@ public class RoomManager(
         if (room.Players.Count > 0)
         {
             var notification = new PlayerLeavedNotification(userId, room.Owner);
-            await notificationService.NotifyGameRoomAsync(roomId, notification)
-                .WithRetry(3, TimeSpan.FromSeconds(0.2));
+            var operation = () => notificationService.NotifyGameRoomAsync(roomId, notification);
+            var notifyResult = await operation.WithRetry(delay: TimeSpan.FromSeconds(0.15));
+            if (!notifyResult.Success)
+                return OperationResult.Error(notifyResult.ErrorMsg);
+            
             return await roomRepository.UpdateAsync(room, ct);
         }
 

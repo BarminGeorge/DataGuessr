@@ -85,8 +85,8 @@ public class GameManager(
             return OperationResult<Game>.Error(resultUpdate.ErrorMsg);
         
         var notification = new NewGameNotification(game);
-        var notifyResult = await notificationService.NotifyGameRoomAsync(roomId, notification)
-            .WithRetry(3,TimeSpan.FromSeconds(0.2));
+        var operation = () => notificationService.NotifyGameRoomAsync(roomId, notification);
+        var notifyResult = await operation.WithRetry(delay: TimeSpan.FromSeconds(0.15));
         
         return !notifyResult.Success 
             ? OperationResult<Game>.Error(notifyResult.ErrorMsg) 
@@ -108,11 +108,11 @@ public class GameManager(
             return OperationResult<Room>.Error("Чтобы закончить игру нужно быть её создателем");
 
         var notification = new ReturnToRoomNotification(getRoomResult.ResultObj);
-        var notifyResult = await notificationService.NotifyGameRoomAsync(roomId, notification)
-            .WithRetry(3, TimeSpan.FromSeconds(0.2));
-        if (!notifyResult.Success)
-            return OperationResult<Room>.Error(notifyResult.ErrorMsg);
-        
-        return OperationResult<Room>.Ok(getRoomResult.ResultObj);
+        var operation = () => notificationService.NotifyGameRoomAsync(roomId, notification);
+        var notifyResult = await operation.WithRetry(delay: TimeSpan.FromSeconds(0.15));
+
+        return notifyResult.Success
+            ? OperationResult<Room>.Ok(getRoomResult.ResultObj)
+            : OperationResult<Room>.Error(notifyResult.ErrorMsg);
     }
 }
