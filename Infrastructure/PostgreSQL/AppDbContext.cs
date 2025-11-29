@@ -44,7 +44,7 @@ public class AppDbContext : DbContext
             // Уникальный индекс на Login, но только для не-null значений
             entity.HasIndex(u => u.Login)
                 .IsUnique()
-                .HasFilter("\"login\" IS NOT NULL");
+                .HasFilter("\"Login\" IS NOT NULL");
 
             entity.HasIndex(u => u.PlayerName);
         });
@@ -58,6 +58,10 @@ public class AppDbContext : DbContext
             entity.Property(p => p.UserId).IsRequired();
             entity.Property(p => p.RoomId).IsRequired();
 
+            entity.Property(p => p.ConnectionId)
+                .IsRequired()
+                .HasMaxLength(255);
+
             // Связь с User
             entity.HasOne<User>()
                 .WithMany()
@@ -65,9 +69,20 @@ public class AppDbContext : DbContext
                 .IsRequired()
                 .OnDelete(DeleteBehavior.Cascade);
 
+            // Связь с Room
+            entity.HasOne<Room>()
+                .WithMany(r => r.Players)
+                .HasForeignKey(p => p.RoomId)
+                .IsRequired()
+                .OnDelete(DeleteBehavior.Cascade);
+
             // Уникальность: один игрок на пользователя в комнате
             entity.HasIndex(p => new { p.UserId, p.RoomId }).IsUnique();
 
+            // ConnectionId уникален (каждый коннект уникален)
+            entity.HasIndex(p => p.ConnectionId).IsUnique();
+
+            // Индексы для быстрого поиска
             entity.HasIndex(p => p.UserId);
             entity.HasIndex(p => p.RoomId);
         });

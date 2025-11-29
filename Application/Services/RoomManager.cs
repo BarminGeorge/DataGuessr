@@ -1,9 +1,10 @@
 using Application.Interfaces;
 using Application.Interfaces.Infrastructure;
 using Application.Notifications;
-using Application.Result;
+using Domain.Common;
 using Domain.Entities;
 using Domain.Enums;
+using Infrastructure.Interfaces;
 
 namespace Application.Services;
 
@@ -12,7 +13,7 @@ public class RoomManager(
     ILogger<RoomManager> logger, 
     INotificationService notificationService,
     IPlayerRepository playerRepository,
-    IUsersRepository usersRepository) : IRoomManager
+    IUserRepository usersRepository) : IRoomManager
 {
     public async Task<OperationResult<Room>> CreateRoomAsync(Guid userId, RoomPrivacy privacy, CancellationToken ct,
         string? password = null, int maxPlayers = 15)

@@ -1,4 +1,5 @@
 using Application.Interfaces;
+using Application.Interfaces.Infrastructure;
 using Application.Requests_Responses;
 using Application.Requests_Responses.Validators;
 using Application.Requests_Responses.Validators.ParameterValidators;
@@ -47,6 +48,11 @@ public static class AddApplicationExtensions
         services.AddScoped<UserService>();
         services.AddScoped<IRoomManager, RoomManager>();
         services.AddScoped<IGameManager, GameManager>();
+        // TODO: Implement infrastructure services after base setup
+        // services.AddScoped<IJwtProvider, JwtProvider>();
+        // services.AddScoped<IRoomRepository, RoomRepository>();
+        // services.AddScoped<IGameCoreService, GameCoreService>();
+
 
         return services;
     }

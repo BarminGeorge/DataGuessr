@@ -30,4 +30,13 @@ public class User : IEntity<Guid>
         PlayerName = playerName;
         AvatarId = avatarId;
     }
+
+    public void UpdateProfile(string playerName, Guid avatarId)
+    {
+        if (string.IsNullOrWhiteSpace(playerName))
+            throw new ArgumentException("PlayerName не может быть пустым", nameof(playerName));
+
+        PlayerName = playerName;
+        AvatarId = avatarId;
+    }
 }

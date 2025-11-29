@@ -1,7 +1,7 @@
 using Application.Interfaces;
 using Application.Interfaces.Infrastructure;
 using Application.Notifications;
-using Application.Result;
+using Domain.Common;
 using Domain.Entities;
 using Domain.Enums;
 using Domain.ValueTypes;

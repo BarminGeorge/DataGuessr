@@ -1,11 +1,13 @@
 using Application.Interfaces;
 using Application.Interfaces.Infrastructure;
 using Application.Notifications;
-using Application.Result;
 using Application.Services;
+using Domain.Common;
 using Domain.Entities;
 using Domain.Enums;
 using FakeItEasy;
+using Infrastructure.Interfaces;
+using Microsoft.AspNetCore.Connections.Features;
 using Microsoft.Extensions.Logging;
 
 namespace Tests.Application.Implementations;
@@ -18,7 +20,7 @@ public class RoomManagerTests
     protected IPlayerRepository PlayerRepository;
     protected ILogger<RoomManager> Logger;
     protected IRoomManager RoomManager;
-    protected IUsersRepository UsersRepository;
+    protected IUserRepository UsersRepository;
     
     [SetUp]
     public void Setup()
@@ -26,7 +28,7 @@ public class RoomManagerTests
         RoomRepository = A.Fake<IRoomRepository>();
         NotificationService = A.Fake<INotificationService>();
         PlayerRepository = A.Fake<IPlayerRepository>();
-        UsersRepository = A.Fake<IUsersRepository>();
+        UsersRepository = A.Fake<IUserRepository>();
         Logger = A.Fake<ILogger<RoomManager>>();
         RoomManager = new RoomManager(RoomRepository, Logger, NotificationService, PlayerRepository, UsersRepository);
     }
@@ -107,10 +109,11 @@ public class JoinRoomTests : RoomManagerTests
         base.Setup();
         roomId = Guid.NewGuid();
         userId = Guid.NewGuid();
+        var connectionId = Guid.NewGuid().ToString();
         cancellationToken = CancellationToken.None;
         
         room = new Room(Guid.NewGuid(), RoomPrivacy.Public, 10);
-        player = new Player(userId, roomId);
+        player = new Player(userId, roomId, connectionId);
     }
 
     private void SetupSuccessfulMocks()

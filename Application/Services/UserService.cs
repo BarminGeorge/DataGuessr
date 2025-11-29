@@ -2,16 +2,17 @@ using System.IdentityModel.Tokens.Jwt;
 using System.Security.Claims;
 using System.Text;
 using Application.Interfaces.Infrastructure;
-using Application.Result;
+using Domain.Common;
 using Domain.Entities;
 using Microsoft.IdentityModel.Tokens;
 using Microsoft.Extensions.Options;
+using Infrastructure.Interfaces;
 
 namespace Application.Services;
  
 public class UserService(
     IJwtProvider provider, 
-    IUsersRepository usersRepository, 
+    IUserRepository usersRepository, 
     IAvatarRepository avatarRepository,
     IPasswordHasher passwordHasher)
 {

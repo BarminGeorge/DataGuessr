@@ -1,6 +1,6 @@
 using Application.Interfaces;
 using Application.Interfaces.Infrastructure;
-using Application.Result;
+using Domain.Common;
 using Domain.Entities;
 using Domain.ValueTypes;
 

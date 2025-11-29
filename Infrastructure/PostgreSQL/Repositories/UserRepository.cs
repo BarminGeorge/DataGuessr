@@ -14,10 +14,13 @@ public class UserRepository : IUserRepository
         this.db = db ?? throw new ArgumentNullException(nameof(db));
     }
 
-    public async Task<OperationResult> AddAsync(User user, CancellationToken ct = default)
+    public async Task<OperationResult> AddAsync(User user, CancellationToken ct)
     {
-        try
+        return await OperationResult.TryAsync(async () =>
         {
+            if (user == null)
+                throw new ArgumentNullException(nameof(user));
+
             // Проверяем уникальность логина ТОЛЬКО если Login указан (для гостей может быть null)
             if (!string.IsNullOrEmpty(user.Login))
             {
@@ -26,48 +29,65 @@ public class UserRepository : IUserRepository
                     .FirstOrDefaultAsync(u => u.Login == user.Login, ct);
 
                 if (existingUser != null)
-                    return OperationResult.Error($"Пользователь с логином '{user.Login}' уже существует");
+                    throw new InvalidOperationException($"Пользователь с логином '{user.Login}' уже существует");
             }
 
             await db.Users.AddAsync(user, ct);
             await db.SaveChangesAsync(ct);
-
-            return OperationResult.Ok();
-        }
-        catch (OperationCanceledException)
-        {
-            return OperationResult.Error("Операция была отменена");
-        }
-        catch (DbUpdateException ex)
-        {
-            return OperationResult.Error($"Ошибка при сохранении пользователя: {ex.Message}");
-        }
-        catch (Exception ex)
-        {
-            return OperationResult.Error($"Неожиданная ошибка: {ex.Message}");
-        }
+        });
     }
 
-
-    public async Task<OperationResult<User>> GetByNameAsync(string userName, CancellationToken ct = default)
+    public async Task<OperationResult<User>> GetByLoginAsync(string login, CancellationToken ct)
     {
-        try
+        return await OperationResult<User>.TryAsync(async () =>
         {
+            if (string.IsNullOrWhiteSpace(login))
+                throw new ArgumentException("Login не может быть пустым", nameof(login));
+
             var user = await db.Users
                 .AsNoTracking()
-                .FirstOrDefaultAsync(u => u.PlayerName == userName, ct);
+                .FirstOrDefaultAsync(u => u.Login == login, ct)
+                ?? throw new KeyNotFoundException($"Пользователь с логином '{login}' не найден");
 
-            return user != null
-                ? OperationResult<User>.Ok(user)
-                : OperationResult<User>.Error($"Пользователь с именем '{userName}' не найден");
-        }
-        catch (OperationCanceledException)
+            return user;
+        });
+    }
+
+    public async Task<OperationResult> UpdateUserAsync(Guid userId, Guid avatarId, string playerName, CancellationToken ct)
+    {
+        return await OperationResult.TryAsync(async () =>
         {
-            return OperationResult<User>.Error("Операция была отменена");
-        }
-        catch (Exception ex)
+            if (string.IsNullOrWhiteSpace(playerName))
+                throw new ArgumentException("PlayerName не может быть пустым", nameof(playerName));
+
+            var user = await db.Users.FirstOrDefaultAsync(u => u.Id == userId, ct)
+                ?? throw new KeyNotFoundException($"Пользователь с ID '{userId}' не найден");
+
+            // Проверяем существует ли аватар
+            var avatarExists = await db.Avatars.AnyAsync(a => a.Id == avatarId, ct);
+            if (!avatarExists)
+                throw new KeyNotFoundException($"Аватар с ID '{avatarId}' не найден");
+
+            // Обновляем данные пользователя
+            user.UpdateProfile(playerName, avatarId);
+
+            db.Users.Update(user);
+            await db.SaveChangesAsync(ct);
+        });
+    }
+
+    public async Task<OperationResult<string>> GetPlayerNameByIdAsync(Guid playerId, CancellationToken ct)
+    {
+        return await OperationResult<string>.TryAsync(async () =>
         {
-            return OperationResult<User>.Error($"Ошибка при поиске пользователя: {ex.Message}");
-        }
+            var playerName = await db.Users
+                .AsNoTracking()
+                .Where(u => u.Id == playerId)
+                .Select(u => u.PlayerName)
+                .FirstOrDefaultAsync(ct)
+                ?? throw new KeyNotFoundException($"Пользователь с ID '{playerId}' не найден");
+
+            return playerName;
+        });
     }
 }

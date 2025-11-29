@@ -1,5 +1,6 @@
-using Application.Result;
+using Domain.Common;
 using Domain.Entities;
+using Microsoft.AspNetCore.Http;
 
 namespace Application.Interfaces.Infrastructure;
 
