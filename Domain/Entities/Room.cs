@@ -5,73 +5,49 @@ namespace Domain.Entities;
 
 public class Room : IEntity<Guid>
 {
-    public Guid Id { get; }
-    public IReadOnlyList<Game> Games => games.AsReadOnly();
-    public HashSet<Player> Players => new();
+    public Guid Id { get; private set; }
+
+    // Навигационные свойства для EF Core
+    public virtual ICollection<Player> Players { get; private set; } = new List<Player>();
+    public virtual ICollection<Game> Games { get; private set; } = new List<Game>();
+
     public Guid Owner { get; private set; }
     public RoomPrivacy Privacy { get; private set; }
-    public string Code { get; private set; } = string.Empty;
-
-    public string? Password { get; private set; } = null;
+    public string? Password { get; private set; }
     public RoomStatus Status { get; private set; }
-    private int _maxPlayers;
+    public int MaxPlayers { get; private set; }
 
-    public int MaxPlayers
-    {
-        get => _maxPlayers;
-        set
-        {
-            if (Status == RoomStatus.Archived)
-                throw new InvalidOperationException("Комната архивирована");
-            if (HasOngoingGame())
-                throw new InvalidOperationException("В комнате сейчас идет игра, нельзя изменять настройки комнаты");
-            ArgumentOutOfRangeException.ThrowIfNegativeOrZero(value);
-            _maxPlayers = value;
-        }
-    }
-    private readonly List<Game> games = [];
-    private readonly HashSet<Player> players = [];
+    public DateTime ClosedAt { get; private set; }
 
-    protected Room()
-    {
-    }
+    // Конструктор для EF Core
+    protected Room() { }
 
-    public Room(Guid ownerId, RoomPrivacy privacy, int maxPlayers, string? password = null)
+    public Room(
+        Guid ownerId,
+        RoomPrivacy privacy,
+        int maxPlayers,
+        string? password = null,
+        TimeSpan? duration = null)
     {
         Id = Guid.NewGuid();
         Owner = ownerId;
         Privacy = privacy;
         Status = RoomStatus.Available;
         Password = password;
-        Code = "123456"; // TODO выдача кода для комнаты
         MaxPlayers = maxPlayers;
+
+        ClosedAt = DateTime.UtcNow + (duration ?? TimeSpan.FromDays(1));
     }
 
-    public void AddGame(Game game)
-    {
-        if (Status == RoomStatus.Archived)
-            throw new InvalidOperationException("Комната архивирована");
-        if (HasOngoingGame())
-            throw new InvalidOperationException("Нельзя начать новую игру. Последняя игра еще не окончена");
-        ArgumentNullException.ThrowIfNull(game);
-
-        games.Add(game);
-    }
-
+    public bool IsExpired => DateTime.UtcNow > ClosedAt;
     public void AddPlayer(Player player)
     {
         if (Status == RoomStatus.Archived)
             throw new InvalidOperationException("Комната архивирована");
-
-        ArgumentNullException.ThrowIfNull(player);
-
-        if (players.Contains(player))
-            return;
-
-        if (players.Count >= MaxPlayers)
+        if (Players.Count >= MaxPlayers)
             throw new InvalidOperationException("Комната заполнена");
 
-        players.Add(player);
+        Players.Add(player);
     }
 
     public void RemovePlayer(Player player)
@@ -79,33 +55,11 @@ public class Room : IEntity<Guid>
         if (Status == RoomStatus.Archived)
             throw new InvalidOperationException("Комната архивирована");
         ArgumentNullException.ThrowIfNull(player);
-        players.Remove(player);
+        Players.Remove(player);
     }
 
-    public void ArchiveRoom()
+    public void AddGame(Game game)
     {
-        Status = RoomStatus.Archived;
-        players.Clear();
-    }
-
-    public bool IsFull()
-    {
-        return games.Count == MaxPlayers;
-    }
-
-    public Game? CurrentGame()
-    {
-        if (Status == RoomStatus.Archived)
-            throw new InvalidOperationException("Комната архивирована");
-        return Games.LastOrDefault();
-    }
-
-    public bool HasOngoingGame()
-    {
-        if (Status == RoomStatus.Archived)
-            throw new InvalidOperationException("Комната архивирована");
-        var currentGame = CurrentGame();
-        if (currentGame is null) return false;
-        return currentGame.Status == GameStatus.InProgress;
+        Games.Add(game);
     }
 }

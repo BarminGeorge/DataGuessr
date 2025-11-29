@@ -10,7 +10,8 @@ public static class ModelToUiMapper
         return new RoomDto(
             room.Id, 
             room.Owner, 
-            room.Players);
+            room.Players.ToList(),
+            room.ClosedAt);
     }
 
     public static GameDto ToDto(this Game game)
@@ -20,7 +21,7 @@ public static class ModelToUiMapper
             game.Mode,
             game.Status,
             game.CurrentStatistic,
-            game.Questions,
+            game.Questions.ToList(),
             game.QuestionsCount,
             game.QuestionDuration);
     }

@@ -8,12 +8,12 @@ public partial class AppHub(IGameManager gameManager, IRoomManager roomManager, 
 {
     public override async Task OnDisconnectedAsync(Exception? exception)
     {
-        var getUserResult = await connectionService.GetUserByConnection(Context.ConnectionId);
-        if (getUserResult.Success)
+        var getPlayerResult = await connectionService.GetPlayerByConnection(Context.ConnectionId);
+        if (getPlayerResult.Success)
         {
-            var (userId, roomId) = getUserResult.ResultObj;
+            var (playerId, roomId) = getPlayerResult.ResultObj;
             await connectionService.RemoveConnection(Context.ConnectionId);
-            await roomManager.LeaveRoomAsync(roomId, userId);
+            await roomManager.LeaveRoomAsync(roomId, playerId);
             await Groups.RemoveFromGroupAsync(Context.ConnectionId, $"room-{roomId}");
         }
         

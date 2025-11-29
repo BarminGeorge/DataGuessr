@@ -10,7 +10,7 @@ public class SignalRNotificationService(IHubContext<AppHub> hubContext) : INotif
     public async Task<OperationResult> NotifyGameRoomAsync<T>(Guid roomId, T notification) where T : GameNotification
     {
         var groupName = $"room-{roomId}";
-        await hubContext.Clients.Group(groupName).SendAsync(notification.MethodName, notification);
-        return OperationResult.Ok();
+        return await OperationResult.TryAsync(() 
+            => hubContext.Clients.Group(groupName).SendAsync(notification.MethodName, notification));
     }
 }

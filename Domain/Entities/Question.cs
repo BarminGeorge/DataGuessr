@@ -3,9 +3,23 @@ using Domain.ValueTypes;
 
 namespace Domain.Entities;
 
-public class Question(Answer rightAnswer, string formulation) : IEntity<Guid>
+public class Question : IEntity<Guid>
 {
-    public Guid Id { get; } = Guid.NewGuid();
-    public Answer RightAnswer { get; } = rightAnswer;
-    public string Formulation { get; } = formulation;
+    public Guid Id { get; private set; }
+    public Answer RightAnswer { get; private set; }
+    public string Formulation { get; private set; }
+    public string ImageUrl { get; private set; }
+
+    protected Question() { }
+
+    public Question(
+        Answer rightAnswer,
+        string formulation,
+        string imageUrl)
+    {
+        Id = Guid.NewGuid();
+        RightAnswer = rightAnswer;
+        Formulation = formulation;
+        ImageUrl = imageUrl;
+    }
 }

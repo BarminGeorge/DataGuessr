@@ -6,51 +6,55 @@ namespace Domain.Entities;
 
 public class Game : IEntity<Guid>
 {
-    public Guid Id { get; }
-    public GameMode Mode { get; }
+    public Guid Id { get; private set; }
+    public Guid RoomId { get; private set; }
+
+    public GameMode Mode { get; private set; }
     public GameStatus Status { get; private set; }
-    public Statistic CurrentStatistic { get; set; }
-    public IReadOnlyList<Question> Questions
+    public int QuestionsCount { get; private set; }
+    public TimeSpan QuestionDuration { get; private set; }
+
+    public Statistic? CurrentStatistic { get; set; }
+
+    public virtual ICollection<Question> Questions { get; private set; } = new List<Question>();
+
+    protected Game() { }
+
+    public Game(
+        Guid roomId,
+        GameMode mode,
+        TimeSpan questionDuration,
+        int questionsCount)
     {
-        get
-        {
-            if (questions != null) 
-                return questions.AsReadOnly();
-            return new List<Question>();
-        }
-    }
-    public int QuestionsCount { get; }
-
-    public TimeSpan QuestionDuration { get; }
-
-    private readonly List<Question>? questions;
-
-    public Game(GameMode mode, IEnumerable<Question>? questions, TimeSpan questionDuration, int questionsCount)
-    {
+        Id = Guid.NewGuid();
+        RoomId = roomId;
         Mode = mode;
-        CurrentStatistic = new Statistic();
-        
-        this.questions = questions != null ? questions.ToList() : [];
+        Status = GameStatus.NotStarted;
         QuestionDuration = questionDuration;
         QuestionsCount = questionsCount;
-        Id = Guid.NewGuid();
-        Status = GameStatus.NotStarted;
+        CurrentStatistic = null;
     }
-
-    public void AddQuestion(Question question) => questions.Add(question);
-    public void AddQuestions(IEnumerable<Question> question) => questions.AddRange(question);
 
     public void StartGame()
     {
-        if (Status is GameStatus.NotStarted)
-            Status = GameStatus.InProgress;
-        throw new InvalidOperationException("Игра уже началась");
+        if (Status != GameStatus.NotStarted)
+            throw new InvalidOperationException("Игра уже началась");
+
+        Status = GameStatus.InProgress;
     }
 
     public void FinishGame()
     {
-        if (Status is GameStatus.InProgress)
-            Status = GameStatus.Finished;
-        throw new InvalidOperationException("Игра еще не началась или уже закончена");
+        if (Status != GameStatus.InProgress)
+            throw new InvalidOperationException("Игра еще не началась или уже закончена");
+
+        Status = GameStatus.Finished;
+    }
+
+    // TODO
+    public void AddQuestions(IEnumerable<Question> questions)
+    {
+        foreach (var question in questions)
+            Questions.Add(question);
     }
 }

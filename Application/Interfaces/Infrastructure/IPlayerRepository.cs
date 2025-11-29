@@ -3,7 +3,7 @@ using Domain.Entities;
 
 namespace Application.Interfaces.Infrastructure;
 
-public interface IPlayerRepository : IUsersRepository
+public interface IPlayerRepository
 {
-    Task<OperationResult<Player>> GetPlayerByIdAsync(Guid playerId);
+    Task<OperationResult<Player>> GetPlayerByIdAsync(Guid playerId, CancellationToken ct);
 }
