@@ -1,4 +1,4 @@
-using Domain.Interfaces;
+п»їusing Domain.Interfaces;
 using Domain.ValueTypes;
 
 namespace Domain.Entities;
@@ -10,7 +10,7 @@ public class Question : IEntity<Guid>
     public string Formulation { get; private set; }
     public string ImageUrl { get; private set; }
     
-    // навигация для many-to-many
+    // РЅР°РІРёРіР°С†РёСЏ РґР»СЏ many-to-many
     public virtual ICollection<Game> Games { get; private set; } = new List<Game>();
 
     protected Question() { }
