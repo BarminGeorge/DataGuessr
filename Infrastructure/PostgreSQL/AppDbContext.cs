@@ -11,6 +11,8 @@ public class AppDbContext : DbContext
     public DbSet<Game> Games { get; set; }
     public DbSet<Room> Rooms { get; set; }
     public DbSet<Avatar> Avatars { get; set; }
+    public DbSet<Question> Questions { get; set; }
+    public DbSet<PlayerAnswer> PlayerAnswers { get; set; }
 
     public AppDbContext(DbContextOptions<AppDbContext> options) : base(options)
     {
@@ -18,6 +20,7 @@ public class AppDbContext : DbContext
 
     protected override void OnModelCreating(ModelBuilder modelBuilder)
     {
+        // ============ USER ============
         modelBuilder.Entity<User>(entity =>
         {
             entity.ToTable("users");
@@ -28,20 +31,11 @@ public class AppDbContext : DbContext
                 .HasMaxLength(100);
 
             entity.Property(u => u.Login)
-                .HasMaxLength(50)
-                .IsRequired(false); 
+                .HasMaxLength(50);
 
             entity.Property(u => u.PasswordHash)
-                .HasMaxLength(255)
-                .IsRequired(false);
+                .HasMaxLength(255);
 
-            entity.HasOne<Avatar>()
-                .WithMany()
-                .HasForeignKey(u => u.AvatarId)
-                .IsRequired(false)
-                .OnDelete(DeleteBehavior.SetNull);
-
-            // Уникальный индекс на Login, но только для не-null значений
             entity.HasIndex(u => u.Login)
                 .IsUnique()
                 .HasFilter("\"Login\" IS NOT NULL");
@@ -49,7 +43,32 @@ public class AppDbContext : DbContext
             entity.HasIndex(u => u.PlayerName);
         });
 
+        // ============ AVATAR ============
+        modelBuilder.Entity<Avatar>(entity =>
+        {
+            entity.ToTable("avatars");
+            entity.HasKey(a => a.Id);
 
+            entity.Property(a => a.UserId).IsRequired();
+            entity.Property(a => a.Filename)
+                .IsRequired()
+                .HasMaxLength(255);
+
+            entity.Property(a => a.Mimetype)
+                .IsRequired()
+                .HasMaxLength(50);
+
+            // 1:1 связь
+            entity.HasOne(a => a.User)
+                .WithOne(u => u.Avatar)
+                .HasForeignKey<Avatar>(a => a.UserId)
+                .IsRequired()
+                .OnDelete(DeleteBehavior.Cascade);
+
+            entity.HasIndex(a => a.UserId).IsUnique();
+        });
+
+        // ============ PLAYER ============
         modelBuilder.Entity<Player>(entity =>
         {
             entity.ToTable("players");
@@ -57,37 +76,26 @@ public class AppDbContext : DbContext
 
             entity.Property(p => p.UserId).IsRequired();
             entity.Property(p => p.RoomId).IsRequired();
-
             entity.Property(p => p.ConnectionId)
                 .IsRequired()
                 .HasMaxLength(255);
 
-            // Связь с User
             entity.HasOne<User>()
                 .WithMany()
                 .HasForeignKey(p => p.UserId)
-                .IsRequired()
                 .OnDelete(DeleteBehavior.Cascade);
 
-            // Связь с Room
             entity.HasOne<Room>()
                 .WithMany(r => r.Players)
                 .HasForeignKey(p => p.RoomId)
-                .IsRequired()
                 .OnDelete(DeleteBehavior.Cascade);
 
-            // Уникальность: один игрок на пользователя в комнате
             entity.HasIndex(p => new { p.UserId, p.RoomId }).IsUnique();
-
-            // ConnectionId уникален (каждый коннект уникален)
             entity.HasIndex(p => p.ConnectionId).IsUnique();
-
-            // Индексы для быстрого поиска
-            entity.HasIndex(p => p.UserId);
             entity.HasIndex(p => p.RoomId);
         });
 
-
+        // ============ ROOM ============
         modelBuilder.Entity<Room>(entity =>
         {
             entity.ToTable("rooms");
@@ -97,21 +105,14 @@ public class AppDbContext : DbContext
             entity.Property(r => r.Privacy).IsRequired();
             entity.Property(r => r.Status).IsRequired();
             entity.Property(r => r.MaxPlayers).IsRequired();
+            entity.Property(r => r.Password).HasMaxLength(128);
+            entity.Property(r => r.ClosedAt).IsRequired();
 
-            entity.Property(r => r.Password)
-                .HasMaxLength(128)
-                .IsRequired(false);
-
-            entity.Property(r => r.ClosedAt)
-                .IsRequired();
-
-            // Связь: Room 1 - * Players
             entity.HasMany(r => r.Players)
                 .WithOne()
                 .HasForeignKey(p => p.RoomId)
                 .OnDelete(DeleteBehavior.Cascade);
 
-            // Связь: Room 1 - * Games
             entity.HasMany(r => r.Games)
                 .WithOne()
                 .HasForeignKey(g => g.RoomId)
@@ -121,48 +122,7 @@ public class AppDbContext : DbContext
             entity.HasIndex(r => r.ClosedAt);
         });
 
-
-        modelBuilder.Entity<Game>(entity =>
-        {
-            entity.ToTable("games");
-            entity.HasKey(g => g.Id);
-
-            entity.Property(g => g.RoomId).IsRequired();
-            entity.Property(g => g.Mode).IsRequired();
-            entity.Property(g => g.Status).IsRequired();
-            entity.Property(g => g.QuestionsCount).IsRequired();
-            entity.Property(g => g.QuestionDuration).IsRequired();
-
-            entity.OwnsOne(g => g.CurrentStatistic);
-
-            entity.HasOne<Room>()
-                .WithMany(r => r.Games)
-                .HasForeignKey(g => g.RoomId)
-                .OnDelete(DeleteBehavior.Cascade);
-
-            entity.HasMany(g => g.Questions)
-                .WithMany()
-                .UsingEntity<Dictionary<string, object>>(
-                    "game_questions",
-                    j => j
-                        .HasOne<Question>()
-                        .WithMany()
-                        .HasForeignKey("question_id")
-                        .OnDelete(DeleteBehavior.Cascade),
-                    j => j
-                        .HasOne<Game>()
-                        .WithMany()
-                        .HasForeignKey("game_id")
-                        .OnDelete(DeleteBehavior.Cascade),
-                    j =>
-                    {
-                        j.HasKey("game_id", "question_id");
-                        j.ToTable("game_questions");
-                    }
-                );
-        });
-
-
+        // ============ QUESTION ============
         modelBuilder.Entity<Question>(entity =>
         {
             entity.ToTable("questions");
@@ -182,23 +142,106 @@ public class AppDbContext : DbContext
                     value => new Answer(value)
                 )
                 .IsRequired();
+
+            entity.HasMany(q => q.Games)
+                .WithMany(g => g.Questions)
+                .UsingEntity<Dictionary<string, object>>(
+                    "game_questions",
+                    j => j
+                        .HasOne<Game>()
+                        .WithMany()
+                        .HasForeignKey("game_id")
+                        .OnDelete(DeleteBehavior.Cascade),
+                    j => j
+                        .HasOne<Question>()
+                        .WithMany()
+                        .HasForeignKey("question_id")
+                        .OnDelete(DeleteBehavior.Cascade),
+                    j =>
+                    {
+                        j.HasKey("game_id", "question_id");
+                        j.ToTable("game_questions");
+                    }
+                );
         });
 
-        modelBuilder.Entity<Avatar>(entity =>
+        // ============ GAME ============
+        modelBuilder.Entity<Game>(entity =>
         {
-            entity.ToTable("avatars");
-            entity.HasKey(a => a.Id);
+            entity.ToTable("games");
+            entity.HasKey(g => g.Id);
 
-            entity.Property(a => a.Filename)
-                .IsRequired()
-                .HasMaxLength(255);
+            entity.Property(g => g.RoomId).IsRequired();
+            entity.Property(g => g.Mode).IsRequired();
+            entity.Property(g => g.Status).IsRequired();
+            entity.Property(g => g.QuestionsCount).IsRequired();
+            entity.Property(g => g.QuestionDuration).IsRequired();
 
-            entity.Property(a => a.Mimetype)
-                .IsRequired()
-                .HasMaxLength(50);
+            // CurrentStatistic как JSON (EF сам сериализует/десериализует)
+            entity.Property(g => g.CurrentStatistic)
+                .HasColumnType("jsonb")
+                .IsRequired(false);
+
+            entity.HasOne<Room>()
+                .WithMany(r => r.Games)
+                .HasForeignKey(g => g.RoomId)
+                .OnDelete(DeleteBehavior.Cascade);
+
+            entity.HasMany(g => g.Questions)
+                .WithMany(q => q.Games)
+                .UsingEntity<Dictionary<string, object>>(
+                    "game_questions",
+                    j => j
+                        .HasOne<Question>()
+                        .WithMany()
+                        .HasForeignKey("question_id")
+                        .OnDelete(DeleteBehavior.Cascade),
+                    j => j
+                        .HasOne<Game>()
+                        .WithMany()
+                        .HasForeignKey("game_id")
+                        .OnDelete(DeleteBehavior.Cascade),
+                    j =>
+                    {
+                        j.HasKey("game_id", "question_id");
+                        j.ToTable("game_questions");
+                    }
+                );
+
+            // PlayerAnswers связь (конфигурация для каскадного удаления)
+            // Навигационное свойство убрано из Game, работаем через репозиторий
+            entity.HasMany<PlayerAnswer>()
+                .WithOne()
+                .HasForeignKey(pa => pa.GameId)
+                .OnDelete(DeleteBehavior.Cascade);
+
+            entity.HasIndex(g => g.Status);
+            entity.HasIndex(g => g.RoomId);
         });
 
+        // ============ PLAYER_ANSWER ============
+        modelBuilder.Entity<PlayerAnswer>(entity =>
+        {
+            entity.ToTable("player_answers");
+            entity.HasKey(pa => pa.Id);
 
+            entity.Property(pa => pa.GameId).IsRequired();
+            entity.Property(pa => pa.PlayerId).IsRequired();
+            entity.Property(pa => pa.QuestionId).IsRequired();
 
+            entity.Property(pa => pa.Answer)
+                .HasConversion(
+                    answer => answer.Date,
+                    value => new Answer(value)
+                )
+                .IsRequired();
+
+            // Один ответ на вопрос от одного игрока в игре
+            entity.HasIndex(pa => new { pa.GameId, pa.QuestionId, pa.PlayerId }).IsUnique();
+
+            entity.HasIndex(pa => pa.GameId);
+            entity.HasIndex(pa => pa.QuestionId);
+            entity.HasIndex(pa => pa.PlayerId);
+        });
     }
 }

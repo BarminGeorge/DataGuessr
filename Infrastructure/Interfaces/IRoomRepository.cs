@@ -9,5 +9,6 @@ public interface IRoomRepository
     Task<OperationResult<IEnumerable<Room>>> GetWaitingPublicRoomsAsync(CancellationToken ct);
     Task<OperationResult> AddAsync(Room room, CancellationToken ct);
     Task<OperationResult> UpdateAsync(Room room, CancellationToken ct);
-    Task<OperationResult> RemoveAsync(Guid id, CancellationToken ct);
+    Task<OperationResult> RemoveAsync(Guid rooId, CancellationToken ct);
+    Task<OperationResult<Game>> GetCurrentGameAsync(Guid roomId, CancellationToken ct);
 }
