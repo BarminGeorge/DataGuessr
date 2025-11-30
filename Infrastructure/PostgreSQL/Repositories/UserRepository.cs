@@ -21,7 +21,7 @@ public class UserRepository : IUserRepository
             if (user == null)
                 throw new ArgumentNullException(nameof(user));
 
-            // Проверяем уникальность логина ТОЛЬКО если Login указан (для гостей может быть null)
+            // Проверяем уникальность логина
             if (!string.IsNullOrEmpty(user.Login))
             {
                 var existingUser = await db.Users
@@ -46,6 +46,7 @@ public class UserRepository : IUserRepository
 
             var user = await db.Users
                 .AsNoTracking()
+                .Include(u => u.Avatar)
                 .FirstOrDefaultAsync(u => u.Login == login, ct)
                 ?? throw new KeyNotFoundException($"Пользователь с логином '{login}' не найден");
 
@@ -53,23 +54,36 @@ public class UserRepository : IUserRepository
         });
     }
 
-    public async Task<OperationResult> UpdateUserAsync(Guid userId, Avatar avatar, string playerName, CancellationToken ct)
+    public async Task<OperationResult> UpdateUserAsync(
+        Guid userId,
+        Avatar avatar,
+        string playerName,
+        CancellationToken ct)
     {
         return await OperationResult.TryAsync(async () =>
         {
             if (string.IsNullOrWhiteSpace(playerName))
                 throw new ArgumentException("PlayerName не может быть пустым", nameof(playerName));
 
-            var user = await db.Users.FirstOrDefaultAsync(u => u.Id == userId, ct)
+            if (avatar == null)
+                throw new ArgumentNullException(nameof(avatar));
+
+            //Загружаем user с его текущей аватаркой
+            var user = await db.Users
+                .Include(u => u.Avatar)
+                .FirstOrDefaultAsync(u => u.Id == userId, ct)
                 ?? throw new KeyNotFoundException($"Пользователь с ID '{userId}' не найден");
 
-            // Проверяем существует ли аватар
-            var avatarExists = await db.Avatars.AnyAsync(a => a.Id == avatar.Id, ct);
-            if (!avatarExists)
-                throw new KeyNotFoundException($"Аватар с ID '{avatar.Id}' не найден");
+            var oldAvatar = user.Avatar;
 
-            // Обновляем данные пользователя
+            //Обновляем профиль
             user.UpdateProfile(playerName, avatar);
+
+            //Удаляем старую аватарку (FK constraint автоматически обработает
+            if (oldAvatar != null)
+            {
+                db.Avatars.Remove(oldAvatar);
+            }
 
             db.Users.Update(user);
             await db.SaveChangesAsync(ct);

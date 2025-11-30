@@ -27,7 +27,10 @@ public class PlayerRepository : IPlayerRepository
         });
     }
 
-    public async Task<OperationResult<Player>> GetPlayerByUserIdAndRoomAsync(Guid userId, Guid roomId, CancellationToken ct = default)
+    public async Task<OperationResult<Player>> GetPlayerByUserIdAndRoomAsync(
+        Guid userId,
+        Guid roomId,
+        CancellationToken ct = default)
     {
         return await OperationResult<Player>.TryAsync(async () =>
         {
@@ -40,7 +43,9 @@ public class PlayerRepository : IPlayerRepository
         });
     }
 
-    public async Task<OperationResult<List<Player>>> GetPlayersByRoomAsync(Guid roomId, CancellationToken ct = default)
+    public async Task<OperationResult<List<Player>>> GetPlayersByRoomAsync(
+        Guid roomId,
+        CancellationToken ct = default)
     {
         return await OperationResult<List<Player>>.TryAsync(async () =>
         {
@@ -69,45 +74,40 @@ public class PlayerRepository : IPlayerRepository
         });
     }
 
-    public async Task<OperationResult> CreatePlayerAsync(string connectionId, Guid userId, Guid roomId, CancellationToken ct)
+    public async Task<OperationResult> CreatePlayerAsync(
+        string connectionId,
+        Guid userId,
+        Guid roomId,
+        CancellationToken ct)
     {
         return await OperationResult.TryAsync(async () =>
         {
-            // Валидация входных параметров
             if (string.IsNullOrWhiteSpace(connectionId))
                 throw new ArgumentException("ConnectionId не может быть пустым");
 
-            // Проверяем существует ли пользователь
+            var room = await db.Rooms
+                .Include(r => r.Players)
+                .FirstOrDefaultAsync(r => r.Id == roomId, ct)
+                ?? throw new KeyNotFoundException($"Комната с ID '{roomId}' не найдена");
+
+            if (room.IsExpired)
+                throw new InvalidOperationException("Комната истекла");
+
+            if (room.Players.Count >= room.MaxPlayers)
+                throw new InvalidOperationException("Комната заполнена");
+
+            if (room.Players.Any(p => p.UserId == userId))
+                throw new InvalidOperationException("Пользователь уже в этой комнате");
+
             var userExists = await db.Users.AnyAsync(u => u.Id == userId, ct);
             if (!userExists)
                 throw new KeyNotFoundException($"Пользователь с ID '{userId}' не найден");
 
-            // Проверяем существует ли комната
-            var room = await db.Rooms.FirstOrDefaultAsync(r => r.Id == roomId, ct)
-                ?? throw new KeyNotFoundException($"Комната с ID '{roomId}' не найдена");
-
-            // Проверяем не истекла ли комната
-            if (room.IsExpired)
-                throw new InvalidOperationException("Комната истекла");
-
-            // Проверяем заполнена ли комната
-            var playersCount = await db.Players.CountAsync(p => p.RoomId == roomId, ct);
-            if (playersCount >= room.MaxPlayers)
-                throw new InvalidOperationException("Комната заполнена");
-
-            // Проверяем нет ли уже игрока этого пользователя в этой комнате
-            var playerExists = await db.Players.AnyAsync(p => p.UserId == userId && p.RoomId == roomId, ct);
-            if (playerExists)
-                throw new InvalidOperationException("Пользователь уже в этой комнате");
-
-            // Проверяем уникальность ConnectionId
             var connectionExists = await db.Players.AnyAsync(p => p.ConnectionId == connectionId, ct);
             if (connectionExists)
                 throw new InvalidOperationException($"ConnectionId '{connectionId}' уже занят");
 
-            // Создаём Player
             var player = new Player(userId, roomId, connectionId);
-
             await db.Players.AddAsync(player, ct);
             await db.SaveChangesAsync(ct);
         });
