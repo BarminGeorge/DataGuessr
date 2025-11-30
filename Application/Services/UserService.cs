@@ -22,7 +22,7 @@ public class UserService(
         var operation = () => avatarRepository.SaveUserAvatarAsync(image, ct);
         var result = await operation.WithRetry(3, TimeSpan.FromSeconds(0.15));
         var avatar = result.ResultObj;
-        var user = new User(login, playerName, avatar.Id, hashedPassword);
+        var user = new User(login, playerName, avatar, hashedPassword);
         await usersRepository.AddAsync(user, ct);
     }
 
@@ -45,7 +45,7 @@ public class UserService(
             return OperationResult.Error(avatarResult.ErrorMsg);
 
         return await OperationResult.TryAsync(() =>
-            usersRepository.UpdateUserAsync(userId, avatarResult.ResultObj.Id, PlayerName, ct));
+            usersRepository.UpdateUserAsync(userId, avatarResult.ResultObj, PlayerName, ct));
     }
 
     public async Task<OperationResult<User>> CreateGuest(string playerName, IFormFile image, CancellationToken ct)
@@ -56,7 +56,7 @@ public class UserService(
             return OperationResult<User>.Error(result.ErrorMsg);
         
         var avatar = result.ResultObj;
-        var user = new User(playerName, avatar.Id);
+        var user = new User(playerName, avatar);
         await usersRepository.AddAsync(user, ct);
         return OperationResult<User>.Ok(user);
     }

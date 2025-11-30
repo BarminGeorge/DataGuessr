@@ -2,8 +2,6 @@ using Application.Interfaces;
 using Domain.Common;
 using Infrastructure.Interfaces;
 
-
-
 namespace Application.Services;
 
 public class ConnectionService(IPlayerRepository playerRepository) : IConnectionService

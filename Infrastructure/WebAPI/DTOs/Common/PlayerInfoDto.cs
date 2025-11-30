@@ -1,4 +1,4 @@
-﻿namespace DataGuessr.Infrastructure.WebAPI.DTOs.Common
+﻿namespace Infrastructure.WebAPI.DTOs.Common
 {
     public record PlayerInfoDto(
         Guid PlayerId,

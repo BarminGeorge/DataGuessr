@@ -1,9 +1,9 @@
 using Application.Interfaces;
-using Application.Interfaces.Infrastructure;
 using Application.Notifications;
 using Domain.Common;
 using Domain.Entities;
 using Domain.ValueTypes;
+using Infrastructure.Interfaces;
 
 namespace Application.Services;
 
@@ -13,7 +13,8 @@ public class GameCoreService(
     INotificationService notificationService,
     IGameRepository gameRepository,
     IQuestionService questionService,
-    IEvaluationService evaluationService)
+    IEvaluationService evaluationService,
+    IPlayerAnswerRepository answerRepository)
     : IGameCoreService
 {
     
@@ -41,13 +42,13 @@ public class GameCoreService(
             await Task.Delay(game.QuestionDuration);
             await notificationService.NotifyGameRoomAsync(room.Id,
                 new QuestionClosedNotification(question.Id, question.RightAnswer.Date));
-            var rawAnswer = await gameRepository.LoadAnswersAsync(question.Id, token);
+            var rawAnswer = await answerRepository.LoadAnswersAsync(game.Id, question.Id, token);
             // TODO: ошибки
             if (rawAnswer.ResultObj is not null)
             {
                 game.CurrentStatistic.Update(rawAnswer.ResultObj, question.RightAnswer.Date, 
                     evaluationService.CalculateScore(game.Mode));
-                await gameRepository.SaveStatisticAsync(game.CurrentStatistic, token);
+                await gameRepository.SaveStatisticAsync(game.Id, game.CurrentStatistic, token);
             }
             await notificationService.NotifyGameRoomAsync(room.Id,     
                 new StatisticNotification(game.CurrentStatistic));

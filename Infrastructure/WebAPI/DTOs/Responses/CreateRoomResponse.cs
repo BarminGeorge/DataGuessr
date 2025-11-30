@@ -1,4 +1,4 @@
-﻿namespace DataGuessr.Infrastructure.WebAPI.DTOs.Responses
+﻿namespace Infrastructure.WebAPI.DTOs.Responses
 {
     /// <summary>
     /// Ответ после создания комнаты

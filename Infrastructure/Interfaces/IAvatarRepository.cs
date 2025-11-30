@@ -2,7 +2,7 @@
 using Domain.Entities;
 using Microsoft.AspNetCore.Http;
 
-namespace Application.Interfaces.Infrastructure;
+namespace Infrastructure.Interfaces;
 
 public interface IAvatarRepository
 {

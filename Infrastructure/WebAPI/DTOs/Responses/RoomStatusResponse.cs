@@ -1,6 +1,6 @@
-﻿using DataGuessr.Infrastructure.WebAPI.DTOs.Common;
+﻿using Infrastructure.WebAPI.DTOs.Common;
 
-namespace DataGuessr.Infrastructure.WebAPI.DTOs.Responses
+namespace Infrastructure.WebAPI.DTOs.Responses
 {
     /// <summary>
     /// Текущий статус комнаты

@@ -53,7 +53,7 @@ public class UserRepository : IUserRepository
         });
     }
 
-    public async Task<OperationResult> UpdateUserAsync(Guid userId, Guid avatarId, string playerName, CancellationToken ct)
+    public async Task<OperationResult> UpdateUserAsync(Guid userId, Avatar avatar, string playerName, CancellationToken ct)
     {
         return await OperationResult.TryAsync(async () =>
         {
@@ -64,12 +64,12 @@ public class UserRepository : IUserRepository
                 ?? throw new KeyNotFoundException($"Пользователь с ID '{userId}' не найден");
 
             // Проверяем существует ли аватар
-            var avatarExists = await db.Avatars.AnyAsync(a => a.Id == avatarId, ct);
+            var avatarExists = await db.Avatars.AnyAsync(a => a.Id == avatar.Id, ct);
             if (!avatarExists)
-                throw new KeyNotFoundException($"Аватар с ID '{avatarId}' не найден");
+                throw new KeyNotFoundException($"Аватар с ID '{avatar.Id}' не найден");
 
             // Обновляем данные пользователя
-            user.UpdateProfile(playerName, avatarId);
+            user.UpdateProfile(playerName, avatar);
 
             db.Users.Update(user);
             await db.SaveChangesAsync(ct);

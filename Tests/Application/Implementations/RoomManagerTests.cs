@@ -1,5 +1,4 @@
 using Application.Interfaces;
-using Application.Interfaces.Infrastructure;
 using Application.Notifications;
 using Application.Services;
 using Domain.Common;
@@ -7,7 +6,6 @@ using Domain.Entities;
 using Domain.Enums;
 using FakeItEasy;
 using Infrastructure.Interfaces;
-using Microsoft.AspNetCore.Connections.Features;
 using Microsoft.Extensions.Logging;
 
 namespace Tests.Application.Implementations;

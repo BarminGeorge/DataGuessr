@@ -1,5 +1,4 @@
 using Application.Interfaces;
-using Application.Interfaces.Infrastructure;
 using Application.Notifications;
 using Domain.Common;
 using Domain.Entities;
