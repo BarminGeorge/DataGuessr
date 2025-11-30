@@ -1,5 +1,5 @@
 using Application.Notifications;
-using Application.Result;
+using Domain.Common;
 using Microsoft.AspNetCore.SignalR;
 using AppHub = Application.Endpoints.Hubs.AppHub;
 

@@ -1,6 +1,6 @@
 ﻿using System.ComponentModel.DataAnnotations;
 
-namespace DataGuessr.Infrastructure.WebAPI.DTOs.Requests
+namespace Infrastructure.WebAPI.DTOs.Requests
 {
     /// <summary>
     /// Запрос на создание новой игры в комнате

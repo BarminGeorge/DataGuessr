@@ -1,4 +1,4 @@
-using Application.Result;
+using Domain.Common;
 
 namespace Application.Interfaces;
 

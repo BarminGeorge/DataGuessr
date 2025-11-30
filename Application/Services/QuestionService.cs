@@ -1,12 +1,15 @@
 using Application.Interfaces;
 using Application.Interfaces.Infrastructure;
-using Application.Result;
+using Domain.Common;
 using Domain.Entities;
 using Domain.ValueTypes;
+using Infrastructure.Interfaces;
 
 namespace Application.Services;
 
-public class QuestionService(IQuestionRepository questionRepository, IGameRepository gameRepository) : IQuestionService
+public class QuestionService(
+    IQuestionRepository questionRepository,
+    IPlayerAnswerRepository answersRepository) : IQuestionService
 {
     public async Task<OperationResult<IEnumerable<Question>>> GetAllQuestionsAsync(Game game,  CancellationToken ct)
     {
@@ -19,6 +22,6 @@ public class QuestionService(IQuestionRepository questionRepository, IGameReposi
 
     public async Task<OperationResult> SubmitAnswerAsync(Guid roomId, Guid gameId, Guid questionId, Answer answer,  CancellationToken ct)
     {
-        return await gameRepository.SaveAnswerAsync(roomId, gameId, questionId, answer, ct);
+        return await answersRepository.SaveAnswerAsync(roomId, gameId, questionId, answer, ct);
     }
 }

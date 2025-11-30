@@ -1,6 +1,6 @@
 ﻿using DataGuessr.Infrastructure.WebAPI.Enums;
 
-namespace DataGuessr.Infrastructure.WebAPI.DTOs.Responses
+namespace Infrastructure.WebAPI.DTOs.Responses
 {
     /// <summary>
     /// Ответ с информацией об игре

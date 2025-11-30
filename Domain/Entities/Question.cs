@@ -1,4 +1,4 @@
-using Domain.Interfaces;
+﻿using Domain.Interfaces;
 using Domain.ValueTypes;
 
 namespace Domain.Entities;
@@ -9,6 +9,9 @@ public class Question : IEntity<Guid>
     public Answer RightAnswer { get; private set; }
     public string Formulation { get; private set; }
     public string ImageUrl { get; private set; }
+    
+    // навигация для many-to-many
+    public virtual ICollection<Game> Games { get; private set; } = new List<Game>();
 
     protected Question() { }
 

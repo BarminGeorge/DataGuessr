@@ -1,7 +1,7 @@
-﻿using DataGuessr.Infrastructure.WebAPI.Enums;
-using System.ComponentModel.DataAnnotations;
+﻿using System.ComponentModel.DataAnnotations;
+using DataGuessr.Infrastructure.WebAPI.Enums;
 
-namespace DataGuessr.Infrastructure.WebAPI.DTOs.Requests
+namespace Infrastructure.WebAPI.DTOs.Requests
 {
     /// <summary>
     /// Запрос на создание новой комнаты

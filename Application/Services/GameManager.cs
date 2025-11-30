@@ -1,10 +1,10 @@
 using Application.Interfaces;
-using Application.Interfaces.Infrastructure;
 using Application.Notifications;
-using Application.Result;
+using Domain.Common;
 using Domain.Entities;
 using Domain.Enums;
 using Domain.ValueTypes;
+using Infrastructure.Interfaces;
 
 namespace Application.Services;
 
@@ -47,7 +47,7 @@ public class GameManager(
         if (!getRoomResult.Success) 
             return OperationResult.Error(getRoomResult.ErrorMsg);
 
-        var getGameResult = await gameRepository.GetCurrentGameAsync(roomId, ct);
+        var getGameResult = await roomRepository.GetCurrentGameAsync(roomId, ct);
         if (!getGameResult.Success)
             return OperationResult.Error(getGameResult.ErrorMsg);
 

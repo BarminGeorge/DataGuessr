@@ -1,4 +1,6 @@
-﻿namespace DataGuessr.Infrastructure.WebAPI.DTOs.Responses
+﻿using Infrastructure.WebAPI.DTOs.Responses;
+
+namespace DataGuessr.Infrastructure.WebAPI.DTOs.Responses
 {
     /// <summary>
     /// Ответ после успешного присоединения к комнате

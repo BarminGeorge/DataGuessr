@@ -1,6 +1,7 @@
 using Application.DI;
 using Application.EndPoints;
 using Application.Services;
+using Infrastructure.DI;
 using Microsoft.AspNetCore.CookiePolicy;
 
 var builder = WebApplication.CreateBuilder(args);
@@ -10,6 +11,7 @@ var configuration = builder.Configuration;
 services.Configure<JwtOptions>(configuration.GetSection(nameof(JwtOptions)));
 
 services.AddApplication();
+services.AddInfrastructure(configuration);
 
 services.AddEndpointsApiExplorer();
 services.AddSwaggerGen();

@@ -1,6 +1,6 @@
 ﻿using System.ComponentModel.DataAnnotations;
 
-namespace DataGuessr.Infrastructure.WebAPI.DTOs.Requests
+namespace Infrastructure.WebAPI.DTOs.Requests
 {
     /// <summary>
     /// Запрос на присоединение к комнате по ссылке
