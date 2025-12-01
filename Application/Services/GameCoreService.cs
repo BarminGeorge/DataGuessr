@@ -9,7 +9,7 @@ namespace Application.Services;
 
 public class GameCoreService(
     Game game,
-    Room room,
+    Guid roomId,
     INotificationService notificationService,
     IGameRepository gameRepository,
     IQuestionService questionService,
@@ -18,11 +18,11 @@ public class GameCoreService(
     : IGameCoreService
 {
     
-    public async Task<OperationResult> RunGameCycle(CancellationToken token)
+    public async Task<OperationResult> RunGameCycle(CancellationToken canselToken)
     {
         game.StartGame();
         var questionsRes = await questionService
-            .GetAllQuestionsAsync(game, token);
+            .GetAllQuestionsAsync(game, canselToken);
         if (!questionsRes.Success)
             return OperationResult.Error(questionsRes.ErrorMsg);
         
@@ -33,24 +33,25 @@ public class GameCoreService(
         game.CurrentStatistic = new Statistic();
         foreach (var question in questions)
         {
-            await notificationService.NotifyGameRoomAsync(room.Id, 
+            await notificationService.NotifyGameRoomAsync(roomId, 
                 new NewQuestionNotification(question.Id,
                                             question.Formulation,
                                             question.ImageUrl,
                                             DateTime.Now + game.QuestionDuration,
                                             game.QuestionDuration.Seconds));
-            await Task.Delay(game.QuestionDuration);
-            await notificationService.NotifyGameRoomAsync(room.Id,
+            await Task.Delay(game.QuestionDuration, canselToken);
+            await notificationService.NotifyGameRoomAsync(roomId,
                 new QuestionClosedNotification(question.Id, question.RightAnswer.Date));
-            var rawAnswer = await answerRepository.LoadAnswersAsync(game.Id, question.Id, token);
-            // TODO: ошибки
+            var rawAnswer = await answerRepository.LoadAnswersAsync(game.Id, question.Id, canselToken);
+            if (!rawAnswer.Success) return OperationResult.Error(rawAnswer.ErrorMsg);
             if (rawAnswer.ResultObj is not null)
             {
                 game.CurrentStatistic.Update(rawAnswer.ResultObj, question.RightAnswer.Date, 
                     evaluationService.CalculateScore(game.Mode));
-                await gameRepository.SaveStatisticAsync(game.Id, game.CurrentStatistic, token);
+                var saveStatisticResult = await gameRepository.SaveStatisticAsync(game.Id, game.CurrentStatistic, canselToken);
+                if (!saveStatisticResult.Success) return OperationResult.Error(rawAnswer.ErrorMsg);
             }
-            await notificationService.NotifyGameRoomAsync(room.Id,     
+            await notificationService.NotifyGameRoomAsync(roomId,     
                 new StatisticNotification(game.CurrentStatistic));
         }   
         game.FinishGame();  
