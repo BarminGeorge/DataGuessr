@@ -1,6 +1,9 @@
 using Application.DI;
 using Application.EndPoints;
+using Application.Interfaces;
 using Application.Services;
+using Hangfire;
+using Hangfire.PostgreSql;
 using Infrastructure.DI;
 using Microsoft.AspNetCore.CookiePolicy;
 
@@ -12,6 +15,11 @@ services.Configure<JwtOptions>(configuration.GetSection(nameof(JwtOptions)));
 
 services.AddApplication();
 services.AddInfrastructure(configuration);
+
+services.AddHangfire(config => config
+    .UsePostgreSqlStorage(configuration.GetConnectionString("DefaultConnection")));
+
+services.AddHangfireServer();
 
 services.AddEndpointsApiExplorer();
 services.AddSwaggerGen();
@@ -36,8 +44,20 @@ app.UseCookiePolicy(new CookiePolicyOptions
 app.UseAuthentication();
 app.UseAuthorization();
 
+app.UseHangfireDashboard("/hangfire");
+
 app.MapGet("/api", () => "Hello World!");
 app.MapUserEndpoints();
 app.MapRoomEndpoints();
+
+RecurringJob.AddOrUpdate<IGuestCleanupService>(
+    "cleanup-orphaned-guests",
+    service => service.CleanupOrphanedGuestsAsync(CancellationToken.None),
+    Cron.Hourly);
+
+RecurringJob.AddOrUpdate<IGuestCleanupService>(
+    "cleanup-expired-rooms",
+    service => service.CleanupExpiredRoomsAsync(CancellationToken.None),
+    Cron.Daily);
 
 app.Run();

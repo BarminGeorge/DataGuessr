@@ -5,6 +5,8 @@ using Application.Requests_Responses.Validators;
 using Application.Requests_Responses.Validators.ParameterValidators;
 using Application.Services;
 using FluentValidation;
+using Infrastructure.Interfaces;
+using Infrastructure.PostgreSQL.Repositories;
 using SharpGrip.FluentValidation.AutoValidation.Endpoints.Extensions;
 
 namespace Application.DI;
@@ -48,10 +50,10 @@ public static class AddApplicationExtensions
         services.AddScoped<UserService>();
         services.AddScoped<IRoomManager, RoomManager>();
         services.AddScoped<IGameManager, GameManager>();
-        // TODO: Implement infrastructure services after base setup
-        // services.AddScoped<IJwtProvider, JwtProvider>();
-        // services.AddScoped<IRoomRepository, RoomRepository>();
-        // services.AddScoped<IGameCoreService, GameCoreService>();
+        services.AddScoped<IJwtProvider, JwtProvider>();
+        services.AddScoped<IGameCoreService, GameCoreService>();
+        services.AddScoped<IGuestCleanupService, GuestCleanupService>();// очищает автоматически старые комнаты и удаляет гостей которые не в игре
+
 
 
         return services;

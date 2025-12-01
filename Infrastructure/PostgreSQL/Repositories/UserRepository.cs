@@ -8,6 +8,7 @@ namespace Infrastructure.PostgreSQL.Repositories;
 public class UserRepository : IUserRepository
 {
     private readonly AppDbContext db;
+    private readonly TimeSpan retryDelay = TimeSpan.FromMilliseconds(100);
 
     public UserRepository(AppDbContext db)
     {
@@ -16,12 +17,11 @@ public class UserRepository : IUserRepository
 
     public async Task<OperationResult> AddAsync(User user, CancellationToken ct)
     {
-        return await OperationResult.TryAsync(async () =>
+        Func<Task<OperationResult>> operation = async () =>
         {
             if (user == null)
                 throw new ArgumentNullException(nameof(user));
 
-            // Проверяем уникальность логина
             if (!string.IsNullOrEmpty(user.Login))
             {
                 var existingUser = await db.Users
@@ -34,12 +34,16 @@ public class UserRepository : IUserRepository
 
             await db.Users.AddAsync(user, ct);
             await db.SaveChangesAsync(ct);
-        });
+
+            return OperationResult.Ok();
+        };
+
+        return await operation.WithRetry(maxRetries: 3, retryDelay);
     }
 
     public async Task<OperationResult<User>> GetByLoginAsync(string login, CancellationToken ct)
     {
-        return await OperationResult<User>.TryAsync(async () =>
+        Func<Task<OperationResult<User>>> operation = async () =>
         {
             if (string.IsNullOrWhiteSpace(login))
                 throw new ArgumentException("Login не может быть пустым", nameof(login));
@@ -50,8 +54,10 @@ public class UserRepository : IUserRepository
                 .FirstOrDefaultAsync(u => u.Login == login, ct)
                 ?? throw new KeyNotFoundException($"Пользователь с логином '{login}' не найден");
 
-            return user;
-        });
+            return OperationResult<User>.Ok(user);
+        };
+
+        return await operation.WithRetry(maxRetries: 3, retryDelay);
     }
 
     public async Task<OperationResult> UpdateUserAsync(
@@ -60,7 +66,7 @@ public class UserRepository : IUserRepository
         string playerName,
         CancellationToken ct)
     {
-        return await OperationResult.TryAsync(async () =>
+        Func<Task<OperationResult>> operation = async () =>
         {
             if (string.IsNullOrWhiteSpace(playerName))
                 throw new ArgumentException("PlayerName не может быть пустым", nameof(playerName));
@@ -68,7 +74,6 @@ public class UserRepository : IUserRepository
             if (avatar == null)
                 throw new ArgumentNullException(nameof(avatar));
 
-            //Загружаем user с его текущей аватаркой
             var user = await db.Users
                 .Include(u => u.Avatar)
                 .FirstOrDefaultAsync(u => u.Id == userId, ct)
@@ -76,10 +81,8 @@ public class UserRepository : IUserRepository
 
             var oldAvatar = user.Avatar;
 
-            //Обновляем профиль
             user.UpdateProfile(playerName, avatar);
 
-            //Удаляем старую аватарку (FK constraint автоматически обработает
             if (oldAvatar != null)
             {
                 db.Avatars.Remove(oldAvatar);
@@ -87,12 +90,16 @@ public class UserRepository : IUserRepository
 
             db.Users.Update(user);
             await db.SaveChangesAsync(ct);
-        });
+
+            return OperationResult.Ok();
+        };
+
+        return await operation.WithRetry(maxRetries: 3, retryDelay);
     }
 
     public async Task<OperationResult<string>> GetPlayerNameByIdAsync(Guid playerId, CancellationToken ct)
     {
-        return await OperationResult<string>.TryAsync(async () =>
+        Func<Task<OperationResult<string>>> operation = async () =>
         {
             var playerName = await db.Users
                 .AsNoTracking()
@@ -101,7 +108,9 @@ public class UserRepository : IUserRepository
                 .FirstOrDefaultAsync(ct)
                 ?? throw new KeyNotFoundException($"Пользователь с ID '{playerId}' не найден");
 
-            return playerName;
-        });
+            return OperationResult<string>.Ok(playerName);
+        };
+
+        return await operation.WithRetry(maxRetries: 3, retryDelay);
     }
 }

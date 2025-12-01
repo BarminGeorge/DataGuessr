@@ -10,6 +10,7 @@ namespace Infrastructure.PostgreSQL.Repositories;
 public class RoomRepository : IRoomRepository
 {
     private readonly AppDbContext db;
+    private readonly TimeSpan retryDelay = TimeSpan.FromMilliseconds(100);
 
     public RoomRepository(AppDbContext db)
     {
@@ -18,7 +19,7 @@ public class RoomRepository : IRoomRepository
 
     public async Task<OperationResult<Room>> GetByIdAsync(Guid id, CancellationToken ct)
     {
-        return await OperationResult<Room>.TryAsync(async () =>
+        Func<Task<OperationResult<Room>>> operation = async () =>
         {
             var room = await db.Rooms
                 .AsNoTracking()
@@ -27,13 +28,15 @@ public class RoomRepository : IRoomRepository
                 .FirstOrDefaultAsync(r => r.Id == id, ct)
                 ?? throw new KeyNotFoundException($"Комната с ID '{id}' не найдена");
 
-            return room;
-        });
+            return OperationResult<Room>.Ok(room);
+        };
+
+        return await operation.WithRetry(maxRetries: 3, retryDelay);
     }
 
     public async Task<OperationResult<IEnumerable<Room>>> GetWaitingPublicRoomsAsync(CancellationToken ct)
     {
-        return await OperationResult<IEnumerable<Room>>.TryAsync(async () =>
+        Func<Task<OperationResult<IEnumerable<Room>>>> operation = async () =>
         {
             var rooms = await db.Rooms
                 .AsNoTracking()
@@ -43,42 +46,51 @@ public class RoomRepository : IRoomRepository
                 .Include(r => r.Players)
                 .ToListAsync(ct);
 
-            return rooms;
-        });
+            return OperationResult<IEnumerable<Room>>.Ok(rooms);
+        };
+
+        return await operation.WithRetry(maxRetries: 3, retryDelay);
     }
 
     public async Task<OperationResult> AddAsync(Room room, CancellationToken ct)
     {
-        return await OperationResult.TryAsync(async () =>
+        Func<Task<OperationResult>> operation = async () =>
         {
             if (room == null)
                 throw new ArgumentNullException(nameof(room));
 
             await db.Rooms.AddAsync(room, ct);
             await db.SaveChangesAsync(ct);
-        });
+
+            return OperationResult.Ok();
+        };
+
+        return await operation.WithRetry(maxRetries: 3, retryDelay);
     }
 
     public async Task<OperationResult> UpdateAsync(Room room, CancellationToken ct)
     {
-        return await OperationResult.TryAsync(async () =>
+        Func<Task<OperationResult>> operation = async () =>
         {
             if (room == null)
                 throw new ArgumentNullException(nameof(room));
 
-            // Проверяем существует ли комната
             var existingRoom = await db.Rooms.AnyAsync(r => r.Id == room.Id, ct);
             if (!existingRoom)
                 throw new KeyNotFoundException($"Комната с ID '{room.Id}' не найдена");
 
             db.Rooms.Update(room);
             await db.SaveChangesAsync(ct);
-        });
+
+            return OperationResult.Ok();
+        };
+
+        return await operation.WithRetry(maxRetries: 3, retryDelay);
     }
 
     public async Task<OperationResult> RemoveAsync(Guid roomId, CancellationToken ct)
     {
-        return await OperationResult.TryAsync(async () =>
+        Func<Task<OperationResult>> operation = async () =>
         {
             var room = await db.Rooms
                 .FirstOrDefaultAsync(r => r.Id == roomId, ct)
@@ -87,15 +99,16 @@ public class RoomRepository : IRoomRepository
             db.Rooms.Remove(room);
             await db.SaveChangesAsync(ct);
 
-            // Триггер автоматически удалит orphaned гостей
-        });
+            return OperationResult.Ok();
+        };
+
+        return await operation.WithRetry(maxRetries: 3, retryDelay);
     }
 
     public async Task<OperationResult<Game>> GetCurrentGameAsync(Guid roomId, CancellationToken ct)
     {
-        return await OperationResult<Game>.TryAsync(async () =>
+        Func<Task<OperationResult<Game>>> operation = async () =>
         {
-            // Проверяем существует ли комната
             var roomExists = await db.Rooms.AnyAsync(r => r.Id == roomId, ct);
             if (!roomExists)
                 throw new KeyNotFoundException($"Комната с ID '{roomId}' не найдена");
@@ -106,7 +119,9 @@ public class RoomRepository : IRoomRepository
                 .FirstOrDefaultAsync(ct)
                 ?? throw new KeyNotFoundException("Активная игра в комнате не найдена");
 
-            return game;
-        });
+            return OperationResult<Game>.Ok(game);
+        };
+
+        return await operation.WithRetry(maxRetries: 3, retryDelay);
     }
 }

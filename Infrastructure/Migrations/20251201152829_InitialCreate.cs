@@ -1,4 +1,5 @@
 ﻿using System;
+using Domain.ValueTypes;
 using Microsoft.EntityFrameworkCore.Migrations;
 
 #nullable disable
@@ -11,19 +12,6 @@ namespace Infrastructure.Migrations
         /// <inheritdoc />
         protected override void Up(MigrationBuilder migrationBuilder)
         {
-            migrationBuilder.CreateTable(
-                name: "avatars",
-                columns: table => new
-                {
-                    Id = table.Column<Guid>(type: "uuid", nullable: false),
-                    Filename = table.Column<string>(type: "character varying(255)", maxLength: 255, nullable: false),
-                    Mimetype = table.Column<string>(type: "character varying(50)", maxLength: 50, nullable: false)
-                },
-                constraints: table =>
-                {
-                    table.PrimaryKey("PK_avatars", x => x.Id);
-                });
-
             migrationBuilder.CreateTable(
                 name: "questions",
                 columns: table => new
@@ -60,7 +48,6 @@ namespace Infrastructure.Migrations
                 columns: table => new
                 {
                     Id = table.Column<Guid>(type: "uuid", nullable: false),
-                    AvatarId = table.Column<Guid>(type: "uuid", nullable: false),
                     PlayerName = table.Column<string>(type: "character varying(100)", maxLength: 100, nullable: false),
                     Login = table.Column<string>(type: "character varying(50)", maxLength: 50, nullable: true),
                     PasswordHash = table.Column<string>(type: "character varying(255)", maxLength: 255, nullable: true)
@@ -68,12 +55,6 @@ namespace Infrastructure.Migrations
                 constraints: table =>
                 {
                     table.PrimaryKey("PK_users", x => x.Id);
-                    table.ForeignKey(
-                        name: "FK_users_avatars_AvatarId",
-                        column: x => x.AvatarId,
-                        principalTable: "avatars",
-                        principalColumn: "Id",
-                        onDelete: ReferentialAction.SetNull);
                 });
 
             migrationBuilder.CreateTable(
@@ -85,7 +66,8 @@ namespace Infrastructure.Migrations
                     Mode = table.Column<int>(type: "integer", nullable: false),
                     Status = table.Column<int>(type: "integer", nullable: false),
                     QuestionsCount = table.Column<int>(type: "integer", nullable: false),
-                    QuestionDuration = table.Column<TimeSpan>(type: "interval", nullable: false)
+                    QuestionDuration = table.Column<TimeSpan>(type: "interval", nullable: false),
+                    CurrentStatistic = table.Column<Statistic>(type: "jsonb", nullable: true)
                 },
                 constraints: table =>
                 {
@@ -94,6 +76,26 @@ namespace Infrastructure.Migrations
                         name: "FK_games_rooms_RoomId",
                         column: x => x.RoomId,
                         principalTable: "rooms",
+                        principalColumn: "Id",
+                        onDelete: ReferentialAction.Cascade);
+                });
+
+            migrationBuilder.CreateTable(
+                name: "avatars",
+                columns: table => new
+                {
+                    Id = table.Column<Guid>(type: "uuid", nullable: false),
+                    UserId = table.Column<Guid>(type: "uuid", nullable: false),
+                    Filename = table.Column<string>(type: "character varying(255)", maxLength: 255, nullable: false),
+                    Mimetype = table.Column<string>(type: "character varying(50)", maxLength: 50, nullable: false)
+                },
+                constraints: table =>
+                {
+                    table.PrimaryKey("PK_avatars", x => x.Id);
+                    table.ForeignKey(
+                        name: "FK_avatars_users_UserId",
+                        column: x => x.UserId,
+                        principalTable: "users",
                         principalColumn: "Id",
                         onDelete: ReferentialAction.Cascade);
                 });
@@ -148,6 +150,33 @@ namespace Infrastructure.Migrations
                         onDelete: ReferentialAction.Cascade);
                 });
 
+            migrationBuilder.CreateTable(
+                name: "player_answers",
+                columns: table => new
+                {
+                    Id = table.Column<Guid>(type: "uuid", nullable: false),
+                    GameId = table.Column<Guid>(type: "uuid", nullable: false),
+                    PlayerId = table.Column<Guid>(type: "uuid", nullable: false),
+                    QuestionId = table.Column<Guid>(type: "uuid", nullable: false),
+                    Answer = table.Column<DateTime>(type: "timestamp with time zone", nullable: false)
+                },
+                constraints: table =>
+                {
+                    table.PrimaryKey("PK_player_answers", x => x.Id);
+                    table.ForeignKey(
+                        name: "FK_player_answers_games_GameId",
+                        column: x => x.GameId,
+                        principalTable: "games",
+                        principalColumn: "Id",
+                        onDelete: ReferentialAction.Cascade);
+                });
+
+            migrationBuilder.CreateIndex(
+                name: "IX_avatars_UserId",
+                table: "avatars",
+                column: "UserId",
+                unique: true);
+
             migrationBuilder.CreateIndex(
                 name: "IX_game_questions_question_id",
                 table: "game_questions",
@@ -159,6 +188,32 @@ namespace Infrastructure.Migrations
                 column: "RoomId");
 
             migrationBuilder.CreateIndex(
+                name: "IX_games_Status",
+                table: "games",
+                column: "Status");
+
+            migrationBuilder.CreateIndex(
+                name: "IX_player_answers_GameId",
+                table: "player_answers",
+                column: "GameId");
+
+            migrationBuilder.CreateIndex(
+                name: "IX_player_answers_GameId_QuestionId_PlayerId",
+                table: "player_answers",
+                columns: new[] { "GameId", "QuestionId", "PlayerId" },
+                unique: true);
+
+            migrationBuilder.CreateIndex(
+                name: "IX_player_answers_PlayerId",
+                table: "player_answers",
+                column: "PlayerId");
+
+            migrationBuilder.CreateIndex(
+                name: "IX_player_answers_QuestionId",
+                table: "player_answers",
+                column: "QuestionId");
+
+            migrationBuilder.CreateIndex(
                 name: "IX_players_ConnectionId",
                 table: "players",
                 column: "ConnectionId",
@@ -168,11 +223,6 @@ namespace Infrastructure.Migrations
                 name: "IX_players_RoomId",
                 table: "players",
                 column: "RoomId");
-
-            migrationBuilder.CreateIndex(
-                name: "IX_players_UserId",
-                table: "players",
-                column: "UserId");
 
             migrationBuilder.CreateIndex(
                 name: "IX_players_UserId_RoomId",
@@ -191,11 +241,6 @@ namespace Infrastructure.Migrations
                 column: "Status");
 
             migrationBuilder.CreateIndex(
-                name: "IX_users_AvatarId",
-                table: "users",
-                column: "AvatarId");
-
-            migrationBuilder.CreateIndex(
                 name: "IX_users_Login",
                 table: "users",
                 column: "Login",
@@ -212,25 +257,28 @@ namespace Infrastructure.Migrations
         protected override void Down(MigrationBuilder migrationBuilder)
         {
             migrationBuilder.DropTable(
+                name: "avatars");
+
+            migrationBuilder.DropTable(
                 name: "game_questions");
+
+            migrationBuilder.DropTable(
+                name: "player_answers");
 
             migrationBuilder.DropTable(
                 name: "players");
 
             migrationBuilder.DropTable(
-                name: "games");
+                name: "questions");
 
             migrationBuilder.DropTable(
-                name: "questions");
+                name: "games");
 
             migrationBuilder.DropTable(
                 name: "users");
 
             migrationBuilder.DropTable(
                 name: "rooms");
-
-            migrationBuilder.DropTable(
-                name: "avatars");
         }
     }
 }
