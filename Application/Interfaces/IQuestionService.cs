@@ -7,5 +7,5 @@ namespace Application.Interfaces;
 public interface IQuestionService
 {
     Task<OperationResult<IEnumerable<Question>>> GetAllQuestionsAsync(Game game, CancellationToken ct);
-    Task<OperationResult> SubmitAnswerAsync(Guid roomId, Guid gameId, Guid questionId, Answer answer, CancellationToken ct);
+    Task<OperationResult> SubmitAnswerAsync(Guid gameId, Guid questionId, Guid playerId, Answer answer, CancellationToken ct);
 }

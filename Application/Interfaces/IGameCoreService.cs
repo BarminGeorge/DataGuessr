@@ -4,5 +4,5 @@ namespace Application.Interfaces;
 
 public interface IGameCoreService
 {
-    public Task<OperationResult> RunGameCycle(CancellationToken token);
+    public Task<OperationResult> RunGameCycle(CancellationToken canselToken);
 }
