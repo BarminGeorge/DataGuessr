@@ -30,20 +30,14 @@ public class QuestionServiceTests
         answersRepository = A.Fake<IPlayerAnswerRepository>();
         
         questionService = new QuestionService(questionRepository, answersRepository);
-    }
-
-    private void SetupSuccessfulMocks()
-    {
         A.CallTo(() => questionRepository.GetUniqQuestionsAsync(A<int>.That.Matches(x => x >= 0),
                 A<CancellationToken>.Ignored))
             .Returns(OperationResult<IEnumerable<Question>>.Ok(A.CollectionOfFake<Question>(questionsCount)));
     }
-
+    
     [Test]
     public async Task GetAllQuestionsAsync_WithGameContainingQuestion_ReturnsAllQuestionsFromGameField()
     {
-        SetupSuccessfulMocks();
- 
         var gameWithQuestions = new Game(roomId, GameMode.DefaultMode, questionDuraction, questionsCount);
         var fakeQuestions = A.CollectionOfFake<Question>(questionsCount);
         gameWithQuestions.AddQuestions(fakeQuestions);
@@ -59,8 +53,6 @@ public class QuestionServiceTests
     [Test]
     public async Task GetAllQuestionsAsync_WithGameNotContainingQuestion_ReturnsAllQuestionsFromDatabase()
     {
-        SetupSuccessfulMocks();
-        
         var gameWithoutQuestions = new Game(roomId, GameMode.DefaultMode, questionDuraction, questionsCount);
         
         var result = await questionService.GetAllQuestionsAsync(gameWithoutQuestions, cancellationToken);

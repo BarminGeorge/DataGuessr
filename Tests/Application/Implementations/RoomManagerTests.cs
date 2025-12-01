@@ -10,7 +10,7 @@ using Microsoft.Extensions.Logging;
 
 namespace Tests.Application.Implementations;
 
-[TestFixture]
+
 public class RoomManagerTests
 {
     protected IRoomRepository RoomRepository;
@@ -71,7 +71,7 @@ public class CreateRoomTests : RoomManagerTests
         {
             Assert.That(result.Success, Is.True);
             Assert.That(result.ResultObj, Is.Not.Null);
-            Assert.That(result.ResultObj.Owner, Is.EqualTo(userId));
+            Assert.That(result.ResultObj!.Owner, Is.EqualTo(userId));
             Assert.That(result.ResultObj.Privacy, Is.EqualTo(privacy));
             Assert.That(result.ResultObj.MaxPlayers, Is.EqualTo(maxPlayers));
         });
