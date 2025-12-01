@@ -10,6 +10,7 @@ public static class RoomEndpoints
         var group = app.MapGroup("rooms");
         
         group.MapGet("", GetAvailableRooms);
+        group.MapGet("{id:guid}", GetRoomPrivacy);
         
         return app;
     }
@@ -19,5 +20,11 @@ public static class RoomEndpoints
     {
         var operationResult = await roomManager.GetAvailablePublicRoomsAsync(ct);
         return operationResult.Success ? Results.Ok(operationResult.ResultObj) : Results.BadRequest(operationResult);
+    }
+
+    private static async Task<IResult> GetRoomPrivacy(Guid roomId, IRoomManager roomManager, HttpContext context, CancellationToken ct)
+    {
+        var result = await roomManager.GetRoomPrivacyAsync(roomId, ct);
+        return result.Success ? Results.Ok(result) : Results.BadRequest(result);
     }
 }

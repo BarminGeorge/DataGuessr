@@ -116,4 +116,12 @@ public class RoomManager(
     {
         return await roomRepository.GetWaitingPublicRoomsAsync(ct);
     }
+
+    public async Task<OperationResult<RoomPrivacy>> GetRoomPrivacyAsync(Guid roomId, CancellationToken ct)
+    {
+        var getRoomResult = await roomRepository.GetByIdAsync(roomId, ct);
+        return getRoomResult.Success 
+            ? OperationResult<RoomPrivacy>.Ok(getRoomResult.ResultObj.Privacy) 
+            : OperationResult<RoomPrivacy>.Error(getRoomResult.ErrorMsg); 
+    }
 }
