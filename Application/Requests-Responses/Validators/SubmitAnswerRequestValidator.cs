@@ -6,7 +6,7 @@ public class SubmitAnswerRequestValidator : AbstractValidator<SubmitAnswerReques
 {
     public SubmitAnswerRequestValidator()
     {
-        RuleFor(x => x.RoomId)
+        RuleFor(x => x.PlayerId)
             .NotEmpty().WithMessage("Room ID is required");
 
         RuleFor(x => x.GameId)
