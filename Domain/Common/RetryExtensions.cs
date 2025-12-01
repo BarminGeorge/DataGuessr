@@ -14,7 +14,8 @@ namespace Domain.Common
                 try
                 {
                     result = await operation();
-                    return result;
+                    if (result.Success)
+                        return result;
                 }
                 catch (Exception ex)
                 {
@@ -39,7 +40,8 @@ namespace Domain.Common
                 try
                 {
                     result = await operation();
-                    return result;
+                    if (result.Success)
+                        return result;
                 }
                 catch (Exception ex)
                 {

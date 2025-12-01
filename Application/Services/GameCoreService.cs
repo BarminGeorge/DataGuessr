@@ -52,7 +52,7 @@ public class GameCoreService(
             }
             await notificationService.NotifyGameRoomAsync(room.Id,     
                 new StatisticNotification(game.CurrentStatistic));
-        }   
+        }
         game.FinishGame();  
         return OperationResult.Ok();
     }
