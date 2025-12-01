@@ -18,11 +18,11 @@ public class GameCoreService(
     : IGameCoreService
 {
     
-    public async Task<OperationResult> RunGameCycle(CancellationToken canselToken)
+    public async Task<OperationResult> RunGameCycle(CancellationToken canсelToken)
     {
         game.StartGame();
         var questionsRes = await questionService
-            .GetAllQuestionsAsync(game, canselToken);
+            .GetAllQuestionsAsync(game, canсelToken);
         if (!questionsRes.Success)
             return OperationResult.Error(questionsRes.ErrorMsg);
         
@@ -39,17 +39,17 @@ public class GameCoreService(
                                             question.ImageUrl,
                                             DateTime.Now + game.QuestionDuration,
                                             game.QuestionDuration.Seconds));
-            await Task.Delay(game.QuestionDuration, canselToken);
+            await Task.Delay(game.QuestionDuration, canсelToken);
             await notificationService.NotifyGameRoomAsync(roomId,
                 new QuestionClosedNotification(question.Id, question.RightAnswer.Date));
-            var rawAnswer = await answerRepository.LoadAnswersAsync(game.Id, question.Id, canselToken);
+            var rawAnswer = await answerRepository.LoadAnswersAsync(game.Id, question.Id, canсelToken);
             if (!rawAnswer.Success) return OperationResult.Error(rawAnswer.ErrorMsg);
             if (rawAnswer.ResultObj is not null)
             {
                 game.CurrentStatistic.Update(rawAnswer.ResultObj, question.RightAnswer.Date, 
                     evaluationService.CalculateScore(game.Mode));
-                var saveStatisticResult = await gameRepository.SaveStatisticAsync(game.Id, game.CurrentStatistic, canselToken);
-                if (!saveStatisticResult.Success) return OperationResult.Error(rawAnswer.ErrorMsg);
+                var saveStatisticResult = await gameRepository.SaveStatisticAsync(game.Id, game.CurrentStatistic, canсelToken);
+                if (!saveStatisticResult.Success) return OperationResult.Error(saveStatisticResult.ErrorMsg);
             }
             await notificationService.NotifyGameRoomAsync(roomId,     
                 new StatisticNotification(game.CurrentStatistic));
