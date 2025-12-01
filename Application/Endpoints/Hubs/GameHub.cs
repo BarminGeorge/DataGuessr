@@ -32,7 +32,7 @@ public partial class AppHub
 
     public async Task<EmptyResponse> SubmitAnswer(SubmitAnswerRequest request, CancellationToken ct = default)
     {
-        var result = await gameManager.SubmitAnswerAsync(request.RoomId, request.GameId, request.QuestionId, request.Answer, ct);
+        var result = await gameManager.SubmitAnswerAsync(request.GameId, request.QuestionId, request.PlayerId, request.Answer, ct);
         return result.Success
             ? EmptyResponse.CreateSuccess()
             : EmptyResponse.CreateFailure(result.ErrorMsg);

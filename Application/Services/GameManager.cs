@@ -97,9 +97,9 @@ public class GameManager(
             : OperationResult<Game>.Ok(game);
     }
 
-    public async Task<OperationResult> SubmitAnswerAsync(Guid roomId, Guid gameId, Guid questionId, Answer answer, CancellationToken ct)
+    public async Task<OperationResult> SubmitAnswerAsync(Guid gameId, Guid questionId, Guid playerId, Answer answer, CancellationToken ct)
     {
-        return await questionService.SubmitAnswerAsync(roomId, gameId, questionId, answer, ct);
+        return await questionService.SubmitAnswerAsync(gameId, questionId, playerId, answer, ct);
     }
 
     public async Task<OperationResult<Room>> FinishGameAsync(Guid userId, Guid roomId, CancellationToken ct)
