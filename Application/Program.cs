@@ -2,10 +2,10 @@ using Application.DI;
 using Application.EndPoints;
 using Application.Interfaces;
 using Application.Endpoints.Hubs;
-using Application.Services;
 using Hangfire;
 using Hangfire.PostgreSql;
 using Infrastructure.DI;
+using Infrastructure.RegistrationUtils;
 using Microsoft.AspNetCore.CookiePolicy;
 
 var builder = WebApplication.CreateBuilder(args);

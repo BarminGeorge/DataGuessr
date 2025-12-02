@@ -1,11 +1,5 @@
-using System.IdentityModel.Tokens.Jwt;
-using System.Security.Claims;
-using System.Text;
-using Application.Interfaces.Infrastructure;
 using Domain.Common;
 using Domain.Entities;
-using Microsoft.IdentityModel.Tokens;
-using Microsoft.Extensions.Options;
 using Infrastructure.Interfaces;
 
 namespace Application.Services;
@@ -60,50 +54,4 @@ public class UserService(
         await usersRepository.AddAsync(user, ct);
         return OperationResult<User>.Ok(user);
     }
-}
-
-// в инфраструктуру
-public class PasswordHasher : IPasswordHasher
-{
-    public string GenerateAsync(string password)
-    {
-        return BCrypt.Net.BCrypt.EnhancedHashPassword(password);
-    }
-
-    public bool VerifyAsync(string password, string hashedPassword)
-    {
-        return BCrypt.Net.BCrypt.EnhancedVerify(password, hashedPassword);
-    }
-}
-
-// в инфраструктуру
-public class JwtProvider(IOptions<JwtOptions> options) : IJwtProvider
-{
-    private readonly JwtOptions options = options.Value;
-
-    public string GenerateTokenAsync(User user)
-    {
-        // TODO: пока небезопасно храниться в appsettings.json, переделать
-        
-        var signingCredentials = new SigningCredentials(
-            new SymmetricSecurityKey(Encoding.UTF8.GetBytes(options.SecretKey)), 
-            SecurityAlgorithms.HmacSha256);
-
-        Claim[] claims = [new("userId", user.Id.ToString())];
-        
-        var token = new JwtSecurityToken(
-            claims: claims,
-            signingCredentials: signingCredentials,
-            expires: DateTime.UtcNow.AddHours(options.ExpairsHours));
-        
-        var tokenValue = new JwtSecurityTokenHandler().WriteToken(token);
-        return tokenValue;
-    }
-}
-
-// в инфраструктуру
-public class JwtOptions
-{
-    public string SecretKey { get; set; }
-    public int ExpairsHours { get; set; }
 }
