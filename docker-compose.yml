@@ -7,22 +7,36 @@ services:
       POSTGRES_DB: DataGuessrDB
       POSTGRES_USER: dataguessr_user
       POSTGRES_PASSWORD: YourStrongPassword123
-    ports:
-      - "5432:5432"
     volumes:
       - postgres_data:/var/lib/postgresql/data
+    restart: always
 
   app:
     build: .
     environment:
-      - ASPNETCORE_ENVIRONMENT=Development
+      - ASPNETCORE_ENVIRONMENT=Production
       - ASPNETCORE_URLS=http://+:8080
-      - ASPNETCORE_HTTPS_PORT=
       - ConnectionStrings__DefaultConnection=Host=postgres;Port=5432;Database=DataGuessrDB;Username=dataguessr_user;Password=YourStrongPassword123
     ports:
-      - "5000:8080"
+      - "5000:8080" 
     depends_on:
       - postgres
+    restart: always
+
+  caddy:
+    image: caddy:latest
+    restart: always
+    ports:
+      - "80:80"
+      - "443:443"
+    volumes:
+      - ./Caddyfile:/etc/caddy/Caddyfile
+      - caddy_data:/data
+      - caddy_config:/config
+    depends_on:
+      - app
 
 volumes:
   postgres_data:
+  caddy_data:
+  caddy_config:
