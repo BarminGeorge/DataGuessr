@@ -259,3 +259,197 @@ public class JoinRoomTests : RoomManagerTests
         });
     }
 }
+
+public class LeaveRoomTests : RoomManagerTests
+{
+    private Guid roomId;
+    private Guid userId;
+    private Room room;
+    private Player player;
+    private CancellationToken cancellationToken;
+
+    [SetUp]
+    public new void Setup()
+    {
+        base.Setup();
+        roomId = Guid.NewGuid();
+        userId = Guid.NewGuid();
+        var connectionId = Guid.NewGuid().ToString();
+        cancellationToken = CancellationToken.None;
+
+        room = new Room(Guid.NewGuid(), RoomPrivacy.Public, 10);
+        player = new Player(userId, roomId, connectionId);
+    }
+    
+    [Test]
+    public async Task LeaveRoomAsync_WhenRoomNotFound_ReturnsError()
+    { 
+        var errorMessage = "Room not found";
+
+        A.CallTo(() => RoomRepository.GetByIdAsync(roomId, cancellationToken))
+            .Returns(OperationResult<Room>.Error(errorMessage));
+        
+        var result = await RoomManager.LeaveRoomAsync(roomId, userId, cancellationToken);
+        
+        Assert.Multiple(() =>
+        {
+            Assert.That(result.Success, Is.False);
+            Assert.That(result.ErrorMsg, Is.EqualTo(errorMessage));
+        });
+
+        A.CallTo(() => RoomRepository.GetByIdAsync(roomId, cancellationToken))
+            .MustHaveHappenedOnceExactly();
+        A.CallTo(() => PlayerRepository.GetPlayerByIdAsync(A<Guid>._, A<CancellationToken>._))
+            .MustNotHaveHappened();
+        A.CallTo(() => NotificationService.NotifyGameRoomAsync(A<Guid>._, A<PlayerLeavedNotification>._))
+            .MustNotHaveHappened();
+        A.CallTo(() => RoomRepository.UpdateAsync(A<Room>._, A<CancellationToken>._))
+            .MustNotHaveHappened();
+    }
+
+    [Test]
+    public async Task LeaveRoomAsync_WhenPlayerNotFound_ReturnsError()
+    {
+        var errorMessage = "Player not found";
+
+        A.CallTo(() => RoomRepository.GetByIdAsync(roomId, cancellationToken))
+            .Returns(OperationResult<Room>.Ok(room));
+        A.CallTo(() => PlayerRepository.GetPlayerByIdAsync(userId, cancellationToken))
+            .Returns(OperationResult<Player>.Error(errorMessage));
+        
+        var result = await RoomManager.LeaveRoomAsync(roomId, userId, cancellationToken);
+        
+        Assert.Multiple(() =>
+        {
+            Assert.That(result.Success, Is.False);
+            Assert.That(result.ErrorMsg, Is.EqualTo(errorMessage));
+        });
+        
+        A.CallTo(() => RoomRepository.GetByIdAsync(roomId, cancellationToken))
+            .MustHaveHappenedOnceExactly();
+        A.CallTo(() => PlayerRepository.GetPlayerByIdAsync(userId, cancellationToken))
+            .MustHaveHappenedOnceExactly();
+        A.CallTo(() => NotificationService.NotifyGameRoomAsync(A<Guid>._, A<PlayerLeavedNotification>._))
+            .MustNotHaveHappened();
+        A.CallTo(() => RoomRepository.UpdateAsync(A<Room>._, A<CancellationToken>._))
+            .MustNotHaveHappened();
+    }
+
+    [Test]
+    public async Task LeaveRoomAsync_WhenNotificationFails_ReturnsError()
+    {
+        var notificationError = "Notification failed";
+
+        A.CallTo(() => RoomRepository.GetByIdAsync(roomId, cancellationToken))
+            .Returns(OperationResult<Room>.Ok(room));
+        A.CallTo(() => PlayerRepository.GetPlayerByIdAsync(userId, cancellationToken))
+            .Returns(OperationResult<Player>.Ok(player));
+        A.CallTo(() => NotificationService.NotifyGameRoomAsync(roomId, A<PlayerLeavedNotification>._))
+            .Returns(OperationResult.Error(notificationError));
+        
+        var result = await RoomManager.LeaveRoomAsync(roomId, userId, cancellationToken);
+
+        Assert.Multiple(() =>
+        {
+            Assert.That(result.Success, Is.False);
+            Assert.That(result.ErrorMsg, Is.EqualTo(notificationError));
+        });
+        
+        A.CallTo(() => RoomRepository.GetByIdAsync(roomId, cancellationToken)).MustHaveHappenedOnceExactly();
+        A.CallTo(() => PlayerRepository.GetPlayerByIdAsync(userId, cancellationToken)).MustHaveHappenedOnceExactly();
+        A.CallTo(() => NotificationService.NotifyGameRoomAsync(roomId, A<PlayerLeavedNotification>._)).MustHaveHappened();
+        A.CallTo(() => RoomRepository.UpdateAsync(A<Room>._, A<CancellationToken>._)).MustNotHaveHappened();
+    }
+
+    [Test]
+    public async Task LeaveRoomAsync_WhenSuccessful_RemovesPlayerAndSendsNotification()
+    {
+        room.AddPlayer(player);
+
+        A.CallTo(() => RoomRepository.GetByIdAsync(roomId, cancellationToken))
+            .Returns(OperationResult<Room>.Ok(room));
+        A.CallTo(() => PlayerRepository.GetPlayerByIdAsync(userId, cancellationToken))
+            .Returns(OperationResult<Player>.Ok(player));
+        A.CallTo(() => NotificationService.NotifyGameRoomAsync(roomId, A<PlayerLeavedNotification>._))
+            .Returns(OperationResult.Ok());
+        A.CallTo(() => RoomRepository.UpdateAsync(room, cancellationToken))
+            .Returns(OperationResult.Ok());
+        
+        var result = await RoomManager.LeaveRoomAsync(roomId, userId, cancellationToken);
+
+        Assert.Multiple(() =>
+        {
+            Assert.That(result.Success, Is.True); 
+            Assert.That(room.Players.Contains(player), Is.False);
+        });
+        
+        A.CallTo(() => RoomRepository.GetByIdAsync(roomId, cancellationToken)).MustHaveHappenedOnceExactly();
+        A.CallTo(() => PlayerRepository.GetPlayerByIdAsync(userId, cancellationToken)).MustHaveHappenedOnceExactly();
+        
+        A.CallTo(() => NotificationService.NotifyGameRoomAsync(
+            roomId, 
+            A<PlayerLeavedNotification>.That.Matches(n => 
+                n.PlayerId == userId && n.OwnerId == room.Owner)))
+            .MustHaveHappenedOnceExactly();
+        
+        A.CallTo(() => RoomRepository.UpdateAsync(room, cancellationToken)).MustHaveHappenedOnceExactly();
+    }
+
+    [Test]
+    public async Task LeaveRoomAsync_WhenRepositoryUpdateFails_ReturnsError()
+    {
+        var updateError = "Update failed";
+        room.AddPlayer(player);
+
+        A.CallTo(() => RoomRepository.GetByIdAsync(roomId, cancellationToken))
+            .Returns(OperationResult<Room>.Ok(room));
+        A.CallTo(() => PlayerRepository.GetPlayerByIdAsync(userId, cancellationToken))
+            .Returns(OperationResult<Player>.Ok(player));
+        A.CallTo(() => NotificationService.NotifyGameRoomAsync(roomId, A<PlayerLeavedNotification>._))
+            .Returns(OperationResult.Ok());
+        A.CallTo(() => RoomRepository.UpdateAsync(room, cancellationToken))
+            .Returns(OperationResult.Error(updateError));
+        
+        var result = await RoomManager.LeaveRoomAsync(roomId, userId, cancellationToken);
+
+        Assert.Multiple(() =>
+        {
+            Assert.That(result.Success, Is.False);
+            Assert.That(result.ErrorMsg, Is.EqualTo(updateError));
+        });
+        
+        A.CallTo(() => RoomRepository.GetByIdAsync(roomId, cancellationToken))
+            .MustHaveHappenedOnceExactly();
+        A.CallTo(() => PlayerRepository.GetPlayerByIdAsync(userId, cancellationToken))
+            .MustHaveHappenedOnceExactly();
+        A.CallTo(() => NotificationService.NotifyGameRoomAsync(roomId, A<PlayerLeavedNotification>._))
+            .MustHaveHappenedOnceExactly();
+        A.CallTo(() => RoomRepository.UpdateAsync(room, cancellationToken))
+            .MustHaveHappenedOnceExactly();
+    }
+
+    [Test]
+    public async Task LeaveRoomAsync_WithRetryLogic_RetriesOnNotificationFailure()
+    {
+        A.CallTo(() => RoomRepository.GetByIdAsync(roomId, cancellationToken))
+            .Returns(OperationResult<Room>.Ok(room));
+        A.CallTo(() => PlayerRepository.GetPlayerByIdAsync(userId, cancellationToken))
+            .Returns(OperationResult<Player>.Ok(player));
+        
+        A.CallTo(() => NotificationService.NotifyGameRoomAsync(roomId, A<PlayerLeavedNotification>._))
+            .ReturnsNextFromSequence(
+                OperationResult.Error("First fail"),
+                OperationResult.Error("Second fail"),
+                OperationResult.Ok()
+            );
+        A.CallTo(() => RoomRepository.UpdateAsync(room, cancellationToken))
+            .Returns(OperationResult.Ok());
+        
+        var result = await RoomManager.LeaveRoomAsync(roomId, userId, cancellationToken);
+
+        Assert.That(result.Success, Is.True);
+        
+        A.CallTo(() => NotificationService.NotifyGameRoomAsync(roomId, A<PlayerLeavedNotification>._))
+            .MustHaveHappened(3, Times.Exactly);
+    }
+}

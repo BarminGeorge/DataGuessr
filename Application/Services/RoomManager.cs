@@ -35,6 +35,8 @@ public class RoomManager(
             return OperationResult<Room>.Error(getRoomResult.ErrorMsg);
 
         var room = getRoomResult.ResultObj;
+        if (room.Privacy == RoomPrivacy.Private && password != room.Password)
+            return OperationResult<Room>.Error("Invalid password");
         
         var getPlayerResult = await playerRepository.GetPlayerByIdAsync(userId, ct);
         if (!getPlayerResult.Success)
@@ -76,18 +78,14 @@ public class RoomManager(
         var player = getPlayerResult.ResultObj;
         
         room.RemovePlayer(player);
-        if (room.Players.Count > 0)
-        {
-            var notification = new PlayerLeavedNotification(userId, room.Owner);
-            var operation = () => notificationService.NotifyGameRoomAsync(roomId, notification);
-            var notifyResult = await operation.WithRetry(delay: TimeSpan.FromSeconds(0.15));
-            if (!notifyResult.Success)
-                return OperationResult.Error(notifyResult.ErrorMsg);
+        
+        var notification = new PlayerLeavedNotification(userId, room.Owner);
+        var operation = () => notificationService.NotifyGameRoomAsync(roomId, notification);
+        var notifyResult = await operation.WithRetry(delay: TimeSpan.FromSeconds(0.15));
+        if (!notifyResult.Success)
+            return OperationResult.Error(notifyResult.ErrorMsg);
             
-            return await roomRepository.UpdateAsync(room, ct);
-        }
-
-        return await roomRepository.RemoveAsync(roomId, ct);
+        return await roomRepository.UpdateAsync(room, ct);
     }
     
     public async Task<OperationResult<Room>> FindOrCreateQuickRoomAsync(Guid userId, CancellationToken ct)
@@ -97,18 +95,17 @@ public class RoomManager(
         if (!availableRoomResult.Success)
         {
             var creatingResult = await CreateRoomAsync(userId, RoomPrivacy.Public, ct);
-            if (!creatingResult.Success)
-                return OperationResult<Room>.Error(creatingResult.ErrorMsg);
-            
-            rooms = [creatingResult.ResultObj];
+            return !creatingResult.Success 
+                ? OperationResult<Room>.Error(creatingResult.ErrorMsg) 
+                : creatingResult;
         }
         
         foreach (var room in rooms)
         {
             var joinRoomResult = await JoinRoomAsync(room.Id, userId, ct);
             if (!joinRoomResult.Success)
-                break;
-            logger.LogInformation($"No suitable rooms found, creating new quick match for user {userId}");
+                continue;
+            
             return OperationResult<Room>.Ok(room);
         }
         
@@ -118,5 +115,13 @@ public class RoomManager(
     public async Task<OperationResult<IEnumerable<Room>>> GetAvailablePublicRoomsAsync(CancellationToken ct)
     {
         return await roomRepository.GetWaitingPublicRoomsAsync(ct);
+    }
+
+    public async Task<OperationResult<RoomPrivacy>> GetRoomPrivacyAsync(Guid roomId, CancellationToken ct)
+    {
+        var getRoomResult = await roomRepository.GetByIdAsync(roomId, ct);
+        return getRoomResult.Success 
+            ? OperationResult<RoomPrivacy>.Ok(getRoomResult.ResultObj.Privacy) 
+            : OperationResult<RoomPrivacy>.Error(getRoomResult.ErrorMsg); 
     }
 }

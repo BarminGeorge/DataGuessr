@@ -1,6 +1,7 @@
 using Application.DI;
 using Application.EndPoints;
 using Application.Interfaces;
+using Application.Endpoints.Hubs;
 using Application.Services;
 using Hangfire;
 using Hangfire.PostgreSql;
@@ -21,6 +22,34 @@ services.AddHangfire(config => config
 
 services.AddHangfireServer();
 
+services.AddCors(options =>
+{
+    options.AddPolicy("AllowFiitDomain",
+        policy =>
+        {
+            policy.WithOrigins("https://dataguessr.fiit.com")
+                .AllowAnyHeader()
+                .AllowAnyMethod()
+                .AllowCredentials();
+        });
+});
+
+services.AddSignalR(options =>
+{
+    options.EnableDetailedErrors = builder.Environment.IsDevelopment();
+});
+
+services.AddAuthentication(_ =>
+    {
+    
+    })
+    .AddCookie(options =>
+    {
+        options.Cookie.HttpOnly = true;
+        options.Cookie.SecurePolicy = CookieSecurePolicy.Always;
+        options.Cookie.SameSite = SameSiteMode.Strict;
+    });
+
 services.AddEndpointsApiExplorer();
 services.AddSwaggerGen();
 
@@ -31,6 +60,12 @@ if (app.Environment.IsDevelopment())
     app.UseSwagger();
     app.UseSwaggerUI();
 }
+else
+{
+    app.UseHsts();
+}
+
+app.UseCors("AllowFiitDomain");
 
 app.UseHttpsRedirection();
 
@@ -49,6 +84,9 @@ app.UseHangfireDashboard("/hangfire");
 app.MapGet("/api", () => "Hello World!");
 app.MapUserEndpoints();
 app.MapRoomEndpoints();
+app.MapHub<AppHub>("/appHub");
+
+app.MapControllers();
 
 RecurringJob.AddOrUpdate<IGuestCleanupService>(
     "cleanup-orphaned-guests",

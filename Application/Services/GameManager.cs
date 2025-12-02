@@ -25,7 +25,7 @@ public class GameManager(
         return room.Owner == userId;
     }
     
-    private async Task<OperationResult> CanStartGameAsync(Guid roomId, Guid userId,  CancellationToken ct)
+    private async Task<OperationResult> CanStartGameAsync(Guid roomId, Guid userId, CancellationToken ct)
     {
         var getRoomResult = await roomRepository.GetByIdAsync(roomId, ct);
         if (!getRoomResult.Success)
@@ -52,8 +52,14 @@ public class GameManager(
             return OperationResult.Error(getGameResult.ErrorMsg);
 
         var game = getGameResult.ResultObj;
+
+        Task.Run(() => gameCoreService.RunGameCycle(ct))
+            .ContinueWith(t =>
+            {
+                if (t.IsFaulted && t.Exception != null)
+                    logger.LogError(t.Exception, $"Game cycle failed for game {game.Id}");
+            }, TaskContinuationOptions.OnlyOnFaulted);
         
-        await gameCoreService.RunGameCycle(ct);
         logger.LogInformation($"Match {game.Id} started in room {roomId} by user {startedByUserId}");
         
         return OperationResult.Ok();
@@ -73,7 +79,7 @@ public class GameManager(
 
         var room = getRoomResult.ResultObj;
         if (!IsOwnerRoom(room, createdByUserId))
-            OperationResult.Error("Can't create new game, you are not the owner");
+            return OperationResult<Game>.Error("Can't create new game, you are not the owner");
         
         var game = new Game(roomId, mode, questionDuration, countQuestions);
         if (questions != null)
@@ -109,7 +115,7 @@ public class GameManager(
             return OperationResult<Room>.Error(getRoomResult.ErrorMsg);
 
         if (!IsOwnerRoom(getRoomResult.ResultObj, userId))
-            return OperationResult<Room>.Error("Чтобы закончить игру нужно быть её создателем");
+            return OperationResult<Room>.Error("You are not the owner");
 
         var notification = new ReturnToRoomNotification(getRoomResult.ResultObj);
         var operation = () => notificationService.NotifyGameRoomAsync(roomId, notification);
