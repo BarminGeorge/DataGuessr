@@ -15,8 +15,7 @@ public static class RoomEndpoints
         return app;
     }
 
-    private static async Task<IResult> GetAvailableRooms(CreateRoomRequest request, IRoomManager roomManager,
-        HttpContext context, CancellationToken ct)
+    private static async Task<IResult> GetAvailableRooms(IRoomManager roomManager, HttpContext context, CancellationToken ct)
     {
         var operationResult = await roomManager.GetAvailablePublicRoomsAsync(ct);
         return operationResult.Success ? Results.Ok(operationResult.ResultObj) : Results.BadRequest(operationResult);
