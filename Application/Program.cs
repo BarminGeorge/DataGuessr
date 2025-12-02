@@ -17,10 +17,10 @@ services.Configure<JwtOptions>(configuration.GetSection(nameof(JwtOptions)));
 services.AddApplication();
 services.AddInfrastructure(configuration);
 
-services.AddHangfire(config => config
-    .UsePostgreSqlStorage(configuration.GetConnectionString("DefaultConnection")));
+// services.AddHangfire(config => config
+ //   .UsePostgreSqlStorage(configuration.GetConnectionString("DefaultConnection")));
 
-services.AddHangfireServer();
+// services.AddHangfireServer();
 
 services.AddCors(options =>
 {
@@ -52,6 +52,7 @@ services.AddAuthentication(_ =>
 
 services.AddEndpointsApiExplorer();
 services.AddSwaggerGen();
+services.AddControllers();
 
 var app = builder.Build();
 
@@ -79,7 +80,7 @@ app.UseCookiePolicy(new CookiePolicyOptions
 app.UseAuthentication();
 app.UseAuthorization();
 
-app.UseHangfireDashboard("/hangfire");
+// app.UseHangfireDashboard("/hangfire");
 
 app.MapGet("/api", () => "Hello World!");
 app.MapUserEndpoints();
@@ -88,14 +89,14 @@ app.MapHub<AppHub>("/appHub");
 
 app.MapControllers();
 
-RecurringJob.AddOrUpdate<IGuestCleanupService>(
-    "cleanup-orphaned-guests",
-    service => service.CleanupOrphanedGuestsAsync(CancellationToken.None),
-    Cron.Hourly);
-
-RecurringJob.AddOrUpdate<IGuestCleanupService>(
-    "cleanup-expired-rooms",
-    service => service.CleanupExpiredRoomsAsync(CancellationToken.None),
-    Cron.Daily);
+// RecurringJob.AddOrUpdate<IGuestCleanupService>(
+//     "cleanup-orphaned-guests",
+//     service => service.CleanupOrphanedGuestsAsync(CancellationToken.None),
+//     Cron.Hourly);
+//
+// RecurringJob.AddOrUpdate<IGuestCleanupService>(
+//     "cleanup-expired-rooms",
+//     service => service.CleanupExpiredRoomsAsync(CancellationToken.None),
+//     Cron.Daily);
 
 app.Run();
