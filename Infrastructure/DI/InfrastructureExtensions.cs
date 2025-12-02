@@ -17,7 +17,7 @@ public static class InfrastructureExtensions
         services.AddScoped<IPlayerRepository, PlayerRepository>();
         services.AddScoped<IUserRepository, UserRepository>();
         services.AddScoped<IRoomRepository, RoomRepository>();
-
+        services.AddScoped<IQuestionRepository, QuestionRepository>();
         return services;
     }
 }

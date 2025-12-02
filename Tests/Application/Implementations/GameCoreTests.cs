@@ -7,10 +7,9 @@ using Domain.Enums;
 using Domain.ValueTypes;
 using FakeItEasy;
 using Infrastructure.Interfaces;
-using NUnit.Framework;
 using static NUnit.Framework.Assert;
 
-namespace Tests.Application.Services;
+namespace Tests.Application.Implementations;
 
 [TestFixture]
 public class GameCoreServiceTests
@@ -43,8 +42,6 @@ public class GameCoreServiceTests
         answerRepository = A.Fake<IPlayerAnswerRepository>();
         
         service = new GameCoreService(
-            game, 
-            roomId, 
             notificationService, 
             gameRepository, 
             questionService, 
@@ -80,7 +77,7 @@ public class GameCoreServiceTests
             .Returns((_, _) => new Score(10)); 
 
 
-        var result = await service.RunGameCycle(ct);
+        var result = await service.RunGameCycle(game, roomId, ct);
         
         Multiple(() =>
         {
@@ -108,7 +105,7 @@ public class GameCoreServiceTests
         A.CallTo(() => questionService.GetAllQuestionsAsync(game, ct))
             .Returns(OperationResult<IEnumerable<Question>>.Error(errorMsg));
         
-        var result = await service.RunGameCycle(ct);
+        var result = await service.RunGameCycle(game, roomId, ct);
         
         Multiple(() =>
         {
@@ -126,7 +123,7 @@ public class GameCoreServiceTests
         A.CallTo(() => questionService.GetAllQuestionsAsync(game, ct))
             .Returns(OperationResult<IEnumerable<Question>>.Ok(null));
         
-        var result = await service.RunGameCycle(ct);
+        var result = await service.RunGameCycle(game, roomId, ct);
         Multiple(() =>
         {
             That(result.Success, Is.False);
@@ -145,7 +142,7 @@ public class GameCoreServiceTests
         A.CallTo(() => answerRepository.LoadAnswersAsync(game.Id, A<Guid>._, ct))
             .Returns(OperationResult<Dictionary<Guid, Answer>>.Error("Some db error"));
         
-        var result = await service.RunGameCycle(ct);
+        var result = await service.RunGameCycle(game, roomId, ct);
         Multiple(() =>
         {
             That(result.Success, Is.False);
@@ -172,7 +169,7 @@ public class GameCoreServiceTests
         A.CallTo(() => gameRepository.SaveStatisticAsync(game.Id, A<Statistic>._, ct))
             .Returns(OperationResult.Error(saveError));
         
-        var result = await service.RunGameCycle(ct);
+        var result = await service.RunGameCycle(game, roomId, ct);
         That(result.Success, Is.False);
     }
 }

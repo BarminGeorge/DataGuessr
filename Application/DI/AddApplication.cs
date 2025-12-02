@@ -1,5 +1,6 @@
 using Application.Interfaces;
 using Application.Interfaces.Infrastructure;
+using Application.Notifications;
 using Application.Requests_Responses;
 using Application.Requests_Responses.Validators;
 using Application.Requests_Responses.Validators.ParameterValidators;
@@ -53,10 +54,9 @@ public static class AddApplicationExtensions
         services.AddScoped<IGameCoreService, GameCoreService>();
         services.AddScoped<IQuestionService, QuestionService>();
         services.AddScoped<IJwtProvider, JwtProvider>();
-        services.AddScoped<IGuestCleanupService, GuestCleanupService>();// ������� ������������� ������ ������� � ������� ������ ������� �� � ����
-
-
-
+        services.AddScoped<IGuestCleanupService, GuestCleanupService>();
+        services.AddScoped<INotificationService, SignalRNotificationService>();
+        
         return services;
     }
 }

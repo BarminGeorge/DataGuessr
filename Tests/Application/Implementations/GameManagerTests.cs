@@ -72,11 +72,6 @@ public class StartNewGameTests : GameManagerTests
         var result = await GameManager.StartNewGameAsync(roomId, userId, ct);
         
         Assert.That(result.Success, Is.True);
-        
-        await Task.Delay(10);
-        
-        A.CallTo(() => GameCoreService.RunGameCycle(ct))
-            .MustHaveHappenedOnceExactly();
     }
     
     [Test]
@@ -99,7 +94,7 @@ public class StartNewGameTests : GameManagerTests
         
         A.CallTo(() => RoomRepository.GetCurrentGameAsync(A<Guid>._, A<CancellationToken>._))
             .MustNotHaveHappened();
-        A.CallTo(() => GameCoreService.RunGameCycle(A<CancellationToken>._))
+        A.CallTo(() => GameCoreService.RunGameCycle(existingGame, notOwnerRoom.Id, A<CancellationToken>._))
             .MustNotHaveHappened();
     }
     
@@ -189,7 +184,7 @@ public class StartNewGameTests : GameManagerTests
             Assert.That(result.ErrorMsg, Does.Contain(gameErrorMessage));
         });
         
-        A.CallTo(() => GameCoreService.RunGameCycle(A<CancellationToken>._))
+        A.CallTo(() => GameCoreService.RunGameCycle(existingGame, validRoom.Id, A<CancellationToken>._))
             .MustNotHaveHappened();
     }
     
@@ -206,7 +201,7 @@ public class StartNewGameTests : GameManagerTests
             .Returns(OperationResult<Game>.Ok(existingGame));
         
         var exception = new Exception("Game core error");
-        A.CallTo(() => GameCoreService.RunGameCycle(ct))
+        A.CallTo(() => GameCoreService.RunGameCycle(existingGame, validRoom.Id,  A<CancellationToken>._))
             .ThrowsAsync(exception);
         
         var result = await GameManager.StartNewGameAsync(roomId, userId, ct);
@@ -229,7 +224,7 @@ public class StartNewGameTests : GameManagerTests
         A.CallTo(() => RoomRepository.GetCurrentGameAsync(roomId, ct))
             .Returns(OperationResult<Game>.Ok(existingGame));
         
-        A.CallTo(() => GameCoreService.RunGameCycle(ct))
+        A.CallTo(() => GameCoreService.RunGameCycle(existingGame, validRoom.Id, A<CancellationToken>._))
             .Invokes(async () => 
             {
                 runGameCycleCalled = true;

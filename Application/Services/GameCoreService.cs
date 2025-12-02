@@ -8,8 +8,6 @@ using Infrastructure.Interfaces;
 namespace Application.Services;
 
 public class GameCoreService(
-    Game game,
-    Guid roomId,
     INotificationService notificationService,
     IGameRepository gameRepository,
     IQuestionService questionService,
@@ -18,7 +16,7 @@ public class GameCoreService(
     : IGameCoreService
 {
     
-    public async Task<OperationResult> RunGameCycle(CancellationToken canсelToken)
+    public async Task<OperationResult> RunGameCycle(Game game, Guid roomId, CancellationToken canсelToken)
     {
         game.StartGame();
         var questionsRes = await questionService

@@ -53,7 +53,7 @@ public class GameManager(
 
         var game = getGameResult.ResultObj;
 
-        Task.Run(() => gameCoreService.RunGameCycle(ct))
+        Task.Run(() => gameCoreService.RunGameCycle(game, roomId, ct))
             .ContinueWith(t =>
             {
                 if (t.IsFaulted && t.Exception != null)
