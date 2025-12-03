@@ -11,7 +11,7 @@ public partial class AppHub
     {
         var result = await roomManager.CreateRoomAsync(request.UserId, request.Privacy, ct, request.Password, request.MaxPlayers);
         
-        if (result.Success)
+        if (result is { Success: true, ResultObj: not null })
         {
             await connectionService.AddConnection(Context.ConnectionId, request.UserId, result.ResultObj.Id, ct);
             await Groups.AddToGroupAsync(Context.ConnectionId, $"room-{result.ResultObj.Id}", ct);
@@ -25,7 +25,7 @@ public partial class AppHub
     {
         var result = await roomManager.JoinRoomAsync(request.UserId, request.RoomId, ct, request.Password);
 
-        if (result.Success)
+        if (result is { Success: true, ResultObj: not null})
         {
             await connectionService.AddConnection(Context.ConnectionId, request.UserId, request.RoomId, ct);
             await Groups.AddToGroupAsync(Context.ConnectionId, $"room-{request.RoomId}", ct);
@@ -53,7 +53,7 @@ public partial class AppHub
     {
         var result = await roomManager.FindOrCreateQuickRoomAsync(request.UserId, ct);
 
-        if (result.Success)
+        if (result is { Success: true, ResultObj: not null })
         {
             await connectionService.AddConnection(Context.ConnectionId, request.UserId, result.ResultObj.Id, ct);
             await Groups.AddToGroupAsync(Context.ConnectionId, $"room-{result.ResultObj.Id}", ct);

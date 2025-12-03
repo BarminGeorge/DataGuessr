@@ -26,7 +26,7 @@ public static class RoomEndpoints
         HttpContext context, CancellationToken ct)
     {
         var operationResult = await roomManager.GetAvailablePublicRoomsAsync(ct);
-        return operationResult.Success 
+        return operationResult is { Success: true, ResultObj: not null }
             ? OperationResult<IEnumerable<RoomDto>>.Ok(operationResult.ResultObj
                 .Select(x => x.ToDto())) 
             : OperationResult<IEnumerable<RoomDto>>.Error(operationResult.ErrorMsg);

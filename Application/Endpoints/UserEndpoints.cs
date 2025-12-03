@@ -38,7 +38,7 @@ public static class UserEndpoints
     private static async Task<OperationResult> Login(LoginUserRequest request, UserService userService, HttpContext context, CancellationToken ct)
     {
         var token = await userService.Login(request.Login, request.Password, ct);
-        if (!token.Success)
+        if (!token.Success || token.ResultObj is null)
             return OperationResult.Error(token.ErrorMsg);
         context.Response.Cookies.Append("", token.ResultObj);
         return OperationResult.Ok();

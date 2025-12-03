@@ -17,7 +17,7 @@ public partial class AppHub
             ct,
             request.Questions);
 
-        return result.Success
+        return result is { Success: true, ResultObj: not null }
             ? DataResponse<GameDto>.CreateSuccess(result.ResultObj.ToDto())
             : DataResponse<GameDto>.CreateFailure(result.ErrorMsg);
     }
@@ -41,7 +41,7 @@ public partial class AppHub
     public async Task<DataResponse<RoomDto>> FinishGame(FinishGameRequest request, CancellationToken ct = default)
     {
         var result = await gameManager.FinishGameAsync(request.UserId, request.RoomId, ct);
-        return result.Success
+        return result is { Success: true, ResultObj: not null }
             ? DataResponse<RoomDto>.CreateSuccess(result.ResultObj.ToDto())
             : DataResponse<RoomDto>.CreateFailure(result.ErrorMsg);
     }

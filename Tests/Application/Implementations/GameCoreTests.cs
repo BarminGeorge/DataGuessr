@@ -74,7 +74,14 @@ public class GameCoreServiceTests
             .Returns(OperationResult.Ok());
         
         A.CallTo(() => evaluationService.CalculateScore(A<GameMode>._))
-            .Returns((_, _) => new Score(10)); 
+            .Returns((_, _) => new Score(10));
+
+        A.CallTo(() => notificationService.NotifyGameRoomAsync(roomId, A<NewQuestionNotification>._))
+            .Returns(OperationResult.Ok());
+        A.CallTo(() => notificationService.NotifyGameRoomAsync(roomId, A<QuestionClosedNotification>._))
+            .Returns(OperationResult.Ok());
+        A.CallTo(() => notificationService.NotifyGameRoomAsync(roomId, A<StatisticNotification>._))
+            .Returns(OperationResult.Ok());
 
 
         var result = await service.RunGameCycle(game, roomId, ct);
@@ -110,7 +117,7 @@ public class GameCoreServiceTests
         Multiple(() =>
         {
             That(result.Success, Is.False);
-            That(result.ErrorMsg, Is.EqualTo(errorMsg));
+            That(result.ErrorMsg, Does.Contain(errorMsg));
         });
         
         A.CallTo(() => notificationService.NotifyGameRoomAsync(roomId, A<GameNotification>._))
@@ -127,7 +134,6 @@ public class GameCoreServiceTests
         Multiple(() =>
         {
             That(result.Success, Is.False);
-            That(result.ErrorMsg, Does.Contain("не были добавлены вопросы"));
         });
         
     }
@@ -146,7 +152,7 @@ public class GameCoreServiceTests
         Multiple(() =>
         {
             That(result.Success, Is.False);
-            That(result.ErrorMsg, Is.EqualTo("Some db error"));
+            That(result.ErrorMsg, Does.Contain("Some db error"));
 
             That(game.Status, Is.Not.EqualTo(GameStatus.Finished));
         });

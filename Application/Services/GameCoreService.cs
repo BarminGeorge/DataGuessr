@@ -16,43 +16,68 @@ public class GameCoreService(
     : IGameCoreService
 {
     
-    public async Task<OperationResult> RunGameCycle(Game game, Guid roomId, CancellationToken canсelToken)
+    public async Task<OperationResult> RunGameCycle(Game game, Guid roomId, CancellationToken ct)
     {
         game.StartGame();
-        var questionsRes = await questionService
-            .GetAllQuestionsAsync(game, canсelToken);
-        if (!questionsRes.Success)
-            return OperationResult.Error(questionsRes.ErrorMsg);
         
-        if (questionsRes.ResultObj is null)
-            return OperationResult.Error($"В репозиторий игры {game.Id} не были добавлены вопросы");
+        var getQuestionsResult = await questionService.GetAllQuestionsAsync(game, ct);
+        if (!getQuestionsResult.Success || getQuestionsResult.ResultObj == null)
+            return OperationResult.Error($"{getQuestionsResult.ErrorMsg}\n\n{getQuestionsResult.ResultObj}");
         
-        var questions = questionsRes.ResultObj.ToList();
         game.CurrentStatistic = new Statistic();
-        foreach (var question in questions)
+        
+        foreach (var question in getQuestionsResult.ResultObj)
         {
-            await notificationService.NotifyGameRoomAsync(roomId, 
-                new NewQuestionNotification(question.Id,
-                                            question.Formulation,
-                                            question.ImageUrl,
-                                            DateTime.Now + game.QuestionDuration,
-                                            game.QuestionDuration.Seconds));
-            await Task.Delay(game.QuestionDuration, canсelToken);
-            await notificationService.NotifyGameRoomAsync(roomId,
-                new QuestionClosedNotification(question.Id, question.RightAnswer.Date));
-            var rawAnswer = await answerRepository.LoadAnswersAsync(game.Id, question.Id, canсelToken);
-            if (!rawAnswer.Success) return OperationResult.Error(rawAnswer.ErrorMsg);
-            if (rawAnswer.ResultObj is not null)
-            {
-                game.CurrentStatistic.Update(rawAnswer.ResultObj, question.RightAnswer.Date, 
-                    evaluationService.CalculateScore(game.Mode));
-                var saveStatisticResult = await gameRepository.SaveStatisticAsync(game.Id, game.CurrentStatistic, canсelToken);
-                if (!saveStatisticResult.Success) return OperationResult.Error(saveStatisticResult.ErrorMsg);
-            }
-            await notificationService.NotifyGameRoomAsync(roomId,     
-                new StatisticNotification(game.CurrentStatistic));
+            await NotifyRoomAboutNewQuestion(question, game, roomId);
+            await Task.Delay(game.QuestionDuration, ct);
+            await NotifyRoomAboutCloseQuestion(question, roomId);
+            
+            var rawAnswer = await answerRepository.LoadAnswersAsync(game.Id, question.Id, ct);
+            if (!rawAnswer.Success || rawAnswer.ResultObj == null) 
+                return OperationResult.Error($"{rawAnswer.ErrorMsg}\n\n{rawAnswer.ResultObj}");
+
+            UpdateStatistic(game, question, rawAnswer.ResultObj);
+            
+            var saveStatisticResult = await gameRepository.SaveStatisticAsync(game.Id, game.CurrentStatistic, ct);
+            if (!saveStatisticResult.Success) 
+                return OperationResult.Error(saveStatisticResult.ErrorMsg);
+
+            await NotifyRoomAboutResults(game.CurrentStatistic, roomId);
         }
+        
         game.FinishGame();  
         return OperationResult.Ok();
+    }
+
+    private async Task NotifyRoomAboutNewQuestion(Question question, Game game, Guid roomId)
+    {
+        var newQuestionNotification = new NewQuestionNotification(question.Id,
+                                                                  question.Formulation,
+                                                                  question.ImageUrl,
+                                                            DateTime.Now + game.QuestionDuration,
+                                                                  game.QuestionDuration.Seconds);
+        
+        var operation = () => notificationService.NotifyGameRoomAsync(roomId, newQuestionNotification);
+        await operation.WithRetry(delay: TimeSpan.FromSeconds(0.2));
+    }
+
+    private async Task NotifyRoomAboutCloseQuestion(Question question, Guid roomId)
+    {
+        var closedQuestionNotification = new QuestionClosedNotification(question.Id, question.RightAnswer.Date);
+        var operation = () => notificationService.NotifyGameRoomAsync(roomId,closedQuestionNotification);
+        await operation.WithRetry(delay: TimeSpan.FromSeconds(0.2));
+    }
+
+    private void UpdateStatistic(Game game, Question question, Dictionary<Guid, Answer> answers)
+    {
+        var updateFunction = evaluationService.CalculateScore(game.Mode);
+        game.CurrentStatistic?.Update(answers, question.RightAnswer.Date, updateFunction);
+    }
+
+    private async Task NotifyRoomAboutResults(Statistic statistic, Guid roomId)
+    {
+        var statisticNotification = new StatisticNotification(statistic);
+        var operation = () => notificationService.NotifyGameRoomAsync(roomId, statisticNotification);
+        await operation.WithRetry(delay: TimeSpan.FromSeconds(0.2));
     }
 }
