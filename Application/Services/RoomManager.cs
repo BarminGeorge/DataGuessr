@@ -124,4 +124,16 @@ public class RoomManager(
             ? OperationResult<RoomPrivacy>.Ok(getRoomResult.ResultObj.Privacy) 
             : OperationResult<RoomPrivacy>.Error(getRoomResult.ErrorMsg); 
     }
+
+    public async Task<OperationResult> KickPlayerFromRoom(Guid userId, Guid roomId, Guid removedPlayer, CancellationToken ct)
+    {
+        var roomResult = await roomRepository.GetByIdAsync(roomId, ct);
+        if (!roomResult.Success || roomResult.ResultObj is null)
+            return OperationResult.Error(roomResult.ErrorMsg);
+        
+        if (userId != roomResult.ResultObj.Owner)
+            return OperationResult.Error("You are not a owner");
+        
+        return await LeaveRoomAsync(roomId, removedPlayer, ct);
+    }
 }

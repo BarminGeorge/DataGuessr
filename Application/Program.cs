@@ -1,3 +1,4 @@
+using System.Reflection;
 using Application.DI;
 using Application.EndPoints;
 using Application.Interfaces;
@@ -26,14 +27,7 @@ services.AddAntiforgery();
 
 services.AddCors(options =>
 {
-    options.AddPolicy("AllowFiitDomain",
-        policy =>
-        {
-            policy.WithOrigins("https://dataguessr.fiit.com")
-                .AllowAnyHeader()
-                .AllowAnyMethod()
-                .AllowCredentials();
-        });
+    options.AddPolicy("AllowAll", policy => policy.AllowAnyOrigin().AllowAnyMethod().AllowAnyHeader());
 });
 
 services.AddSignalR(options =>
@@ -68,7 +62,7 @@ else
     app.UseHsts();
 }
 
-app.UseCors("AllowFiitDomain");
+app.UseCors("AllowAll"); // TODO
 
 app.UseHttpsRedirection();
 

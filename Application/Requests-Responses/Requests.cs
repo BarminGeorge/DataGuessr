@@ -1,4 +1,3 @@
-using System.ComponentModel.DataAnnotations;
 using Domain.Entities;
 using Domain.Enums;
 using Domain.ValueTypes;
@@ -24,4 +23,6 @@ public record CreateGameRequest(
     IEnumerable<Question>? Questions = null);
 
 public record StartGameRequest(Guid UserId, Guid RoomId);
- public record SubmitAnswerRequest(Guid GameId, Guid QuestionId, Guid PlayerId, Answer Answer);
+public record FinishGameRequest(Guid UserId, Guid RoomId);
+public record SubmitAnswerRequest(Guid GameId, Guid QuestionId, Guid PlayerId, Answer Answer);
+public record KickPlayerRequest(Guid UserId, Guid RoomId, Guid RemovedPlayerId);

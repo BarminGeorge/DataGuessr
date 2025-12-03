@@ -20,4 +20,9 @@ public class ConnectionService(IPlayerRepository playerRepository) : IConnection
     {
         return await playerRepository.GetPlayerByConnectionIdAsync(connectionId);
     }
+
+    public async Task<OperationResult<string>> GetConnectionIdByPlayer(Guid playerId)
+    {
+        return await playerRepository.GetConnectionByPlayerAsync(playerId);
+    }
 }

@@ -37,6 +37,8 @@ public static class AddApplicationExtensions
         services.AddScoped<IValidator<StartGameRequest>, StartGameRequestValidator>();
         services.AddScoped<IValidator<SubmitAnswerRequest>, SubmitAnswerRequestValidator>();
         services.AddScoped<IValidator<UpdateUserRequest>, UpdateUserRequestValidator>();
+        services.AddScoped<IValidator<KickPlayerRequest>, KickPlayerRequestValidator>();
+        services.AddScoped<IValidator<FinishGameRequest>, FinishGameRequsetValidator>();
 
         services.AddFluentValidationAutoValidation();
         

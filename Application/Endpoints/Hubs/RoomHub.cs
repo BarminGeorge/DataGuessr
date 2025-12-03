@@ -1,6 +1,7 @@
 using Application.DtoUI;
 using Application.Mappers;
 using Application.Requests_Responses;
+using Domain.Common;
 
 namespace Application.Endpoints.Hubs;
 
@@ -60,5 +61,28 @@ public partial class AppHub
         }
 
         return DataResponse<RoomDto>.CreateFailure(result.ErrorMsg);
+    }
+
+    public async Task<EmptyResponse> KickPlayerFromRoom(KickPlayerRequest request, CancellationToken ct = default)
+    {
+        var result = await roomManager.KickPlayerFromRoom(request.UserId,  request.RoomId, request.RemovedPlayerId, ct);
+        
+        if (result.Success)
+        {
+            var getConnectionResult = await connectionService.GetConnectionIdByPlayer(request.RemovedPlayerId);
+            if (getConnectionResult is { Success: true, ResultObj: not null })
+            {
+                var operation = () => connectionService.RemoveConnection(getConnectionResult.ResultObj);
+                var removeConnectionResult = await operation.WithRetry(delay: TimeSpan.FromSeconds(0.2));
+                if (!removeConnectionResult.Success)
+                    return EmptyResponse.CreateFailure(removeConnectionResult.ErrorMsg);
+                
+                await Groups.RemoveFromGroupAsync(Context.ConnectionId, $"room-{request.RoomId}", ct);
+                
+                return EmptyResponse.CreateSuccess();
+            }
+        }
+        
+        return EmptyResponse.CreateFailure(result.ErrorMsg);
     }
 }

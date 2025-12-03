@@ -10,10 +10,10 @@ public static class RoomEndpoints
     {
         var group = app.MapGroup("rooms");
         
-        group.MapGet("", GetAvailableRooms)
-            .AddFluentValidationAutoValidation();
-        group.MapGet("{roomId:guid}", GetRoomPrivacy)
-            .AddFluentValidationAutoValidation();
+        group.AddFluentValidationAutoValidation();
+        
+        group.MapGet("", GetAvailableRooms);
+        group.MapGet("{roomId:guid}", GetRoomPrivacy);
         
         return app;
     }

@@ -12,4 +12,5 @@ public interface IPlayerRepository
     Task<OperationResult<(Guid playerId, Guid roomId)>> GetPlayerByConnectionIdAsync(string connectionId);
     Task<OperationResult> CreatePlayerAsync(string connectionId, Guid userId, Guid roomId, CancellationToken ct);
     Task<OperationResult> RemovePlayerByConnectionAsync(string connectionId);
+    Task<OperationResult<string>> GetConnectionByPlayerAsync(Guid playerId, CancellationToken ct = default); 
 }
