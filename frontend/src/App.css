@@ -8,9 +8,10 @@
 .acсent-text {
   font-size: 1rem;
   font-weight: 500;
-  color: #676767;
+  color: #423FE5;
   font-family: "Dm Sans", sans-serif;
 }
+
 
 .link-text {
   font-size: 1rem;
@@ -60,6 +61,7 @@
   border: none;
   border-radius: 0.5rem;
   padding: 1rem 2rem;
+  width: fit-content;
   font-size: 1rem;
   font-weight: 600;
   cursor: pointer;
@@ -79,6 +81,17 @@
     flex-direction: column;
     justify-content: center;
     align-items: center;
+}
+
+.centered-vertical-aligment {
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+
+    margin-top: auto;
+    margin-bottom: auto;
+    gap: 1rem;
+    
 }
 
 .left-aligment {
@@ -124,6 +137,56 @@
 
 .secondary-container {
     width: 100%;
+    display: flex;
+    gap: 0.5rem;
+    flex-direction: column;
+    
+}
+
+.modal-global-container {
+    padding: 2rem 1rem;
+    margin: auto; 
+    background-color: #CBCAF0;
+    gap: 1rem;
+
+   
+    display: flex; 
+    flex-direction: row;
+    justify-content: center;
+    align-items: center;
+    box-sizing: border-box;
+    z-index: 2;
+    border-color: white;
+    border-style: solid;
+    border-width: 0.1rem;
+
+    border-radius: 1rem;
+}
+
+
+.modal-container {
+    display: flex;
+    width: 100%;
+    
+    height: 25vh;
+    width: 25vw;
+    flex-direction: column;
+    padding: 2rem 2rem; 
+    border-radius: 1rem;
+    background-color: #EEEEEE;
+    gap: 1rem;
+}
+
+
+.blur {
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+
+    backdrop-filter: blur(5px);
+    z-index: 1;
 }
 
 .global-container {
@@ -131,6 +194,7 @@
     background-color: #CBCAF0;
     min-width: 100vw;
     min-height: 100vh;
+    
    
     display: flex; 
     flex-direction: column;

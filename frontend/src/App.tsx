@@ -5,6 +5,7 @@ import RegistrationPage from "./pages/RegistrationPage";
 
 import { usePage } from "./PageContext";
 import ProfilePage from "./pages/ProfilePage";
+import LobbyPage from "./pages/game/LobbyPage";
 
 // export default function App() {
 //   return (
@@ -27,6 +28,7 @@ export default function App() {
       {page === "login" && <LoginPage />}
       {page === "registration" && <RegistrationPage />}
       {page === "profile" && <ProfilePage />}
+      {page === "room" && <LobbyPage />}
     </div>
   );
 }

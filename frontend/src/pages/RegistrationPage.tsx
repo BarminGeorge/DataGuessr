@@ -4,7 +4,7 @@ import { http } from "../api/http";
 
 import { useState } from "react";
 import { usePage } from "../PageContext";
-
+import { validateLogin, validatePassword, validateUsername } from "../utils/validations";
 
 async function handleRegistration(
   login: string, 
@@ -42,27 +42,41 @@ export default function RegistrationPage() {
       <Header />
       <div className="container">  
         <div className="title-text">  
-        Вход
+        Регистрация
         </div>
 
 
+        <div className="secondary-container">
         <input 
           type="text"
           className="text-input-primary"
           placeholder={"Придумайте логин"}
           onChange={(e) => setLogin(e.target.value)}
           />
+          <span className="acсent-text">
+            {validateLogin(login)}
+          </span>
+        </div>
+        <div className="secondary-container">
         <input 
           type="text"
           className="text-input-primary"
           placeholder={"Придумайте пароль"}
           onChange={(e) => setPassword(e.target.value)}/>
-
+        <span className="acсent-text">
+                    {validatePassword(password)}
+                  </span>
+        </div>
+        <div className="secondary-container">
         <input 
           type="text"
           className="text-input-primary"
           placeholder={"Придумайте имя пользователя"}
           onChange={(e) => setPlayerName(e.target.value)}/>
+        <span className="acсent-text">
+          {validateUsername(playerName)}
+        </span>
+        </div>
 
         <input 
           type="file"

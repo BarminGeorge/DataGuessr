@@ -33,6 +33,18 @@ const { setPage } = usePage();
 
       <div className="flex items-center gap-3">
         <button className="button-primary" onClick={() => setPage("login")}>Login</button>
+      </div>
+    </div>
+  );
+}
+
+function HeaderWithLogoAndAvatar() {
+const { setPage } = usePage();
+  return (
+    <div className="header-container">
+      <div className="title-text" onClick={() => setPage("home")}>FIITguesser</div>
+
+      <div className="flex items-center gap-3">
         <img onClick={() => setPage("profile")}
           src="src/assets/defaultavatar.jpg"
           alt="avatar"
@@ -42,3 +54,4 @@ const { setPage } = usePage();
     </div>
   );
 }
+

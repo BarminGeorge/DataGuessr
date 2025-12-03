@@ -1,9 +1,11 @@
 import React from "react";
 import Header from "../components/Header";
 import TextInput from "../components/TextInputs";
+
 import { usePage } from "../PageContext";
 import { http } from "../api/http";
 import { useState } from "react";
+import { validateLogin, validatePassword } from "../utils/validations";
 
 async function handleLogin(
   login: string, 
@@ -18,11 +20,21 @@ async function handleLogin(
       "Content-Type": "application/json",
     }})
 
-    localStorage.setItem("token", res.token);
-    setPage("home");
-    } catch (e) {
-      alert(e);
+    if (res.success === true) {
+      localStorage.setItem("token", res.token);
+      setPage("home");
+    } else {
+      alert("Упс, что-то пошло не так");
     }
+    } catch (e) {
+      errorParser(e);
+    }
+}
+
+
+function errorParser(e : any) {
+  console.log(e);
+  return
 }
 
 
@@ -38,22 +50,45 @@ export default function LoginPage() {
         <div className="title-text">  
         Вход
         </div>
-        <input 
-          type="text"
-          className="text-input-primary"
-          placeholder={"Придумайте логин"}
-          onChange={(e) => setLogin(e.target.value)}
-          />
-        <input 
-          type="text"
-          className="text-input-primary"
-          placeholder={"Придумайте пароль"}
-          onChange={(e) => setPassword(e.target.value)}/>
+
+        <div className="secondary-container">
+          <input 
+            type="text"
+            className="text-input-primary"
+            placeholder={"Введите логин"}
+            onChange={(e) => setLogin(e.target.value)}
+            />
+          <span className="acсent-text">
+            {validateLogin(login)}
+          </span>
+        </div>
+
+
+        <div className="secondary-container">
+          <input 
+            type="text"
+            className="text-input-primary"
+            placeholder={"Введите пароль"}
+            onChange={(e) => setPassword(e.target.value)}/>
+          <span className="acсent-text">
+            {validatePassword(password)}
+          </span>
+          
+        </div>
         <div className="secondary-text">Нет аккаунта? 
-          <span className="link-text" onClick={() => setPage("registration")}>Зарегистрироваться</span></div>
+        
+        <span 
+          className="link-text"
+          onClick={() => setPage("registration")}>
+          Зарегистрироваться
+        </span>
+  
+        </div>
        
         <button className="button-primary" 
-        onClick={() => handleLogin(login, password, setPage)}>Войти</button>;
+          onClick={() => handleLogin(login, password, setPage)}>
+            Войти
+        </button>;
 
     </div>
     </div>

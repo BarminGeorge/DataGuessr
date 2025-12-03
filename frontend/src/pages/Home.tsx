@@ -1,11 +1,31 @@
 import React from "react";
 import Header from "../components/Header";
 import TextInput from "../components/TextInputs";
+import http from "../api/http";
+import { usePage } from "../PageContext";
+import EnterModal from "../modals/EnterModal";
+
+async function RandomRoom(
+  setPage: (page:any) => void) {
+  
+  try {
+    const res: any = await http.get(
+      "/rooms");
+    
+    setPage("room");
+    } catch (e) {
+      alert(e);
+    }
+}
+
 
 export default function HomePage() {
+  const { setPage } = usePage();
   return (
     <div className="global-container">
-      <Header variant="logo-and-login-button" />
+      <EnterModal />
+      <div className="blur">
+      <Header variant="logo-and-login-button"/>
       <div className="container">      
       <div className="secondary-container">
         <div className="left-aligment title-variant-1">Время</div>
@@ -29,11 +49,12 @@ export default function HomePage() {
         <TextInput Text="Введите код приглашения" />
 
         <button className="button-primary">Присоединиться</button>;
-
+      
         <span className="mx-1 text-gray-600">или</span>
 
-        <button className="button-primary">Случайная игра</button>;
+        <button className="button-primary" onClick={() => RandomRoom(setPage)}>Случайная игра</button>;
       </div>
+    </div>
     </div>
     </div>
     </div>
