@@ -10,25 +10,27 @@ public class UserService(
     IAvatarRepository avatarRepository,
     IPasswordHasher passwordHasher)
 {
-    public async Task Register(string login, string password, string playerName, IFormFile image, CancellationToken ct)
+    public async Task<OperationResult> Register(string login, string password, string playerName, IFormFile image, CancellationToken ct)
     {
         var hashedPassword = passwordHasher.GenerateAsync(password);
         var operation = () => avatarRepository.SaveUserAvatarAsync(image, ct);
         var result = await operation.WithRetry(3, TimeSpan.FromSeconds(0.15));
         var avatar = result.ResultObj;
         var user = new User(login, playerName, avatar, hashedPassword);
-        await usersRepository.AddAsync(user, ct);
+        return await usersRepository.AddAsync(user, ct);
     }
 
-    public async Task<string> Login(string login, string password, CancellationToken ct)
+    public async Task<OperationResult<string>> Login(string login, string password, CancellationToken ct)
     {
         var user = await usersRepository.GetByLoginAsync(login, ct);
-        var result = passwordHasher.VerifyAsync(password, user.ResultObj.PasswordHash);
+        if (user.ResultObj is null) return OperationResult<string>.Error(user.ErrorMsg);
+        var result = passwordHasher.VerifyAsync(password, user.ResultObj!.PasswordHash);
         if (!result)
             throw new ApplicationException("Invalid username or password");
         
         var token = provider.GenerateTokenAsync(user.ResultObj);
-        return token;
+        
+        return OperationResult<string>.Ok(token);
     }
     
     public async Task<OperationResult> UpdateUser(Guid userId, string PlayerName, IFormFile avatar,  CancellationToken ct)

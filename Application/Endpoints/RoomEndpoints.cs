@@ -1,5 +1,6 @@
 using Application.Interfaces;
 using Microsoft.AspNetCore.Mvc;
+using SharpGrip.FluentValidation.AutoValidation.Endpoints.Extensions;
 
 namespace Application.EndPoints;
 
@@ -9,8 +10,10 @@ public static class RoomEndpoints
     {
         var group = app.MapGroup("rooms");
         
-        group.MapGet("", GetAvailableRooms);
-        group.MapGet("{roomId:guid}", GetRoomPrivacy);
+        group.MapGet("", GetAvailableRooms)
+            .AddFluentValidationAutoValidation();
+        group.MapGet("{roomId:guid}", GetRoomPrivacy)
+            .AddFluentValidationAutoValidation();
         
         return app;
     }

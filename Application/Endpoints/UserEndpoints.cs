@@ -2,6 +2,7 @@ using Application.Extensions;
 using Application.Requests_Responses;
 using Application.Services;
 using Microsoft.AspNetCore.Mvc;
+using SharpGrip.FluentValidation.AutoValidation.Endpoints.Extensions;
 
 namespace Application.EndPoints;
 
@@ -9,14 +10,16 @@ public static class UserEndpoints
 {
     public static IEndpointRouteBuilder MapUserEndpoints(this IEndpointRouteBuilder app)
     {
-        app.MapPost("register", Register)
+        var usersGroup = app.MapGroup("");
+        usersGroup.AddFluentValidationAutoValidation();
+        usersGroup.MapPost("register", Register)
             .DisableAntiforgery()
             .WithFormUpload();
-        app.MapPost("login", Login);
-        app.MapPost("{id:guid}/userUpdate", UpdateUser)
+        usersGroup.MapPost("login", Login);
+        usersGroup.MapPost("{id:guid}/userUpdate", UpdateUser)
             .DisableAntiforgery()
             .WithFormUpload();
-        app.MapPost("guest", CreateGuest)
+        usersGroup.MapPost("guest", CreateGuest)
             .DisableAntiforgery()
             .WithFormUpload();
         
@@ -32,7 +35,7 @@ public static class UserEndpoints
     private static async Task<IResult> Login(LoginUserRequest request, UserService userService, HttpContext context, CancellationToken ct)
     {
         var token = await userService.Login(request.Login, request.Password, ct);
-        context.Response.Cookies.Append("", token);
+        context.Response.Cookies.Append("", token.ResultObj);
         return Results.Ok(token);
     }
 
