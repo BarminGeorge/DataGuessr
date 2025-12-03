@@ -12,7 +12,7 @@ public interface IGameManager
         Guid createdByUserId, 
         GameMode mode, 
         int countQuestions, 
-        TimeSpan QuestionDuration, 
+        TimeSpan questionDuration, 
         CancellationToken ct,
         IEnumerable<Question>? questions = null);
     

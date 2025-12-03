@@ -12,7 +12,7 @@ public static class UserEndpoints
 {
     public static IEndpointRouteBuilder MapUserEndpoints(this IEndpointRouteBuilder app)
     {
-        var usersGroup = app.MapGroup("");
+        var usersGroup = app.MapGroup("api");
         
         usersGroup.AddFluentValidationAutoValidation();
         

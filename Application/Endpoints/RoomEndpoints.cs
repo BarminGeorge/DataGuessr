@@ -12,7 +12,7 @@ public static class RoomEndpoints
 {
     public static IEndpointRouteBuilder MapRoomEndpoints(this IEndpointRouteBuilder app)
     {
-        var group = app.MapGroup("rooms");
+        var group = app.MapGroup("api/rooms");
         
         group.AddFluentValidationAutoValidation();
         
