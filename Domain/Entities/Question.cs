@@ -10,15 +10,11 @@ public class Question : IEntity<Guid>
     public string Formulation { get; private set; }
     public string ImageUrl { get; private set; }
     
-    // навигация для many-to-many
     public virtual ICollection<Game> Games { get; private set; } = new List<Game>();
 
     protected Question() { }
 
-    public Question(
-        Answer rightAnswer,
-        string formulation,
-        string imageUrl)
+    public Question(Answer rightAnswer, string formulation, string imageUrl)
     {
         Id = Guid.NewGuid();
         RightAnswer = rightAnswer;

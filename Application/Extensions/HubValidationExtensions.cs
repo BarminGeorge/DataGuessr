@@ -1,6 +1,8 @@
 using FluentValidation;
 using Microsoft.AspNetCore.SignalR;
 
+namespace Application.Extensions;
+
 public static class HubValidationExtensions
 {
     public static async Task<string?> ValidateRequestAsync<TRequest>(

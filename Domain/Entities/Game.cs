@@ -20,11 +20,7 @@ public class Game : IEntity<Guid>
 
     protected Game() { }
 
-    public Game(
-        Guid roomId,
-        GameMode mode,
-        TimeSpan questionDuration,
-        int questionsCount)
+    public Game(Guid roomId, GameMode mode, TimeSpan questionDuration, int questionsCount)
     {
         Id = Guid.NewGuid();
         RoomId = roomId;
@@ -51,7 +47,6 @@ public class Game : IEntity<Guid>
         Status = GameStatus.Finished;
     }
 
-    // TODO
     public void AddQuestions(IEnumerable<Question> questions)
     {
         foreach (var question in questions)

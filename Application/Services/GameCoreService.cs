@@ -36,12 +36,11 @@ public class GameCoreService(
             if (!rawAnswer.Success || rawAnswer.ResultObj == null) 
                 return OperationResult.Error($"{rawAnswer.ErrorMsg}\n\n{rawAnswer.ResultObj}");
 
+            var oldStatistic = game.CurrentStatistic.Copy();
             UpdateStatistic(game, question, rawAnswer.ResultObj);
+            var diff = game.CurrentStatistic.Diff(oldStatistic);
             
-            var saveStatisticResult = await gameRepository.SaveStatisticAsync(game.Id, game.CurrentStatistic, ct);
-            if (!saveStatisticResult.Success) 
-                return OperationResult.Error(saveStatisticResult.ErrorMsg);
-
+            await NotifyRoomAboutResults(diff, roomId);
             await NotifyRoomAboutResults(game.CurrentStatistic, roomId);
         }
         

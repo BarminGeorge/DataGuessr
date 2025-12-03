@@ -99,10 +99,7 @@ public class GameCoreServiceTests
             .MustHaveHappened(questionsCount, Times.Exactly);
         
         A.CallTo(() => notificationService.NotifyGameRoomAsync(roomId, A<StatisticNotification>._))
-            .MustHaveHappened(questionsCount, Times.Exactly);
-        
-        A.CallTo(() => gameRepository.SaveStatisticAsync(game.Id, A<Statistic>._, ct))
-            .MustHaveHappened(questionsCount, Times.Exactly);
+            .MustHaveHappened(questionsCount * 2, Times.Exactly);
     }
 
     [Test]
@@ -156,26 +153,5 @@ public class GameCoreServiceTests
 
             That(game.Status, Is.Not.EqualTo(GameStatus.Finished));
         });
-    }
-
-    [Test]
-    public async Task RunGameCycle_WhenSaveStatisticFails_ReturnsError()
-    {
-        var questions = CreateQuestionsList();
-        A.CallTo(() => questionService.GetAllQuestionsAsync(game, ct))
-            .Returns(OperationResult<IEnumerable<Question>>.Ok(questions));
-        
-        A.CallTo(() => answerRepository.LoadAnswersAsync(game.Id, A<Guid>._, ct))
-            .Returns(OperationResult<Dictionary<Guid, Answer>>.Ok(new Dictionary<Guid, Answer>()));
-
-        A.CallTo(() => evaluationService.CalculateScore(A<GameMode>._))
-            .Returns((_, _) => new Score(10));
-        
-        var saveError = "Save Failed";
-        A.CallTo(() => gameRepository.SaveStatisticAsync(game.Id, A<Statistic>._, ct))
-            .Returns(OperationResult.Error(saveError));
-        
-        var result = await service.RunGameCycle(game, roomId, ct);
-        That(result.Success, Is.False);
     }
 }
