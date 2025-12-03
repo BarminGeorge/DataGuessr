@@ -17,10 +17,10 @@ public class GameRepository : IGameRepository
 
     public async Task<OperationResult> SaveStatisticAsync(Guid gameId, Statistic statistic, CancellationToken ct)
     {
-        if (statistic == null) throw new ArgumentNullException(nameof(statistic));
-
         return await OperationResult.TryAsync(async () =>
         {
+            ArgumentNullException.ThrowIfNull(statistic);
+
             var game = await db.Games
                 .Include(g => g.CurrentStatistic)
                 .FirstOrDefaultAsync(g => g.Id == gameId, cancellationToken: ct);

@@ -16,11 +16,11 @@ public class QuestionRepository : IQuestionRepository
 
     public async Task<OperationResult<IEnumerable<Question>>> GetUniqQuestionsAsync(int count, CancellationToken ct)
     {
-        if (count <= 0)
-            throw new ArgumentOutOfRangeException(nameof(count), "Count must be greater than zero.");
-
         return await OperationResult<IEnumerable<Question>>.TryAsync(async () =>
         {
+            if (count <= 0)
+                throw new ArgumentOutOfRangeException(nameof(count), "Count must be greater than zero.");
+
             var allIds = await db.Questions
                 .AsNoTracking()
                 .Select(q => q.Id)
@@ -31,10 +31,10 @@ public class QuestionRepository : IQuestionRepository
 
             if (count > allIds.Count)
                 count = allIds.Count;
-            
+
             var random = new Random();
             var selectedIds = allIds.OrderBy(_ => random.Next()).Take(count).ToList();
-            
+
             var questions = await db.Questions
                 .AsNoTracking()
                 .Where(q => selectedIds.Contains(q.Id))

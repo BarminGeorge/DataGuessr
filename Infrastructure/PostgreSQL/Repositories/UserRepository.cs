@@ -18,8 +18,7 @@ public class UserRepository : IUserRepository
     {
         return await OperationResult.TryAsync(async () =>
         {
-            if (user == null)
-                throw new ArgumentNullException(nameof(user));
+            ArgumentNullException.ThrowIfNull(user);
 
             // Проверяем уникальность логина ТОЛЬКО если Login указан (для гостей может быть null)
             if (!string.IsNullOrEmpty(user.Login))
