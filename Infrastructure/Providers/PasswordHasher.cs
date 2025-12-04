@@ -1,4 +1,4 @@
-﻿using Application.Interfaces.Infrastructure;
+﻿using Infrastructure.Interfaces;
 
 namespace Infrastructure.Providers;
 

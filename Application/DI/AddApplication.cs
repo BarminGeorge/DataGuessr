@@ -1,10 +1,11 @@
 using Application.Interfaces;
-using Application.Interfaces.Infrastructure;
+
 using Application.Requests_Responses;
 using Application.Requests_Responses.Validators;
 using Application.Requests_Responses.Validators.ParameterValidators;
 using Application.Services;
 using FluentValidation;
+using Infrastructure.Interfaces;
 using Infrastructure.Providers;
 using SharpGrip.FluentValidation.AutoValidation.Endpoints.Extensions;
 
@@ -54,9 +55,7 @@ public static class AddApplicationExtensions
         services.AddScoped<IGameCoreService, GameCoreService>();
         services.AddScoped<IQuestionService, QuestionService>();
         services.AddScoped<IJwtProvider, JwtProvider>();
-        services.AddScoped<IGuestCleanupService, GuestCleanupService>();// ������� ������������� ������ ������� � ������� ������ ������� �� � ����
-
-
+        services.AddScoped<IGuestCleanupService, GuestCleanupService>();
 
         return services;
     }
