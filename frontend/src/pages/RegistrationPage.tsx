@@ -14,12 +14,17 @@ async function handleRegistration(
   setPage: (page:any) => void) {
   
   try {
+
+    const formData = new FormData();
+    
+    formData.append("login", login);
+    formData.append("password", password);
+    formData.append("playerName", playerName);
+    formData.append("avatar", avatar);
+
     const res: any = await http.post(
       "/register", 
-      { login, password, playerName, avatar }, 
-      {headers: {
-      "Content-Type": "multipart/form-data",
-    }})
+      formData)
 
 
     localStorage.setItem("token", res.token);

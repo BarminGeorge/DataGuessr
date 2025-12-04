@@ -15,10 +15,8 @@ async function handleLogin(
   try {
     const res: any = await http.post(
       "/login", 
-      {login, password }, 
-      {headers: {
-      "Content-Type": "application/json",
-    }})
+      {login, password},
+      {})
 
     if (res.success === true) {
       localStorage.setItem("token", res.token);
