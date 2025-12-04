@@ -19,8 +19,7 @@ public class UserRepository : IUserRepository
     {
         Func<Task<OperationResult>> operation = async () =>
         {
-            if (user == null)
-                throw new ArgumentNullException(nameof(user));
+            ArgumentNullException.ThrowIfNull(user);
 
             if (!string.IsNullOrEmpty(user.Login))
             {
