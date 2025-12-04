@@ -53,7 +53,7 @@ public class GameCoreServiceTests
     private List<Question> CreateQuestionsList()
     {
         var questions = Enumerable.Range(0, questionsCount)
-            .Select<int, Question>(i => new Question(new Answer(DateTime.UtcNow.AddMinutes(1)), 
+            .Select<int, Question>(i => new Question(new DateTimeAnswer(DateTime.UtcNow.AddMinutes(1)), 
                 $"Test Question{i}", $"FakeUrl{i}"))
             .ToList();
         return questions;

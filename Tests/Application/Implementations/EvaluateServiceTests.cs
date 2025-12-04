@@ -19,8 +19,8 @@ public class EvaluateServiceTests
     public void CalculateScore_DefaultMode_ReturnsCorrectDelegate()
     {
         var mode = GameMode.DefaultMode;
-        var answer = new Answer( new DateTime(2023, 1, 1) );
-        var rightAnswer = new DateTime(2023, 1, 10);
+        var answer = new DateTimeAnswer( new DateTime(2023, 1, 1) );
+        var rightAnswer = new DateTimeAnswer(new DateTime(2023, 1, 10));
             
         var scoreCalculator = evaluateService.CalculateScore(mode);
         var score = scoreCalculator(answer, rightAnswer);
@@ -35,8 +35,8 @@ public class EvaluateServiceTests
     {
         var mode = GameMode.DefaultMode;
         var date = new DateTime(2023, 1, 1);
-        var answer = new Answer(date);
-        var rightAnswer = date;
+        var answer = new DateTimeAnswer(date);
+        var rightAnswer =  new DateTimeAnswer(date);
             
         var scoreCalculator = evaluateService.CalculateScore(mode);
         var score = scoreCalculator(answer, rightAnswer);
@@ -49,8 +49,8 @@ public class EvaluateServiceTests
     {
 
         var mode = GameMode.DefaultMode;
-        var answer = new Answer(new DateTime(2023, 1, 1) );
-        var rightAnswer = new DateTime(2023, 1, 2); 
+        var answer = new DateTimeAnswer(new DateTime(2023, 1, 1) );
+        var rightAnswer = new DateTimeAnswer(new DateTime(2023, 1, 2)); 
   
         var scoreCalculator = evaluateService.CalculateScore(mode);
         var score = scoreCalculator(answer, rightAnswer);
@@ -64,8 +64,8 @@ public class EvaluateServiceTests
     {
       
         var mode = GameMode.DefaultMode;
-        var answer = new Answer(new DateTime(2023, 1, 1));
-        var rightAnswer = new DateTime(234, 1, 1); 
+        var answer = new DateTimeAnswer(new DateTime(2023, 1, 1));
+        var rightAnswer = new DateTimeAnswer(new DateTime(234, 1, 1)); 
 
 
         var scoreCalculator = evaluateService.CalculateScore(mode);
@@ -81,8 +81,8 @@ public class EvaluateServiceTests
     {
   
         var mode = GameMode.DefaultMode;
-        var answer = new Answer(new DateTime(2023, 1, 10));
-        var rightAnswer = new DateTime(2023, 1, 1); 
+        var answer = new DateTimeAnswer(new DateTime(2023, 1, 10));
+        var rightAnswer =new DateTimeAnswer(new DateTime(2023, 1, 1)); 
 
      
         var scoreCalculator = evaluateService.CalculateScore(mode);
@@ -113,6 +113,6 @@ public class EvaluateServiceTests
         var scoreCalculator = evaluateService.CalculateScore(mode);
             
         Assert.Throws<NullReferenceException>(() => 
-            scoreCalculator(null, DateTime.Now));
+            scoreCalculator(null, new DateTimeAnswer(DateTime.Now)));
     }
 }

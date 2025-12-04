@@ -138,8 +138,8 @@ public class AppDbContext : DbContext
 
             entity.Property(q => q.RightAnswer)
                 .HasConversion(
-                    answer => answer.Date,
-                    value => new Answer(value)
+                    answer => answer,
+                    value => value
                 )
                 .IsRequired();
 
@@ -231,8 +231,8 @@ public class AppDbContext : DbContext
 
             entity.Property(pa => pa.Answer)
                 .HasConversion(
-                    answer => answer.Date,
-                    value => new Answer(value)
+                    answer => answer,
+                    value => value
                 )
                 .IsRequired();
 
