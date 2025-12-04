@@ -5,8 +5,8 @@ using Application.Endpoints.Hubs;
 using Hangfire;
 using Hangfire.PostgreSql;
 using Infrastructure.DI;
+using Infrastructure.ValueTypes;
 using Microsoft.AspNetCore.CookiePolicy;
-using JwtOptions = Infrastructure.RegistrationUtils.JwtOptions;
 
 var builder = WebApplication.CreateBuilder(args);
 var services = builder.Services;

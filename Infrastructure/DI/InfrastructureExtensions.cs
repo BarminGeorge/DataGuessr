@@ -1,7 +1,7 @@
 ﻿using Infrastructure.Interfaces;
 using Infrastructure.PostgreSQL;
 using Infrastructure.PostgreSQL.Repositories;
-using Infrastructure.RegistrationUtils;
+using Infrastructure.Providers;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
