@@ -162,4 +162,9 @@ public class PlayerRepository : IPlayerRepository
 
         return await operation.WithRetry(maxRetries: 3, retryDelay);
     }
+
+    public Task<OperationResult<string>> GetConnectionByPlayerAsync(Guid playerId, CancellationToken ct = default)
+    {
+        throw new NotImplementedException();
+    }
 }

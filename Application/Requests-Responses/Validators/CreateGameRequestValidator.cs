@@ -6,6 +6,7 @@ public class CreateGameRequestValidator : AbstractValidator<CreateGameRequest>
 {
     public CreateGameRequestValidator()
     {
+        
         RuleFor(x => x.UserId)
             .NotEmpty().WithMessage("User ID is required");
 

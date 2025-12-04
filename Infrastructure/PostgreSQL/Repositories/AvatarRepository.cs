@@ -1,4 +1,4 @@
-﻿using Domain.Common;
+using Domain.Common;
 using Domain.Entities;
 using Infrastructure.Interfaces;
 using Microsoft.AspNetCore.Http;
@@ -39,5 +39,10 @@ public class AvatarRepository : IAvatarRepository
 
             return avatar;
         });
+    }
+    
+    public Task<OperationResult> DeleteUserAvatarAsync(string filename, CancellationToken ct)
+    {
+        throw new NotImplementedException();
     }
 }

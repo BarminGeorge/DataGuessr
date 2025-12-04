@@ -3,13 +3,7 @@ using Domain.Interfaces;
 
 namespace Domain.ValueTypes.Inputs;
 
-public record ImageQuestionType : IQuestionType
+public record ImageQuestionType(string ImageData) : IQuestionType
 {
     public QuestionType Type => QuestionType.Image;
-    public string ImageData { get; }
-    
-    public ImageQuestionType(string imageData)
-    {
-        ImageData = imageData;
-    }
 }

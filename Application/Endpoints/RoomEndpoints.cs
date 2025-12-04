@@ -1,5 +1,10 @@
+using Application.DtoUI;
 using Application.Interfaces;
-using Application.Requests_Responses;
+using Application.Mappers;
+using Domain.Common;
+using Domain.Enums;
+using Microsoft.AspNetCore.Mvc;
+using SharpGrip.FluentValidation.AutoValidation.Endpoints.Extensions;
 
 namespace Application.EndPoints;
 
@@ -7,23 +12,29 @@ public static class RoomEndpoints
 {
     public static IEndpointRouteBuilder MapRoomEndpoints(this IEndpointRouteBuilder app)
     {
-        var group = app.MapGroup("rooms");
+        var group = app.MapGroup("api/rooms");
+        
+        group.AddFluentValidationAutoValidation();
         
         group.MapGet("", GetAvailableRooms);
-        group.MapGet("{id:guid}", GetRoomPrivacy);
+        group.MapGet("{roomId:guid}", GetRoomPrivacy);
         
         return app;
     }
 
-    private static async Task<IResult> GetAvailableRooms(IRoomManager roomManager, HttpContext context, CancellationToken ct)
+    private static async Task<OperationResult<IEnumerable<RoomDto>>> GetAvailableRooms(IRoomManager roomManager, 
+        HttpContext context, CancellationToken ct)
     {
         var operationResult = await roomManager.GetAvailablePublicRoomsAsync(ct);
-        return operationResult.Success ? Results.Ok(operationResult.ResultObj) : Results.BadRequest(operationResult);
+        return operationResult is { Success: true, ResultObj: not null }
+            ? OperationResult<IEnumerable<RoomDto>>.Ok(operationResult.ResultObj
+                .Select(x => x.ToDto())) 
+            : OperationResult<IEnumerable<RoomDto>>.Error(operationResult.ErrorMsg);
     }
 
-    private static async Task<IResult> GetRoomPrivacy(Guid roomId, IRoomManager roomManager, HttpContext context, CancellationToken ct)
+    private static async Task<OperationResult<RoomPrivacy>> GetRoomPrivacy([FromRoute] Guid roomId, 
+        IRoomManager roomManager, HttpContext context, CancellationToken ct)
     {
-        var result = await roomManager.GetRoomPrivacyAsync(roomId, ct);
-        return result.Success ? Results.Ok(result) : Results.BadRequest(result);
+        return await roomManager.GetRoomPrivacyAsync(roomId, ct);
     }
 }

@@ -1,12 +1,10 @@
 using Application.Interfaces;
-
+using Application.Notifications;
 using Application.Requests_Responses;
 using Application.Requests_Responses.Validators;
 using Application.Requests_Responses.Validators.ParameterValidators;
 using Application.Services;
 using FluentValidation;
-using Infrastructure.Interfaces;
-using Infrastructure.Providers;
 using SharpGrip.FluentValidation.AutoValidation.Endpoints.Extensions;
 
 namespace Application.DI;
@@ -39,6 +37,8 @@ public static class AddApplicationExtensions
         services.AddScoped<IValidator<StartGameRequest>, StartGameRequestValidator>();
         services.AddScoped<IValidator<SubmitAnswerRequest>, SubmitAnswerRequestValidator>();
         services.AddScoped<IValidator<UpdateUserRequest>, UpdateUserRequestValidator>();
+        services.AddScoped<IValidator<KickPlayerRequest>, KickPlayerRequestValidator>();
+        services.AddScoped<IValidator<FinishGameRequest>, FinishGameRequsetValidator>();
 
         services.AddFluentValidationAutoValidation();
         
@@ -54,9 +54,9 @@ public static class AddApplicationExtensions
         services.AddScoped<IEvaluationService, EvaluateService>();
         services.AddScoped<IGameCoreService, GameCoreService>();
         services.AddScoped<IQuestionService, QuestionService>();
-        services.AddScoped<IJwtProvider, JwtProvider>();
         services.AddScoped<IGuestCleanupService, GuestCleanupService>();
-
+        services.AddScoped<INotificationService, SignalRNotificationService>();
+        
         return services;
     }
 }

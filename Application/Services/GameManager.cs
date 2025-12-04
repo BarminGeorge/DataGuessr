@@ -17,19 +17,14 @@ public class GameManager(
     ILogger<GameManager> logger)
     : IGameManager
 {
-    private static bool IsOwnerRoom(Room? room, Guid userId)
-    {
-        if (room == null) 
-            return false;
-
-        return room.Owner == userId;
-    }
+    private static bool IsOwnerRoom(Room room, Guid userId) => room.Owner == userId;
     
     private async Task<OperationResult> CanStartGameAsync(Guid roomId, Guid userId, CancellationToken ct)
     {
         var getRoomResult = await roomRepository.GetByIdAsync(roomId, ct);
-        if (!getRoomResult.Success)
+        if (!getRoomResult.Success || getRoomResult.ResultObj == null)
             return OperationResult.Error(getRoomResult.ErrorMsg);
+        
         var room = getRoomResult.ResultObj;
 
         var canStart = IsOwnerRoom(room, userId) && room.Players.Count >= 2;
@@ -48,15 +43,15 @@ public class GameManager(
             return OperationResult.Error(getRoomResult.ErrorMsg);
 
         var getGameResult = await roomRepository.GetCurrentGameAsync(roomId, ct);
-        if (!getGameResult.Success)
+        if (!getGameResult.Success || getGameResult.ResultObj == null)
             return OperationResult.Error(getGameResult.ErrorMsg);
 
         var game = getGameResult.ResultObj;
 
-        Task.Run(() => gameCoreService.RunGameCycle(ct))
+        Task.Run(() => gameCoreService.RunGameCycle(game, roomId, ct))
             .ContinueWith(t =>
             {
-                if (t.IsFaulted && t.Exception != null)
+                if (t is { IsFaulted: true, Exception: not null })
                     logger.LogError(t.Exception, $"Game cycle failed for game {game.Id}");
             }, TaskContinuationOptions.OnlyOnFaulted);
         
@@ -74,7 +69,7 @@ public class GameManager(
         IEnumerable<Question>? questions = null)
     {
         var getRoomResult = await roomRepository.GetByIdAsync(roomId, ct);
-        if (!getRoomResult.Success)
+        if (!getRoomResult.Success || getRoomResult.ResultObj == null)
             return OperationResult<Game>.Error(getRoomResult.ErrorMsg);
 
         var room = getRoomResult.ResultObj;
@@ -111,7 +106,7 @@ public class GameManager(
     public async Task<OperationResult<Room>> FinishGameAsync(Guid userId, Guid roomId, CancellationToken ct)
     {
         var getRoomResult = await roomRepository.GetByIdAsync(roomId, ct);
-        if (!getRoomResult.Success)
+        if (!getRoomResult.Success || getRoomResult.ResultObj == null)
             return OperationResult<Room>.Error(getRoomResult.ErrorMsg);
 
         if (!IsOwnerRoom(getRoomResult.ResultObj, userId))

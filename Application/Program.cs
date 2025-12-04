@@ -2,12 +2,11 @@ using Application.DI;
 using Application.EndPoints;
 using Application.Interfaces;
 using Application.Endpoints.Hubs;
-using Application.Services;
 using Hangfire;
 using Hangfire.PostgreSql;
 using Infrastructure.DI;
-using Infrastructure.ValueTypes;
 using Microsoft.AspNetCore.CookiePolicy;
+using JwtOptions = Infrastructure.RegistrationUtils.JwtOptions;
 
 var builder = WebApplication.CreateBuilder(args);
 var services = builder.Services;
@@ -18,6 +17,8 @@ services.Configure<JwtOptions>(configuration.GetSection(nameof(JwtOptions)));
 services.AddApplication();
 services.AddInfrastructure(configuration);
 
+services.AddAntiforgery();
+
 services.AddHangfire(config => config
     .UsePostgreSqlStorage(configuration.GetConnectionString("DefaultConnection")));
 
@@ -25,15 +26,9 @@ services.AddHangfireServer();
 
 services.AddCors(options =>
 {
-    options.AddPolicy("AllowFiitDomain",
-        policy =>
-        {
-            policy.WithOrigins("https://dataguessr.fiit.com")
-                .AllowAnyHeader()
-                .AllowAnyMethod()
-                .AllowCredentials();
-        });
+    options.AddPolicy("AllowAll", policy => policy.AllowAnyOrigin().AllowAnyMethod().AllowAnyHeader());
 });
+
 
 services.AddSignalR(options =>
 {
@@ -53,6 +48,7 @@ services.AddAuthentication(_ =>
 
 services.AddEndpointsApiExplorer();
 services.AddSwaggerGen();
+services.AddControllers();
 
 var app = builder.Build();
 
@@ -66,7 +62,7 @@ else
     app.UseHsts();
 }
 
-app.UseCors("AllowFiitDomain");
+app.UseCors("AllowAll"); // TODO
 
 app.UseHttpsRedirection();
 
@@ -79,6 +75,7 @@ app.UseCookiePolicy(new CookiePolicyOptions
 
 app.UseAuthentication();
 app.UseAuthorization();
+app.UseAntiforgery();
 
 app.UseHangfireDashboard("/hangfire");
 

@@ -4,7 +4,7 @@ namespace Application.Requests_Responses.Validators.ParameterValidators;
 
 public class LoginValidator : AbstractValidator<string>
 {
-    public  LoginValidator()
+    public LoginValidator()
     {
         RuleFor(x => x)
             .NotEmpty().WithMessage("Login is required")

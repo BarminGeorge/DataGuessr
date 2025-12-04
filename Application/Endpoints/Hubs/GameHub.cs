@@ -1,4 +1,5 @@
 using Application.DtoUI;
+using Application.Extensions;
 using Application.Mappers;
 using Application.Requests_Responses;
 
@@ -8,6 +9,8 @@ public partial class AppHub
 {
     public async Task<DataResponse<GameDto>> CreateGame(CreateGameRequest request, CancellationToken ct = default)
     {
+        if (await this.ValidateRequestAsync(request, ct) is { } error)
+            return DataResponse<GameDto>.CreateFailure(error);
         var result = await gameManager.CreateNewGameAsync(
             request.RoomId, 
             request.UserId, 
@@ -17,13 +20,16 @@ public partial class AppHub
             ct,
             request.Questions);
 
-        return result.Success
+        return result is { Success: true, ResultObj: not null }
             ? DataResponse<GameDto>.CreateSuccess(result.ResultObj.ToDto())
             : DataResponse<GameDto>.CreateFailure(result.ErrorMsg);
     }
 
     public async Task<EmptyResponse> StartGame(StartGameRequest request, CancellationToken ct = default)
     {
+        if (await this.ValidateRequestAsync(request, ct) is { } error)
+            return EmptyResponse.CreateFailure(error);
+        
         var result = await gameManager.StartNewGameAsync(request.RoomId, request.UserId, ct);
         return result.Success
             ? EmptyResponse.CreateSuccess()
@@ -32,6 +38,9 @@ public partial class AppHub
 
     public async Task<EmptyResponse> SubmitAnswer(SubmitAnswerRequest request, CancellationToken ct = default)
     {
+        if (await this.ValidateRequestAsync(request, ct) is { } error)
+            return EmptyResponse.CreateFailure(error);
+        
         var result = await gameManager.SubmitAnswerAsync(request.GameId, request.QuestionId, request.PlayerId, request.Answer, ct);
         return result.Success
             ? EmptyResponse.CreateSuccess()
@@ -40,11 +49,12 @@ public partial class AppHub
 
     public async Task<DataResponse<RoomDto>> FinishGame(FinishGameRequest request, CancellationToken ct = default)
     {
-        var result = await gameManager.FinishGameAsync(request.userId, request.roomId, ct);
-        return result.Success
+        if (await this.ValidateRequestAsync(request, ct) is { } error)
+            return DataResponse<RoomDto>.CreateFailure(error);
+        
+        var result = await gameManager.FinishGameAsync(request.UserId, request.RoomId, ct);
+        return result is { Success: true, ResultObj: not null }
             ? DataResponse<RoomDto>.CreateSuccess(result.ResultObj.ToDto())
             : DataResponse<RoomDto>.CreateFailure(result.ErrorMsg);
     }
 }
-
-public record FinishGameRequest(Guid userId, Guid roomId);

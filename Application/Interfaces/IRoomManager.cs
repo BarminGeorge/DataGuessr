@@ -12,4 +12,5 @@ public interface IRoomManager
     Task<OperationResult<IEnumerable<Room>>> GetAvailablePublicRoomsAsync(CancellationToken ct);
     Task<OperationResult<Room>> FindOrCreateQuickRoomAsync(Guid userId, CancellationToken ct);
     Task<OperationResult<RoomPrivacy>> GetRoomPrivacyAsync(Guid roomId, CancellationToken ct);
+    Task<OperationResult> KickPlayerFromRoom(Guid userId, Guid roomId, Guid removedPlayer, CancellationToken ct);
 }
