@@ -11,10 +11,8 @@ public static class HubValidationExtensions
         CancellationToken ct = default)
     {
         var serviceProvider = hub.Context.GetHttpContext()?.RequestServices;
-        if (serviceProvider == null) 
-            return null;
 
-        var validator = serviceProvider.GetService<IValidator<TRequest>>();
+        var validator = serviceProvider?.GetService<IValidator<TRequest>>();
         if (validator == null) 
             return null;
 
