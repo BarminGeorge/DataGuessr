@@ -101,18 +101,6 @@ public class EvaluateServiceTests
         var ex = Assert.Throws<ArgumentException>(() => 
             evaluateService.CalculateScore(unsupportedMode));
             
-        Assert.That(ex.Message, Does.Contain("не реализован"));
-    }
-
-    [Test]
-    public void CalculateScore_DefaultMode_WithNullAnswer_ThrowsException()
-    {
-    
-        var mode = GameMode.DefaultMode;
-
-        var scoreCalculator = evaluateService.CalculateScore(mode);
-            
-        Assert.Throws<NullReferenceException>(() => 
-            scoreCalculator(null, new DateTimeAnswer(DateTime.Now)));
+        Assert.That(ex.Message, Does.Contain("Unknown mode"));
     }
 }

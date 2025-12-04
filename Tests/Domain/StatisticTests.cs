@@ -1,4 +1,4 @@
-/*using Domain.ValueTypes;
+using Domain.ValueTypes;
 
 namespace Tests.Domain;
 
@@ -66,8 +66,8 @@ public class StatisticTests
         };
         var rightAnswer = new DateTimeAnswer(DateTime.Now.AddMinutes(1));
             
-        statistic.Update(answers, rightAnswer, (answer, right) => 
-            new Score(answer < right ? 1 : 0));
+        statistic.Update(answers, rightAnswer, (_, _) => 
+            new Score(1));
 
         Assert.That(statistic.Scores, Has.Count.EqualTo(1));
         Assert.That(statistic.Scores[userId1].score, Is.EqualTo(1));
@@ -81,18 +81,18 @@ public class StatisticTests
         {
             { userId1, new DateTimeAnswer(DateTime.Now) }
         };
-        var rightAnswer1 = DateTime.Now.AddMinutes(1);
-        statistic.Update(initialAnswers, rightAnswer1, (answer, right) => 
-            new Score(answer.Value < right ? 1 : 0));
+        var rightAnswer1 = new DateTimeAnswer(DateTime.Now.AddMinutes(1));
+        statistic.Update(initialAnswers, rightAnswer1, (_, _) => 
+            new Score(1));
 
         var updatedAnswers = new Dictionary<Guid, Answer>
         {
-            { userId1, new Answer(DateTime.Now.AddMinutes(2)) }
+            { userId1, new DateTimeAnswer(DateTime.Now.AddMinutes(2)) }
         };
-        var rightAnswer2 = DateTime.Now.AddMinutes(3);
+        var rightAnswer2 = new DateTimeAnswer(DateTime.Now.AddMinutes(3));
 
-        statistic.Update(updatedAnswers, rightAnswer2, (answer, right) => 
-            new Score(answer.Value < right ? 2 : 0));
+        statistic.Update(updatedAnswers, rightAnswer2, 
+            (_, _) => new Score(1));
 
         Assert.That(statistic.Scores.Count, Is.EqualTo(1));
         Assert.That(statistic.Scores[userId1].score, Is.EqualTo(3)); // 1 + 2
@@ -104,13 +104,13 @@ public class StatisticTests
         var statistic = new Statistic();
         var answers = new Dictionary<Guid, Answer>
         {
-            { userId1, new Answer(DateTime.Now) },
-            { userId2, new Answer(DateTime.Now) }
+            { userId1, new DateTimeAnswer(DateTime.Now) },
+            { userId2, new DateTimeAnswer(DateTime.Now) }
         };
-        var rightAnswer = DateTime.Now.AddMinutes(1);
+        var rightAnswer = new DateTimeAnswer(DateTime.Now.AddMinutes(1));
 
-        statistic.Update(answers, rightAnswer, (answer, right) => 
-            new Score(answer.Value < right ? 1 : 0));
+        statistic.Update(answers, rightAnswer, (_, _) => 
+            new Score(1));
 
         Assert.That(statistic.Scores.Count, Is.EqualTo(2));
         Assert.Multiple(() =>
@@ -128,22 +128,22 @@ public class StatisticTests
 
         var answers1 = new Dictionary<Guid, Answer>
         {
-            { userId1, new Answer(DateTime.Now) },
-            { userId2, new Answer(DateTime.Now) }
+            { userId1, new DateTimeAnswer(DateTime.Now) },
+            { userId2, new DateTimeAnswer(DateTime.Now) }
         };
-        var rightAnswer1 = DateTime.Now.AddMinutes(1);
+        var rightAnswer1 = new DateTimeAnswer(DateTime.Now.AddMinutes(1));
 
         var answers2 = new Dictionary<Guid, Answer>
         {
-            { userId1, new Answer(DateTime.Now) },
-            { userId3, new Answer(DateTime.Now) }
+            { userId1, new DateTimeAnswer(DateTime.Now) },
+            { userId3, new DateTimeAnswer(DateTime.Now) }
         };
-        var rightAnswer2 = DateTime.Now.AddMinutes(1);
+        var rightAnswer2 = new DateTimeAnswer(DateTime.Now.AddMinutes(1));
 
         stat1.Update(answers1, rightAnswer1, (answer, right) => 
-            new Score(answer.Value < right ? 1 : 0));
+            new Score(1));
         stat2.Update(answers2, rightAnswer2, (answer, right) => 
-            new Score(answer.Value < right ? 2 : 0));
+            new Score(1));
 
         var diff = stat1.Diff(stat2);
 
@@ -164,15 +164,15 @@ public class StatisticTests
 
         var answers1 = new Dictionary<Guid, Answer>
         {
-            { userId1, new Answer(DateTime.Now) }
+            { userId1, new DateTimeAnswer(DateTime.Now) }
         };
-        var rightAnswer1 = DateTime.Now.AddMinutes(1);
+        var rightAnswer1 = new DateTimeAnswer(DateTime.Now.AddMinutes(1));
 
         var answers2 = new Dictionary<Guid, Answer>
         {
-            { userId1, new Answer(DateTime.Now) }
+            { userId1, new DateTimeAnswer(DateTime.Now) }
         };
-        var rightAnswer2 = DateTime.Now.AddMinutes(1);
+        var rightAnswer2 = new DateTimeAnswer(DateTime.Now.AddMinutes(1));
 
         stat1.Update(answers1, rightAnswer1, (_, _) => 
             new Score(5));
@@ -191,13 +191,13 @@ public class StatisticTests
         var original = new Statistic();
         var answers = new Dictionary<Guid, Answer>
         {
-            { userId1, new Answer(DateTime.Now) },
-            { userId2, new Answer(DateTime.Now) }
+            { userId1, new DateTimeAnswer(DateTime.Now) },
+            { userId2, new DateTimeAnswer(DateTime.Now) }
         };
-        var rightAnswer = DateTime.Now.AddMinutes(1);
+        var rightAnswer = new DateTimeAnswer(DateTime.Now.AddMinutes(1));
             
         original.Update(answers, rightAnswer, (answer, right) => 
-            new Score(answer.Value < right ? 1 : 0));
+            new Score(1));
 
         var copy = original.Copy();
 
@@ -216,9 +216,9 @@ public class StatisticTests
         var original = new Statistic();
         var answers = new Dictionary<Guid, Answer>
         {
-            { userId1, new Answer(DateTime.Now) }
+            { userId1, new DateTimeAnswer(DateTime.Now) }
         };
-        var rightAnswer = DateTime.Now.AddMinutes(1);
+        var rightAnswer = new DateTimeAnswer(DateTime.Now.AddMinutes(1));
             
         original.Update(answers, rightAnswer, (_, _) => 
             new Score(1));
@@ -227,7 +227,7 @@ public class StatisticTests
 
         var newAnswers = new Dictionary<Guid, Answer>
         {
-            { userId2, new Answer(DateTime.Now) }
+            { userId2, new DateTimeAnswer(DateTime.Now) }
         };
         original.Update(newAnswers, rightAnswer, (_, _) => 
             new Score(2));
@@ -248,9 +248,9 @@ public class StatisticTests
             
         var answers = new Dictionary<Guid, Answer>
         {
-            { userId1, new Answer(DateTime.Now) }
+            { userId1, new DateTimeAnswer(DateTime.Now) }
         };
-        var rightAnswer = DateTime.Now.AddMinutes(1);
+        var rightAnswer = new DateTimeAnswer(DateTime.Now.AddMinutes(1));
             
         statWithValues.Update(answers, rightAnswer, (_, _) => 
             new Score(5));
@@ -260,4 +260,4 @@ public class StatisticTests
         Assert.That(diff.Scores, Has.Count.EqualTo(1));
         Assert.That(diff.Scores[userId1].score, Is.EqualTo(5));
     }
-}*/
+}
