@@ -137,10 +137,7 @@ public class AppDbContext : DbContext
                 .HasMaxLength(1000);
 
             entity.Property(q => q.RightAnswer)
-                .HasConversion(
-                    answer => answer,
-                    value => value
-                )
+                .HasColumnType("jsonb")
                 .IsRequired();
 
             entity.HasMany(q => q.Games)
@@ -230,10 +227,7 @@ public class AppDbContext : DbContext
             entity.Property(pa => pa.QuestionId).IsRequired();
 
             entity.Property(pa => pa.Answer)
-                .HasConversion(
-                    answer => answer,
-                    value => value
-                )
+                .HasColumnType("jsonb")
                 .IsRequired();
 
             // Один ответ на вопрос от одного игрока в игре
