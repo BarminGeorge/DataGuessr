@@ -1,4 +1,4 @@
-﻿using DataGuessr.Infrastructure.WebAPI.Enums;
+﻿using Domain.Enums;
 
 namespace Infrastructure.WebAPI.DTOs.Responses
 {
@@ -19,6 +19,7 @@ namespace Infrastructure.WebAPI.DTOs.Responses
         public GameResponse() : this(
             Guid.Empty, "", "", GameStatus.NotStarted, 0, 0, DateTime.MinValue
         )
-        { }
+        {
+        }
     }
 }

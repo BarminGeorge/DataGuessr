@@ -5,6 +5,7 @@ using Application.Requests_Responses.Validators;
 using Application.Requests_Responses.Validators.ParameterValidators;
 using Application.Services;
 using FluentValidation;
+using Infrastructure.Providers;
 using SharpGrip.FluentValidation.AutoValidation.Endpoints.Extensions;
 
 namespace Application.DI;

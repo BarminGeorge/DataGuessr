@@ -6,6 +6,7 @@ using Application.Services;
 using Hangfire;
 using Hangfire.PostgreSql;
 using Infrastructure.DI;
+using Infrastructure.ValueTypes;
 using Microsoft.AspNetCore.CookiePolicy;
 
 var builder = WebApplication.CreateBuilder(args);

@@ -1,5 +1,5 @@
 ﻿using System.ComponentModel.DataAnnotations;
-using DataGuessr.Infrastructure.WebAPI.Enums;
+using Domain.Enums;
 
 namespace Infrastructure.WebAPI.DTOs.Requests
 {
