@@ -1,3 +1,5 @@
+using Domain.ValueTypes;
+
 namespace Application.Notifications;
 
 public record NewQuestionNotification(Guid QuestionId, string Formulation, string ImageUrl, DateTime EndTime, int DurationSeconds)
@@ -6,7 +8,7 @@ public record NewQuestionNotification(Guid QuestionId, string Formulation, strin
     public override string MethodName => "QuestionWasAsked";
 }
 
-public record QuestionClosedNotification(Guid QuestionId, DateTime CorrectAnswer)
+public record QuestionClosedNotification(Guid QuestionId, Answer CorrectAnswer)
     : GameNotification
 {
     public override string MethodName => "QuestionClosed";

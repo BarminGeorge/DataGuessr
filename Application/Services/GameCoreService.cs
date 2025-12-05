@@ -62,7 +62,7 @@ public class GameCoreService(
 
     private async Task NotifyRoomAboutCloseQuestion(Question question, Guid roomId)
     {
-        var closedQuestionNotification = new QuestionClosedNotification(question.Id, question.RightAnswer.Date);
+        var closedQuestionNotification = new QuestionClosedNotification(question.Id, question.RightAnswer);
         var operation = () => notificationService.NotifyGameRoomAsync(roomId,closedQuestionNotification);
         await operation.WithRetry(delay: TimeSpan.FromSeconds(0.2));
     }
@@ -70,7 +70,7 @@ public class GameCoreService(
     private void UpdateStatistic(Game game, Question question, Dictionary<Guid, Answer> answers)
     {
         var updateFunction = evaluationService.CalculateScore(game.Mode);
-        game.CurrentStatistic?.Update(answers, question.RightAnswer.Date, updateFunction);
+        game.CurrentStatistic?.Update(answers, question.RightAnswer, updateFunction);
     }
 
     private async Task NotifyRoomAboutResults(Statistic statistic, Guid roomId)

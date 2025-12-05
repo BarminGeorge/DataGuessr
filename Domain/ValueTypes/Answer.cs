@@ -1,3 +1,5 @@
 namespace Domain.ValueTypes;
 
-public record Answer(DateTime Date);
+public abstract record Answer;
+public record DateTimeAnswer(DateTime Value) : Answer;
+public record BoolAnswer(bool Value) : Answer;

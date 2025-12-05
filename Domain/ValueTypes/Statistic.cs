@@ -12,7 +12,7 @@ public record Statistic
         this.scores = scores;
     }
 
-    public void Update(Dictionary<Guid, Answer> answers, DateTime rightAnswer, Func<Answer, DateTime, Score> update)
+    public void Update(Dictionary<Guid, Answer> answers, Answer rightAnswer, Func<Answer, Answer, Score> update)
     {
         foreach (var (id, answer) in answers)
             scores[id] = Scores.TryGetValue(id, out var current) 
