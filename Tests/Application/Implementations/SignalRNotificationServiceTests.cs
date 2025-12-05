@@ -75,7 +75,7 @@ public class SignalRNotificationServiceTests
         Assert.Multiple(() =>
         {
             Assert.That(result.Success, Is.False);
-            Assert.That(result.ErrorMsg, Does.Contain("SignalR error"));
+            Assert.That(result.ErrorMessage, Does.Contain("SignalR error"));
         });
     }
 }

@@ -22,7 +22,7 @@ public class GameCoreService(
         
         var getQuestionsResult = await questionService.GetAllQuestionsAsync(game, ct);
         if (!getQuestionsResult.Success || getQuestionsResult.ResultObj == null)
-            return OperationResult.Error($"{getQuestionsResult.ErrorMsg}\n\n{getQuestionsResult.ResultObj}");
+            return getQuestionsResult;
         
         game.CurrentStatistic = new Statistic();
         
@@ -34,7 +34,7 @@ public class GameCoreService(
             
             var rawAnswer = await answerRepository.LoadAnswersAsync(game.Id, question.Id, ct);
             if (!rawAnswer.Success || rawAnswer.ResultObj == null) 
-                return OperationResult.Error($"{rawAnswer.ErrorMsg}\n\n{rawAnswer.ResultObj}");
+                return rawAnswer;
 
             var oldStatistic = game.CurrentStatistic.Copy();
             UpdateStatistic(game, question, rawAnswer.ResultObj);

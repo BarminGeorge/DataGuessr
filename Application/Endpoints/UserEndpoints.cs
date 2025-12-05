@@ -1,4 +1,5 @@
 using Application.Extensions;
+using Application.Filters;
 using Application.Requests_Responses;
 using Application.Services;
 using Domain.Common;
@@ -12,7 +13,8 @@ public static class UserEndpoints
 {
     public static IEndpointRouteBuilder MapUserEndpoints(this IEndpointRouteBuilder app)
     {
-        var usersGroup = app.MapGroup("api");
+        var usersGroup = app.MapGroup("api")
+            .AddEndpointFilter<ResultConversionFilter>();
         
         usersGroup.AddFluentValidationAutoValidation();
         
@@ -37,10 +39,10 @@ public static class UserEndpoints
 
     private static async Task<OperationResult> Login(LoginUserRequest request, UserService userService, HttpContext context, CancellationToken ct)
     {
-        var token = await userService.Login(request.Login, request.Password, ct);
-        if (!token.Success || token.ResultObj is null)
-            return OperationResult.Error(token.ErrorMsg);
-        context.Response.Cookies.Append("", token.ResultObj);
+        var loginResult = await userService.Login(request.Login, request.Password, ct);
+        if (!loginResult.Success || loginResult.ResultObj is null)
+            return loginResult;
+        context.Response.Cookies.Append("", loginResult.ResultObj);
         return OperationResult.Ok();
     }
 

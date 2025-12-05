@@ -1,11 +1,14 @@
+using System.Text.Json.Serialization;
 using Application.DI;
 using Application.EndPoints;
 using Application.Interfaces;
 using Application.Endpoints.Hubs;
+using Application.Filters;
+using Domain.Common;
+using Domain.ValueTypes;
 using Hangfire;
 using Hangfire.PostgreSql;
 using Infrastructure.DI;
-using Infrastructure.ValueTypes;
 using Microsoft.AspNetCore.CookiePolicy;
 
 var builder = WebApplication.CreateBuilder(args);
@@ -46,8 +49,15 @@ services.AddAuthentication(_ =>
     });
 
 services.AddEndpointsApiExplorer();
-services.AddSwaggerGen();
-services.AddControllers();
+services.AddSwaggerGen(options =>
+{
+    options.UseInlineDefinitionsForEnums();
+});
+services.AddControllers()
+    .AddJsonOptions(options =>
+    {
+        options.JsonSerializerOptions.Converters.Add(new JsonStringEnumConverter());
+    });
 
 var app = builder.Build();
 
@@ -78,7 +88,7 @@ app.UseAntiforgery();
 
 //app.UseHangfireDashboard("/hangfire");
 
-app.MapGet("/api", () => "Hello World!");
+app.MapGet("/api", () => OperationResult.Error.Unauthorized());
 app.MapUserEndpoints();
 app.MapRoomEndpoints();
 app.MapHub<AppHub>("/appHub");
@@ -86,7 +96,7 @@ app.MapHub<AppHub>("/appHub");
 app.MapControllers();
 
 // RecurringJob.AddOrUpdate<IGuestCleanupService>(
-//     "cleanup-orphaned-guests",
+//    "cleanup-orphaned-guests",
 //     service => service.CleanupOrphanedGuestsAsync(CancellationToken.None),
 //     Cron.Hourly);
 //

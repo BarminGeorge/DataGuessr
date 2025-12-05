@@ -3,7 +3,7 @@ using Application.EndPoints;
 using Microsoft.AspNetCore.Authentication.JwtBearer;
 using Microsoft.Extensions.Options;
 using Microsoft.IdentityModel.Tokens;
-using JwtOptions = Infrastructure.ValueTypes.JwtOptions;
+using JwtOptions = Domain.ValueTypes.JwtOptions;
 
 namespace Application.Extensions;
 
