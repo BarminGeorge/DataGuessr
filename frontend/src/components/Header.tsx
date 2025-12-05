@@ -8,11 +8,17 @@ export default function Header({variant  = "logo"}) {
       <HeaderWithLogoAndLoginButton />
     );
   } 
-  else {
+  else if (variant === "logo") {
   return (
       <HeaderWithOnlyLogo />
   );
-}
+  } else if (variant === "logo-and-avatar") {
+    return ;
+  } else if (variant === "logo-and-avatar-and-create-room") {
+    return (
+      <HeaderWithLogoAndAvatarAndCreateRoomButton />
+    ); 
+  }
 }
 
 function HeaderWithOnlyLogo() {
@@ -38,7 +44,7 @@ const { setPage } = usePage();
   );
 }
 
-function HeaderWithLogoAndAvatar() {
+function HeaderWithLogoAndAvatarAndCreateRoomButton() {
 const { setPage } = usePage();
   return (
     <div className="header-container">

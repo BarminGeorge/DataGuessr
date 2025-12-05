@@ -62,13 +62,13 @@ export default function EnterModal() {
         <input 
             type="text"
             className="text-input-primary"
-            placeholder={"Введите логин"}
+            placeholder={"Введите имя"}
             onChange={(e) => setName(e.target.value)}
             />
        </div>
        </div>
        <div className="centered-aligment">
-       <button className="button-primary" onClick={() => handleGuest(playerName, avatar, setPage)}>Продолжить как гость</button>; 
+       <button className="button-primary" onClick={() => handleGuest(playerName, avatar, setPage)}>Продолжить как гость</button>
        </div>
        </div>
        </div>
@@ -89,7 +89,7 @@ export default function EnterModal() {
         </p>
        
         <div className="centered-aligment">
-       <button className="button-primary" onClick={() => setPage("login")}>Войти</button>; 
+       <button className="button-primary" onClick={() => setPage("login")}>Войти</button> 
        </div>
        </div>
         </div> 

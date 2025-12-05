@@ -44,7 +44,7 @@ export default function LoginPage() {
   return (
     <div className="global-container">
       <Header />
-      <div className="container">  
+      <div className="main-container">  
         <div className="title-text">  
         Вход
         </div>

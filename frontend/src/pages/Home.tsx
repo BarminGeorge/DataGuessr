@@ -15,18 +15,27 @@ async function RandomRoom(
     setPage("room");
     } catch (e) {
       alert(e);
+      setPage("room");
     }
 }
 
+function checkLogging() {
+  return false;
+}
 
 export default function HomePage() {
   const { setPage } = usePage();
   return (
     <div className="global-container">
+      
+      <div className={`modal centered-vertical-aligment ${checkLogging() ? 'hide': ''}`}>
       <EnterModal />
-      <div className="blur">
-      <Header variant="logo-and-login-button"/>
-      <div className="container">      
+      </div>
+      <div className={checkLogging() ? "": "blur"}>
+
+
+      <Header variant={checkLogging()? "logo-and-avatar-and-create-room" : "logo-and-login-button"}/>
+      <div className="main-container">      
       <div className="secondary-container">
         <div className="left-aligment title-variant-1">Время</div>
         <div className="centered-aligment title-variant-2">
@@ -48,7 +57,7 @@ export default function HomePage() {
       <div className="right-aligment">
         <TextInput Text="Введите код приглашения" />
 
-        <button className="button-primary">Присоединиться</button>;
+        <button className="button-primary">Присоединиться</button>
       
         <span className="mx-1 text-gray-600">или</span>
 

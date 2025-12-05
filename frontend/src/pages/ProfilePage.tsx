@@ -8,7 +8,7 @@ export default function ProfilePage() {
   return (
     <div className="global-container"> 
     <Header />
-      <div className="container">  
+      <div className="main-container">  
         <div className="title-text">  
         Параметры профиля
         </div>
