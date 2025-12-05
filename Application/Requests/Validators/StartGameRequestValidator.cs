@@ -1,10 +1,10 @@
 using FluentValidation;
 
-namespace Application.Requests_Responses.Validators;
+namespace Application.Requests.Validators;
 
-public class LeaveRoomRequestValidator : AbstractValidator<LeaveRoomRequest>
+public class StartGameRequestValidator : AbstractValidator<StartGameRequest>
 {
-    public LeaveRoomRequestValidator()
+    public StartGameRequestValidator()
     {
         RuleFor(x => x.UserId)
             .NotEmpty().WithMessage("User ID is required");

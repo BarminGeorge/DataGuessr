@@ -5,8 +5,7 @@ namespace Application.Extensions;
 
 public static class HubValidationExtensions
 {
-    public static async Task<string?> ValidateRequestAsync<TRequest>(
-        this Hub hub, 
+    public static async Task<string?> ValidateRequestAsync<TRequest>(this Hub hub, 
         TRequest request, 
         CancellationToken ct = default)
     {

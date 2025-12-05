@@ -2,7 +2,7 @@ using Domain.Entities;
 using Domain.Enums;
 using Domain.ValueTypes;
 
-namespace Application.Requests_Responses;
+namespace Application.Requests;
 
 public record CreateRoomRequest(Guid UserId, RoomPrivacy Privacy, string? Password, int MaxPlayers);
 public record JoinRoomRequest(Guid UserId, Guid RoomId, string? Password);

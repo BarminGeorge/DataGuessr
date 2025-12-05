@@ -1,7 +1,7 @@
-using Application.Requests_Responses.Validators.ParameterValidators;
+using Application.Requests.Validators.ParameterValidators;
 using FluentValidation;
 
-namespace Application.Requests_Responses.Validators;
+namespace Application.Requests.Validators;
 
 public class CreateGuestRequestValidator : AbstractValidator<CreateGuestRequest>
 {

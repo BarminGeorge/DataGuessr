@@ -7,7 +7,7 @@ public static class OperationResultRetryExtensions
         int maxRetries = 3,
         TimeSpan delay = default)
     {
-        var result = OperationResult<TData>.Error("No results found");
+        var result = OperationResult<TData>.Error.NotFound();
 
         for (var attempt = 1; attempt <= maxRetries; attempt++)
         {
@@ -19,7 +19,7 @@ public static class OperationResultRetryExtensions
             }
             catch (Exception ex)
             {
-                result = OperationResult<TData>.Error(ex.ToString());
+                result = OperationResult<TData>.Error.ExternalServiceError(ex.Message);
                 if (attempt < maxRetries)
                     await Task.Delay(delay);
             }
@@ -33,7 +33,7 @@ public static class OperationResultRetryExtensions
         int maxRetries = 3,
         TimeSpan delay = default)
     {
-        var result = OperationResult.Error("No results found");
+        var result = OperationResult.Error.NotFound();
 
         for (var attempt = 1; attempt <= maxRetries; attempt++)
         {
@@ -45,7 +45,7 @@ public static class OperationResultRetryExtensions
             }
             catch (Exception ex)
             {
-                result = OperationResult.Error(ex.ToString());
+                result = OperationResult.Error.InternalError(ex.Message);
                 if (attempt < maxRetries)
                     await Task.Delay(delay);
             }

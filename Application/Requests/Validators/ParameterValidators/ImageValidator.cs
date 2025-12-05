@@ -1,7 +1,7 @@
 using Application.Extensions;
 using FluentValidation;
 
-namespace Application.Requests_Responses.Validators.ParameterValidators;
+namespace Application.Requests.Validators.ParameterValidators;
 
 public class ImageValidator : AbstractValidator<IFormFile>
 {

@@ -16,7 +16,7 @@ public class UserService(
         var operation = () => avatarRepository.SaveUserAvatarAsync(image, ct);
         var result = await operation.WithRetry(3, TimeSpan.FromSeconds(0.15));
         if (!result.Success || result.ResultObj == null)
-            return OperationResult.Error($"{login} failed to register.");
+            return result;
         
         var user = new User(login, playerName, result.ResultObj, hashedPassword);
         return await usersRepository.AddAsync(user, ct);
@@ -26,11 +26,11 @@ public class UserService(
     {
         var getUserResult = await usersRepository.GetByLoginAsync(login, ct);
         if (getUserResult.ResultObj?.PasswordHash == null) 
-            return OperationResult<string>.Error(getUserResult.ErrorMsg);
+            return getUserResult.ConvertToOperationResult<string>();
         
         var result = passwordHasher.VerifyAsync(password, getUserResult.ResultObj.PasswordHash);
         if (!result)
-            return OperationResult<string>.Error("Invalid username or password.");
+            return OperationResult<string>.Error.InternalError("Invalid username or password.");
         
         var token = provider.GenerateTokenAsync(getUserResult.ResultObj);
         
@@ -42,7 +42,7 @@ public class UserService(
         var operation = () => avatarRepository.SaveUserAvatarAsync(avatar, ct);
         var avatarResult = await operation.WithRetry(3, TimeSpan.FromSeconds(0.2));
         if (!avatarResult.Success || avatarResult.ResultObj == null)
-            return OperationResult.Error(avatarResult.ErrorMsg);
+            return avatarResult;
 
         return await OperationResult.TryAsync(() =>
             usersRepository.UpdateUserAsync(userId, avatarResult.ResultObj, playerName, ct));
@@ -53,7 +53,7 @@ public class UserService(
         var operation = () => avatarRepository.SaveUserAvatarAsync(image, ct);
         var result = await operation.WithRetry(3, TimeSpan.FromSeconds(0.2));
         if (!result.Success || result.ResultObj == null)
-            return OperationResult<User>.Error(result.ErrorMsg);
+            return result.ConvertToOperationResult<User>();
 
         var avatar = result.ResultObj;
         var user = new User(playerName, avatar);

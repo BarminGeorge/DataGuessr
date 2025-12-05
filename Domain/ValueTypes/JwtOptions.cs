@@ -1,4 +1,4 @@
-﻿namespace Infrastructure.ValueTypes;
+﻿namespace Domain.ValueTypes;
 
 public class JwtOptions
 {

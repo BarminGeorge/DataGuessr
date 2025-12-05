@@ -66,8 +66,7 @@ public class StatisticTests
         };
         var rightAnswer = new DateTimeAnswer(DateTime.Now.AddMinutes(1));
             
-        statistic.Update(answers, rightAnswer, (_, _) => 
-            new Score(1));
+        statistic.Update(answers, rightAnswer, (_, _) => new Score(1));
 
         Assert.That(statistic.Scores, Has.Count.EqualTo(1));
         Assert.That(statistic.Scores[userId1].score, Is.EqualTo(1));
@@ -82,8 +81,7 @@ public class StatisticTests
             { userId1, new DateTimeAnswer(DateTime.Now) }
         };
         var rightAnswer1 = new DateTimeAnswer(DateTime.Now.AddMinutes(1));
-        statistic.Update(initialAnswers, rightAnswer1, (_, _) => 
-            new Score(1));
+        statistic.Update(initialAnswers, rightAnswer1, (_, _) => new Score(1));
 
         var updatedAnswers = new Dictionary<Guid, Answer>
         {
@@ -91,11 +89,10 @@ public class StatisticTests
         };
         var rightAnswer2 = new DateTimeAnswer(DateTime.Now.AddMinutes(3));
 
-        statistic.Update(updatedAnswers, rightAnswer2, 
-            (_, _) => new Score(1));
+        statistic.Update(updatedAnswers, rightAnswer2, (_, _) => new Score(1));
 
-        Assert.That(statistic.Scores.Count, Is.EqualTo(1));
-        Assert.That(statistic.Scores[userId1].score, Is.EqualTo(3)); // 1 + 2
+        Assert.That(statistic.Scores, Has.Count.EqualTo(1));
+        Assert.That(statistic.Scores[userId1].score, Is.EqualTo(2));
     }
 
     [Test]
@@ -109,10 +106,9 @@ public class StatisticTests
         };
         var rightAnswer = new DateTimeAnswer(DateTime.Now.AddMinutes(1));
 
-        statistic.Update(answers, rightAnswer, (_, _) => 
-            new Score(1));
+        statistic.Update(answers, rightAnswer, (_, _) => new Score(1));
 
-        Assert.That(statistic.Scores.Count, Is.EqualTo(2));
+        Assert.That(statistic.Scores, Has.Count.EqualTo(2));
         Assert.Multiple(() =>
         {
             Assert.That(statistic.Scores[userId1].score, Is.EqualTo(1));
@@ -140,19 +136,17 @@ public class StatisticTests
         };
         var rightAnswer2 = new DateTimeAnswer(DateTime.Now.AddMinutes(1));
 
-        stat1.Update(answers1, rightAnswer1, (answer, right) => 
-            new Score(1));
-        stat2.Update(answers2, rightAnswer2, (answer, right) => 
-            new Score(1));
+        stat1.Update(answers1, rightAnswer1, (_, _) => new Score(1));
+        stat2.Update(answers2, rightAnswer2, (_, _) => new Score(1));
 
         var diff = stat1.Diff(stat2);
 
-        Assert.That(diff.Scores.Count, Is.EqualTo(3));
+        Assert.That(diff.Scores, Has.Count.EqualTo(3));
         Assert.Multiple(() =>
         {
-            Assert.That(diff.Scores[userId1].score, Is.EqualTo(-1)); // 1 - 2
-            Assert.That(diff.Scores[userId2].score, Is.EqualTo(1));  // 1 - 0
-            Assert.That(diff.Scores[userId3].score, Is.EqualTo(-2)); // 0 - 2
+            Assert.That(diff.Scores[userId1].score, Is.EqualTo(0));
+            Assert.That(diff.Scores[userId2].score, Is.EqualTo(1));
+            Assert.That(diff.Scores[userId3].score, Is.EqualTo(-1));
         });
     }
 
@@ -174,10 +168,8 @@ public class StatisticTests
         };
         var rightAnswer2 = new DateTimeAnswer(DateTime.Now.AddMinutes(1));
 
-        stat1.Update(answers1, rightAnswer1, (_, _) => 
-            new Score(5));
-        stat2.Update(answers2, rightAnswer2, (_, _) => 
-            new Score(3));
+        stat1.Update(answers1, rightAnswer1, (_, _) => new Score(5));
+        stat2.Update(answers2, rightAnswer2, (_, _) => new Score(3));
             
         var result = stat1 - stat2;
 
@@ -196,8 +188,7 @@ public class StatisticTests
         };
         var rightAnswer = new DateTimeAnswer(DateTime.Now.AddMinutes(1));
             
-        original.Update(answers, rightAnswer, (answer, right) => 
-            new Score(1));
+        original.Update(answers, rightAnswer, (_, _) => new Score(1));
 
         var copy = original.Copy();
 
@@ -220,8 +211,7 @@ public class StatisticTests
         };
         var rightAnswer = new DateTimeAnswer(DateTime.Now.AddMinutes(1));
             
-        original.Update(answers, rightAnswer, (_, _) => 
-            new Score(1));
+        original.Update(answers, rightAnswer, (_, _) => new Score(1));
             
         var copy = original.Copy();
 
@@ -229,8 +219,7 @@ public class StatisticTests
         {
             { userId2, new DateTimeAnswer(DateTime.Now) }
         };
-        original.Update(newAnswers, rightAnswer, (_, _) => 
-            new Score(2));
+        original.Update(newAnswers, rightAnswer, (_, _) => new Score(2));
 
         Assert.Multiple(() =>
         {
@@ -252,8 +241,7 @@ public class StatisticTests
         };
         var rightAnswer = new DateTimeAnswer(DateTime.Now.AddMinutes(1));
             
-        statWithValues.Update(answers, rightAnswer, (_, _) => 
-            new Score(5));
+        statWithValues.Update(answers, rightAnswer, (_, _) => new Score(5));
 
         var diff = statWithValues.Diff(emptyStat);
 

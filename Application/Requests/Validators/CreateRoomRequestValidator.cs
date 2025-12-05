@@ -1,8 +1,8 @@
-using Application.Requests_Responses.Validators.ParameterValidators;
+using Application.Requests.Validators.ParameterValidators;
 using Domain.Enums;
 using FluentValidation;
 
-namespace Application.Requests_Responses.Validators;
+namespace Application.Requests.Validators;
 
 public class CreateRoomRequestValidator : AbstractValidator<CreateRoomRequest>
 {

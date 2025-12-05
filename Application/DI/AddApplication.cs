@@ -1,8 +1,8 @@
 using Application.Interfaces;
 using Application.Notifications;
-using Application.Requests_Responses;
-using Application.Requests_Responses.Validators;
-using Application.Requests_Responses.Validators.ParameterValidators;
+using Application.Requests;
+using Application.Requests.Validators;
+using Application.Requests.Validators.ParameterValidators;
 using Application.Services;
 using FluentValidation;
 using SharpGrip.FluentValidation.AutoValidation.Endpoints.Extensions;

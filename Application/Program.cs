@@ -1,11 +1,14 @@
+using System.Text.Json.Serialization;
 using Application.DI;
 using Application.EndPoints;
 using Application.Interfaces;
 using Application.Endpoints.Hubs;
+using Application.Filters;
+using Domain.Common;
+using Domain.ValueTypes;
 using Hangfire;
 using Hangfire.PostgreSql;
 using Infrastructure.DI;
-using Infrastructure.ValueTypes;
 using Microsoft.AspNetCore.CookiePolicy;
 
 var builder = WebApplication.CreateBuilder(args);
@@ -19,9 +22,9 @@ services.AddInfrastructure(configuration);
 
 services.AddAntiforgery();
 
-//services.AddHangfire(config => config.UsePostgreSqlStorage(configuration.GetConnectionString("DefaultConnection")));
+services.AddHangfire(config => config.UsePostgreSqlStorage(configuration.GetConnectionString("DefaultConnection")));
 
-//services.AddHangfireServer();
+services.AddHangfireServer();
 
 services.AddCors(options =>
 {
@@ -46,8 +49,15 @@ services.AddAuthentication(_ =>
     });
 
 services.AddEndpointsApiExplorer();
-services.AddSwaggerGen();
-services.AddControllers();
+services.AddSwaggerGen(options =>
+{
+    options.UseInlineDefinitionsForEnums();
+});
+services.AddControllers()
+    .AddJsonOptions(options =>
+    {
+        options.JsonSerializerOptions.Converters.Add(new JsonStringEnumConverter());
+    });
 
 var app = builder.Build();
 
@@ -76,7 +86,7 @@ app.UseAuthentication();
 app.UseAuthorization();
 app.UseAntiforgery();
 
-//app.UseHangfireDashboard("/hangfire");
+app.UseHangfireDashboard("/hangfire");
 
 app.MapGet("/api", () => "Hello World!");
 app.MapUserEndpoints();
@@ -85,14 +95,14 @@ app.MapHub<AppHub>("/appHub");
 
 app.MapControllers();
 
-// RecurringJob.AddOrUpdate<IGuestCleanupService>(
-//     "cleanup-orphaned-guests",
-//     service => service.CleanupOrphanedGuestsAsync(CancellationToken.None),
-//     Cron.Hourly);
-//
-// RecurringJob.AddOrUpdate<IGuestCleanupService>(
-//     "cleanup-expired-rooms",
-//     service => service.CleanupExpiredRoomsAsync(CancellationToken.None),
-//     Cron.Daily);
+RecurringJob.AddOrUpdate<IGuestCleanupService>(
+   "cleanup-orphaned-guests",
+    service => service.CleanupOrphanedGuestsAsync(CancellationToken.None),
+    Cron.Hourly);
+
+RecurringJob.AddOrUpdate<IGuestCleanupService>(
+    "cleanup-expired-rooms",
+    service => service.CleanupExpiredRoomsAsync(CancellationToken.None),
+    Cron.Daily);
 
 app.Run();

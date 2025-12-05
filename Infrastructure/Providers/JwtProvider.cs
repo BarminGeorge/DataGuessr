@@ -2,8 +2,8 @@
 using System.Security.Claims;
 using System.Text;
 using Domain.Entities;
+using Domain.ValueTypes;
 using Infrastructure.Interfaces;
-using Infrastructure.ValueTypes;
 using Microsoft.Extensions.Options;
 using Microsoft.IdentityModel.Tokens;
 

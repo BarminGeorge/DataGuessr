@@ -1,5 +1,4 @@
 ﻿using Domain.Entities;
-using Domain.ValueTypes;
 using Microsoft.EntityFrameworkCore;
 
 namespace Infrastructure.PostgreSQL;

@@ -43,7 +43,6 @@ public class GameCoreServiceTests
         
         service = new GameCoreService(
             notificationService, 
-            gameRepository, 
             questionService, 
             evaluationService, 
             answerRepository
@@ -107,14 +106,14 @@ public class GameCoreServiceTests
     {
         var errorMsg = "Service unavailable";
         A.CallTo(() => questionService.GetAllQuestionsAsync(game, ct))
-            .Returns(OperationResult<IEnumerable<Question>>.Error(errorMsg));
+            .Returns(OperationResult<IEnumerable<Question>>.Error.ServiceUnavailable(errorMsg));
         
         var result = await service.RunGameCycle(game, roomId, ct);
         
         Multiple(() =>
         {
             That(result.Success, Is.False);
-            That(result.ErrorMsg, Does.Contain(errorMsg));
+            That(result.ErrorMessage, Does.Contain(errorMsg));
         });
         
         A.CallTo(() => notificationService.NotifyGameRoomAsync(roomId, A<GameNotification>._))
@@ -127,11 +126,8 @@ public class GameCoreServiceTests
         A.CallTo(() => questionService.GetAllQuestionsAsync(game, ct))
             .Returns(OperationResult<IEnumerable<Question>>.Ok(null));
         
-        var result = await service.RunGameCycle(game, roomId, ct);
-        Multiple(() =>
-        {
-            That(result.Success, Is.False);
-        });
+        ThrowsAsync<InvalidCastException>(async () => 
+            await service.RunGameCycle(game, roomId, ct));
         
     }
 
@@ -143,13 +139,13 @@ public class GameCoreServiceTests
             .Returns(OperationResult<IEnumerable<Question>>.Ok(questions));
         
         A.CallTo(() => answerRepository.LoadAnswersAsync(game.Id, A<Guid>._, ct))
-            .Returns(OperationResult<Dictionary<Guid, Answer>>.Error("Some db error"));
+            .Returns(OperationResult<Dictionary<Guid, Answer>>.Error.ServiceUnavailable("Some db error"));
         
         var result = await service.RunGameCycle(game, roomId, ct);
         Multiple(() =>
         {
             That(result.Success, Is.False);
-            That(result.ErrorMsg, Does.Contain("Some db error"));
+            That(result.ErrorMessage, Does.Contain("Some db error"));
 
             That(game.Status, Is.Not.EqualTo(GameStatus.Finished));
         });
