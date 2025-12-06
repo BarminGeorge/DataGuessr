@@ -8,6 +8,7 @@ namespace Infrastructure.PostgreSQL.Repositories;
 public class QuestionRepository : IQuestionRepository
 {
     private readonly AppDbContext db;
+    private readonly TimeSpan retryDelay = TimeSpan.FromMilliseconds(100);
 
     public QuestionRepository(AppDbContext db)
     {
@@ -16,10 +17,10 @@ public class QuestionRepository : IQuestionRepository
 
     public async Task<OperationResult<IEnumerable<Question>>> GetUniqQuestionsAsync(int count, CancellationToken ct)
     {
-        return await OperationResult<IEnumerable<Question>>.TryAsync(async () =>
+        var operation = new Func<Task<OperationResult<IEnumerable<Question>>>>(async () =>
         {
             if (count <= 0)
-                throw new ArgumentOutOfRangeException(nameof(count), "Count must be greater than zero.");
+                return OperationResult<IEnumerable<Question>>.Error.Validation(" оличество вопросов должно быть больше нул€");
 
             var allIds = await db.Questions
                 .AsNoTracking()
@@ -27,7 +28,7 @@ public class QuestionRepository : IQuestionRepository
                 .ToListAsync(ct);
 
             if (allIds.Count == 0)
-                throw new InvalidOperationException("No questions found in the database.");
+                return OperationResult<IEnumerable<Question>>.Error.NotFound("¬опросы не найдены в базе данных");
 
             if (count > allIds.Count)
                 count = allIds.Count;
@@ -40,7 +41,10 @@ public class QuestionRepository : IQuestionRepository
                 .Where(q => selectedIds.Contains(q.Id))
                 .ToListAsync(ct);
 
-            return questions;
+            return OperationResult<IEnumerable<Question>>.Ok(questions);
+
         });
+
+        return await operation.WithRetry(maxRetries: 3, delay: retryDelay);
     }
 }

@@ -18,24 +18,29 @@ public class RoomRepository : IRoomRepository
 
     public async Task<OperationResult<Room>> GetByIdAsync(Guid id, CancellationToken ct)
     {
-        Func<Task<OperationResult<Room>>> operation = async () =>
+        var operation = new Func<Task<OperationResult<Room>>>(async () =>
         {
+            if (id == Guid.Empty)
+                return OperationResult<Room>.Error.Validation("Id не может быть пустым GUID");
+
             var room = await db.Rooms
                 .AsNoTracking()
                 .Include(r => r.Players)
                 .Include(r => r.Games)
-                .FirstOrDefaultAsync(r => r.Id == id, ct)
-                ?? throw new KeyNotFoundException($"Комната с ID '{id}' не найдена");
+                .FirstOrDefaultAsync(r => r.Id == id, ct);
+
+            if (room == null)
+                return OperationResult<Room>.Error.NotFound($"Комната с ID '{id}' не найдена");
 
             return OperationResult<Room>.Ok(room);
-        };
+        });
 
-        return await operation.WithRetry(maxRetries: 3, retryDelay);
+        return await operation.WithRetry(maxRetries: 3, delay: retryDelay);
     }
 
     public async Task<OperationResult<IEnumerable<Room>>> GetWaitingPublicRoomsAsync(CancellationToken ct)
     {
-        Func<Task<OperationResult<IEnumerable<Room>>>> operation = async () =>
+        var operation = new Func<Task<OperationResult<IEnumerable<Room>>>>(async () =>
         {
             var rooms = await db.Rooms
                 .AsNoTracking()
@@ -46,81 +51,94 @@ public class RoomRepository : IRoomRepository
                 .ToListAsync(ct);
 
             return OperationResult<IEnumerable<Room>>.Ok(rooms);
-        };
+        });
 
-        return await operation.WithRetry(maxRetries: 3, retryDelay);
+        return await operation.WithRetry(maxRetries: 3, delay: retryDelay);
     }
 
     public async Task<OperationResult> AddAsync(Room room, CancellationToken ct)
     {
-        Func<Task<OperationResult>> operation = async () =>
+        var operation = new Func<Task<OperationResult>>(async () =>
         {
             if (room == null)
-                throw new ArgumentNullException(nameof(room));
+                return OperationResult.Error.Validation("Комната не может быть null");
 
             await db.Rooms.AddAsync(room, ct);
             await db.SaveChangesAsync(ct);
 
             return OperationResult.Ok();
-        };
+        });
 
-        return await operation.WithRetry(maxRetries: 3, retryDelay);
+        return await operation.WithRetry(maxRetries: 3, delay: retryDelay);
     }
 
     public async Task<OperationResult> UpdateAsync(Room room, CancellationToken ct)
     {
-        Func<Task<OperationResult>> operation = async () =>
+        var operation = new Func<Task<OperationResult>>(async () =>
         {
             if (room == null)
-                throw new ArgumentNullException(nameof(room));
+                return OperationResult.Error.Validation("Комната не может быть null");
+
+            if (room.Id == Guid.Empty)
+                return OperationResult.Error.Validation("Id комнаты не может быть пустым GUID");
 
             var existingRoom = await db.Rooms.AnyAsync(r => r.Id == room.Id, ct);
             if (!existingRoom)
-                throw new KeyNotFoundException($"Комната с ID '{room.Id}' не найдена");
+                return OperationResult.Error.NotFound($"Комната с ID '{room.Id}' не найдена");
 
             db.Rooms.Update(room);
             await db.SaveChangesAsync(ct);
 
             return OperationResult.Ok();
-        };
+        });
 
-        return await operation.WithRetry(maxRetries: 3, retryDelay);
+        return await operation.WithRetry(maxRetries: 3, delay: retryDelay);
     }
 
     public async Task<OperationResult> RemoveAsync(Guid roomId, CancellationToken ct)
     {
-        Func<Task<OperationResult>> operation = async () =>
+        var operation = new Func<Task<OperationResult>>(async () =>
         {
+            if (roomId == Guid.Empty)
+                return OperationResult.Error.Validation("RoomId не может быть пустым GUID");
+
             var room = await db.Rooms
-                .FirstOrDefaultAsync(r => r.Id == roomId, ct)
-                ?? throw new KeyNotFoundException($"Комната с ID '{roomId}' не найдена");
+                .FirstOrDefaultAsync(r => r.Id == roomId, ct);
+
+            if (room == null)
+                return OperationResult.Error.NotFound($"Комната с ID '{roomId}' не найдена");
 
             db.Rooms.Remove(room);
             await db.SaveChangesAsync(ct);
 
             return OperationResult.Ok();
-        };
+        });
 
-        return await operation.WithRetry(maxRetries: 3, retryDelay);
+        return await operation.WithRetry(maxRetries: 3, delay: retryDelay);
     }
 
     public async Task<OperationResult<Game>> GetCurrentGameAsync(Guid roomId, CancellationToken ct)
     {
-        Func<Task<OperationResult<Game>>> operation = async () =>
+        var operation = new Func<Task<OperationResult<Game>>>(async () =>
         {
+            if (roomId == Guid.Empty)
+                return OperationResult<Game>.Error.Validation("RoomId не может быть пустым GUID");
+
             var roomExists = await db.Rooms.AnyAsync(r => r.Id == roomId, ct);
             if (!roomExists)
-                throw new KeyNotFoundException($"Комната с ID '{roomId}' не найдена");
+                return OperationResult<Game>.Error.NotFound($"Комната с ID '{roomId}' не найдена");
 
             var game = await db.Games
                 .Where(g => g.RoomId == roomId && g.Status != GameStatus.Finished)
                 .Include(g => g.Questions)
-                .FirstOrDefaultAsync(ct)
-                ?? throw new KeyNotFoundException("Активная игра в комнате не найдена");
+                .FirstOrDefaultAsync(ct);
+
+            if (game == null)
+                return OperationResult<Game>.Error.NotFound("Активная игра в комнате не найдена");
 
             return OperationResult<Game>.Ok(game);
-        };
+        });
 
-        return await operation.WithRetry(maxRetries: 3, retryDelay);
+        return await operation.WithRetry(maxRetries: 3, delay: retryDelay);
     }
 }
