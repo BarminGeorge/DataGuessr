@@ -17,47 +17,49 @@ public class UserRepository : IUserRepository
 
     public async Task<OperationResult> AddAsync(User user, CancellationToken ct)
     {
-        Func<Task<OperationResult>> operation = async () =>
+        var operation = new Func<Task<OperationResult>>(async () =>
         {
             if (user == null)
-                throw new ArgumentNullException(nameof(user));
+                return OperationResult.Error.Validation("Пользователь не может быть null");
 
-            if (!string.IsNullOrEmpty(user.Login))
-            {
-                var existingUser = await db.Users
-                    .AsNoTracking()
-                    .FirstOrDefaultAsync(u => u.Login == user.Login, ct);
+            if (string.IsNullOrEmpty(user.Login))
+                return OperationResult.Error.Validation("Логин не может быть пустым");
 
-                if (existingUser != null)
-                    throw new InvalidOperationException($"Пользователь с логином '{user.Login}' уже существует");
-            }
+            var existingUser = await db.Users
+                .AsNoTracking()
+                .FirstOrDefaultAsync(u => u.Login == user.Login, ct);
+
+            if (existingUser != null)
+                return OperationResult.Error.AlreadyExists($"Пользователь с логином '{user.Login}' уже существует");
 
             await db.Users.AddAsync(user, ct);
             await db.SaveChangesAsync(ct);
 
             return OperationResult.Ok();
-        };
+        });
 
-        return await operation.WithRetry(maxRetries: 3, retryDelay);
+        return await operation.WithRetry(maxRetries: 3, delay: retryDelay);
     }
 
     public async Task<OperationResult<User>> GetByLoginAsync(string login, CancellationToken ct)
     {
-        Func<Task<OperationResult<User>>> operation = async () =>
+        var operation = new Func<Task<OperationResult<User>>>(async () =>
         {
             if (string.IsNullOrWhiteSpace(login))
-                throw new ArgumentException("Login не может быть пустым", nameof(login));
+                return OperationResult<User>.Error.Validation("Логин не может быть пустым");
 
             var user = await db.Users
                 .AsNoTracking()
                 .Include(u => u.Avatar)
-                .FirstOrDefaultAsync(u => u.Login == login, ct)
-                ?? throw new KeyNotFoundException($"Пользователь с логином '{login}' не найден");
+                .FirstOrDefaultAsync(u => u.Login == login, ct);
+
+            if (user == null)
+                return OperationResult<User>.Error.NotFound($"Пользователь с логином '{login}' не найден");
 
             return OperationResult<User>.Ok(user);
-        };
+        });
 
-        return await operation.WithRetry(maxRetries: 3, retryDelay);
+        return await operation.WithRetry(maxRetries: 3, delay: retryDelay);
     }
 
     public async Task<OperationResult> UpdateUserAsync(
@@ -66,51 +68,59 @@ public class UserRepository : IUserRepository
         string playerName,
         CancellationToken ct)
     {
-        Func<Task<OperationResult>> operation = async () =>
+        var operation = new Func<Task<OperationResult>>(async () =>
         {
+            if (userId == Guid.Empty)
+                return OperationResult.Error.Validation("UserId не может быть пустым GUID");
+
             if (string.IsNullOrWhiteSpace(playerName))
-                throw new ArgumentException("PlayerName не может быть пустым", nameof(playerName));
+                return OperationResult.Error.Validation("PlayerName не может быть пустым");
 
             if (avatar == null)
-                throw new ArgumentNullException(nameof(avatar));
+                return OperationResult.Error.Validation("Avatar не может быть null");
 
             var user = await db.Users
                 .Include(u => u.Avatar)
-                .FirstOrDefaultAsync(u => u.Id == userId, ct)
-                ?? throw new KeyNotFoundException($"Пользователь с ID '{userId}' не найден");
+                .FirstOrDefaultAsync(u => u.Id == userId, ct);
+
+            if (user == null)
+                return OperationResult.Error.NotFound($"Пользователь с ID '{userId}' не найден");
 
             var oldAvatar = user.Avatar;
 
             user.UpdateProfile(playerName, avatar);
 
             if (oldAvatar != null)
-            {
                 db.Avatars.Remove(oldAvatar);
-            }
 
             db.Users.Update(user);
             await db.SaveChangesAsync(ct);
 
             return OperationResult.Ok();
-        };
+        });
 
-        return await operation.WithRetry(maxRetries: 3, retryDelay);
+        return await operation.WithRetry(maxRetries: 3, delay: retryDelay);
     }
 
     public async Task<OperationResult<string>> GetPlayerNameByIdAsync(Guid playerId, CancellationToken ct)
     {
-        Func<Task<OperationResult<string>>> operation = async () =>
+        var operation = new Func<Task<OperationResult<string>>>(async () =>
         {
+            if (playerId == Guid.Empty)
+                return OperationResult<string>.Error.Validation("PlayerId не может быть пустым GUID");
+
             var playerName = await db.Users
                 .AsNoTracking()
                 .Where(u => u.Id == playerId)
                 .Select(u => u.PlayerName)
-                .FirstOrDefaultAsync(ct)
-                ?? throw new KeyNotFoundException($"Пользователь с ID '{playerId}' не найден");
+                .FirstOrDefaultAsync(ct);
+
+            if (string.IsNullOrEmpty(playerName))
+                return OperationResult<string>.Error.NotFound($"Пользователь с ID '{playerId}' не найден");
 
             return OperationResult<string>.Ok(playerName);
-        };
+        });
 
-        return await operation.WithRetry(maxRetries: 3, retryDelay);
+        return await operation.WithRetry(maxRetries: 3, delay: retryDelay);
     }
 }

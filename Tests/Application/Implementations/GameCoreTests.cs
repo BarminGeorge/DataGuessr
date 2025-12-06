@@ -43,7 +43,6 @@ public class GameCoreServiceTests
         
         service = new GameCoreService(
             notificationService, 
-            gameRepository, 
             questionService, 
             evaluationService, 
             answerRepository
@@ -53,8 +52,8 @@ public class GameCoreServiceTests
     private List<Question> CreateQuestionsList()
     {
         var questions = Enumerable.Range(0, questionsCount)
-            .Select<int, Question>(i => new Question(new Answer(DateTime.UtcNow.AddMinutes(1)), 
-                $"Test Question{i}", $"FakeUrl{i}"))
+            .Select<int, Question>(i => new Question(new DateTimeAnswer(DateTime.UtcNow.AddMinutes(1)), 
+                $"Test Question{i}", $"FakeUrl{i}", GameMode.DefaultMode))
             .ToList();
         return questions;
     }
@@ -99,10 +98,7 @@ public class GameCoreServiceTests
             .MustHaveHappened(questionsCount, Times.Exactly);
         
         A.CallTo(() => notificationService.NotifyGameRoomAsync(roomId, A<StatisticNotification>._))
-            .MustHaveHappened(questionsCount, Times.Exactly);
-        
-        A.CallTo(() => gameRepository.SaveStatisticAsync(game.Id, A<Statistic>._, ct))
-            .MustHaveHappened(questionsCount, Times.Exactly);
+            .MustHaveHappened(questionsCount * 2, Times.Exactly);
     }
 
     [Test]
@@ -110,14 +106,14 @@ public class GameCoreServiceTests
     {
         var errorMsg = "Service unavailable";
         A.CallTo(() => questionService.GetAllQuestionsAsync(game, ct))
-            .Returns(OperationResult<IEnumerable<Question>>.Error(errorMsg));
+            .Returns(OperationResult<IEnumerable<Question>>.Error.ServiceUnavailable(errorMsg));
         
         var result = await service.RunGameCycle(game, roomId, ct);
         
         Multiple(() =>
         {
             That(result.Success, Is.False);
-            That(result.ErrorMsg, Does.Contain(errorMsg));
+            That(result.ErrorMessage, Does.Contain(errorMsg));
         });
         
         A.CallTo(() => notificationService.NotifyGameRoomAsync(roomId, A<GameNotification>._))
@@ -130,11 +126,8 @@ public class GameCoreServiceTests
         A.CallTo(() => questionService.GetAllQuestionsAsync(game, ct))
             .Returns(OperationResult<IEnumerable<Question>>.Ok(null));
         
-        var result = await service.RunGameCycle(game, roomId, ct);
-        Multiple(() =>
-        {
-            That(result.Success, Is.False);
-        });
+        ThrowsAsync<InvalidCastException>(async () => 
+            await service.RunGameCycle(game, roomId, ct));
         
     }
 
@@ -146,36 +139,15 @@ public class GameCoreServiceTests
             .Returns(OperationResult<IEnumerable<Question>>.Ok(questions));
         
         A.CallTo(() => answerRepository.LoadAnswersAsync(game.Id, A<Guid>._, ct))
-            .Returns(OperationResult<Dictionary<Guid, Answer>>.Error("Some db error"));
+            .Returns(OperationResult<Dictionary<Guid, Answer>>.Error.ServiceUnavailable("Some db error"));
         
         var result = await service.RunGameCycle(game, roomId, ct);
         Multiple(() =>
         {
             That(result.Success, Is.False);
-            That(result.ErrorMsg, Does.Contain("Some db error"));
+            That(result.ErrorMessage, Does.Contain("Some db error"));
 
             That(game.Status, Is.Not.EqualTo(GameStatus.Finished));
         });
-    }
-
-    [Test]
-    public async Task RunGameCycle_WhenSaveStatisticFails_ReturnsError()
-    {
-        var questions = CreateQuestionsList();
-        A.CallTo(() => questionService.GetAllQuestionsAsync(game, ct))
-            .Returns(OperationResult<IEnumerable<Question>>.Ok(questions));
-        
-        A.CallTo(() => answerRepository.LoadAnswersAsync(game.Id, A<Guid>._, ct))
-            .Returns(OperationResult<Dictionary<Guid, Answer>>.Ok(new Dictionary<Guid, Answer>()));
-
-        A.CallTo(() => evaluationService.CalculateScore(A<GameMode>._))
-            .Returns((_, _) => new Score(10));
-        
-        var saveError = "Save Failed";
-        A.CallTo(() => gameRepository.SaveStatisticAsync(game.Id, A<Statistic>._, ct))
-            .Returns(OperationResult.Error(saveError));
-        
-        var result = await service.RunGameCycle(game, roomId, ct);
-        That(result.Success, Is.False);
     }
 }

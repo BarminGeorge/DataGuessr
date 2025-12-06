@@ -1,13 +1,18 @@
 using Application.DtoUI;
+using Application.Extensions;
 using Application.Mappers;
-using Application.Requests_Responses;
+using Application.Requests;
+using Domain.Common;
 
 namespace Application.Endpoints.Hubs;
 
 public partial class AppHub
 {
-    public async Task<DataResponse<GameDto>> CreateGame(CreateGameRequest request, CancellationToken ct = default)
+    public async Task<OperationResult<GameDto>> CreateGame(CreateGameRequest request, CancellationToken ct = default)
     {
+        if (await this.ValidateRequestAsync(request, ct) is { } error)
+            return OperationResult<GameDto>.Error.Validation(error);
+        
         var result = await gameManager.CreateNewGameAsync(
             request.RoomId, 
             request.UserId, 
@@ -18,31 +23,34 @@ public partial class AppHub
             request.Questions);
 
         return result is { Success: true, ResultObj: not null }
-            ? DataResponse<GameDto>.CreateSuccess(result.ResultObj.ToDto())
-            : DataResponse<GameDto>.CreateFailure(result.ErrorMsg);
+            ? OperationResult<GameDto>.Ok(result.ResultObj.ToDto())
+            : result.ConvertToOperationResult<GameDto>();
     }
 
-    public async Task<EmptyResponse> StartGame(StartGameRequest request, CancellationToken ct = default)
+    public async Task<OperationResult> StartGame(StartGameRequest request, CancellationToken ct = default)
     {
-        var result = await gameManager.StartNewGameAsync(request.RoomId, request.UserId, ct);
-        return result.Success
-            ? EmptyResponse.CreateSuccess()
-            : EmptyResponse.CreateFailure(result.ErrorMsg);
+        if (await this.ValidateRequestAsync(request, ct) is { } error)
+            return OperationResult.Error.Validation(error);
+        
+        return await gameManager.StartNewGameAsync(request.RoomId, request.UserId, ct);
     }
 
-    public async Task<EmptyResponse> SubmitAnswer(SubmitAnswerRequest request, CancellationToken ct = default)
+    public async Task<OperationResult> SubmitAnswer(SubmitAnswerRequest request, CancellationToken ct = default)
     {
-        var result = await gameManager.SubmitAnswerAsync(request.GameId, request.QuestionId, request.PlayerId, request.Answer, ct);
-        return result.Success
-            ? EmptyResponse.CreateSuccess()
-            : EmptyResponse.CreateFailure(result.ErrorMsg);
+        if (await this.ValidateRequestAsync(request, ct) is { } error)
+            return OperationResult.Error.Validation(error);
+        
+        return await gameManager.SubmitAnswerAsync(request.GameId, request.QuestionId, request.PlayerId, request.Answer, ct);
     }
 
-    public async Task<DataResponse<RoomDto>> FinishGame(FinishGameRequest request, CancellationToken ct = default)
+    public async Task<OperationResult<RoomDto>> FinishGame(FinishGameRequest request, CancellationToken ct = default)
     {
+        if (await this.ValidateRequestAsync(request, ct) is { } error)
+            return OperationResult<RoomDto>.Error.Validation(error);
+        
         var result = await gameManager.FinishGameAsync(request.UserId, request.RoomId, ct);
         return result is { Success: true, ResultObj: not null }
-            ? DataResponse<RoomDto>.CreateSuccess(result.ResultObj.ToDto())
-            : DataResponse<RoomDto>.CreateFailure(result.ErrorMsg);
+            ? OperationResult<RoomDto>.Ok(result.ResultObj.ToDto())
+            : result.ConvertToOperationResult<RoomDto>();
     }
 }

@@ -16,7 +16,7 @@ public class QuestionService(
             return OperationResult<IEnumerable<Question>>.Ok(game.Questions);
         
         var count = game.QuestionsCount;
-        return await questionRepository.GetUniqQuestionsAsync(count, ct);
+        return await questionRepository.GetUniqQuestionsAsync(count, game.Mode, ct);
     }
 
     public async Task<OperationResult> SubmitAnswerAsync(Guid gameId, Guid questionId, Guid playerId, Answer answer, CancellationToken ct)

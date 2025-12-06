@@ -17,46 +17,42 @@ public class GameManager(
     ILogger<GameManager> logger)
     : IGameManager
 {
-    private static bool IsOwnerRoom(Room? room, Guid userId)
-    {
-        if (room == null) 
-            return false;
-
-        return room.Owner == userId;
-    }
+    private static bool IsOwnerRoom(Room room, Guid userId) => room.Owner == userId;
     
     private async Task<OperationResult> CanStartGameAsync(Guid roomId, Guid userId, CancellationToken ct)
     {
         var getRoomResult = await roomRepository.GetByIdAsync(roomId, ct);
-        if (!getRoomResult.Success)
-            return OperationResult.Error(getRoomResult.ErrorMsg);
+        if (!getRoomResult.Success || getRoomResult.ResultObj == null)
+            return getRoomResult;
+        
         var room = getRoomResult.ResultObj;
 
         var canStart = IsOwnerRoom(room, userId) && room.Players.Count >= 2;
         var errMessage = canStart ? "" : "You are not owner or players count less then 2";
-        return new OperationResult(canStart, errMessage);
+        var errType = canStart ? ErrorType.None : ErrorType.InvalidOperation;
+        return new OperationResult(canStart, errMessage, errType);
     }
 
     public async Task<OperationResult> StartNewGameAsync(Guid roomId, Guid startedByUserId, CancellationToken ct)
     {
         var canStartGame = await CanStartGameAsync(roomId, startedByUserId, ct);
         if (!canStartGame.Success)
-            return OperationResult.Error($"Can't start new game: {canStartGame.ErrorMsg}");
-        
+            return canStartGame;
+            
         var getRoomResult = await roomRepository.GetByIdAsync(roomId, ct);
         if (!getRoomResult.Success) 
-            return OperationResult.Error(getRoomResult.ErrorMsg);
+            return getRoomResult;
 
         var getGameResult = await roomRepository.GetCurrentGameAsync(roomId, ct);
-        if (!getGameResult.Success)
-            return OperationResult.Error(getGameResult.ErrorMsg);
+        if (!getGameResult.Success || getGameResult.ResultObj == null)
+            return getGameResult;
 
         var game = getGameResult.ResultObj;
 
         Task.Run(() => gameCoreService.RunGameCycle(game, roomId, ct))
             .ContinueWith(t =>
             {
-                if (t.IsFaulted && t.Exception != null)
+                if (t is { IsFaulted: true, Exception: not null })
                     logger.LogError(t.Exception, $"Game cycle failed for game {game.Id}");
             }, TaskContinuationOptions.OnlyOnFaulted);
         
@@ -74,32 +70,32 @@ public class GameManager(
         IEnumerable<Question>? questions = null)
     {
         var getRoomResult = await roomRepository.GetByIdAsync(roomId, ct);
-        if (!getRoomResult.Success)
-            return OperationResult<Game>.Error(getRoomResult.ErrorMsg);
+        if (!getRoomResult.Success || getRoomResult.ResultObj == null)
+            return getRoomResult.ConvertToOperationResult<Game>();
 
         var room = getRoomResult.ResultObj;
         if (!IsOwnerRoom(room, createdByUserId))
-            return OperationResult<Game>.Error("Can't create new game, you are not the owner");
-        
+            return OperationResult<Game>.Error.InvalidOperation("Can't create new game, you are not the owner");
+            
         var game = new Game(roomId, mode, questionDuration, countQuestions);
         if (questions != null)
             game.AddQuestions(questions);
         
         var addGameResult = await gameRepository.AddGameAsync(game, ct);
         if (!addGameResult.Success)
-            return OperationResult<Game>.Error(addGameResult.ErrorMsg);
+            return addGameResult.ConvertToOperationResult<Game>();
         
         room.AddGame(game);
         var resultUpdate = await roomRepository.UpdateAsync(room, ct);
         if (!resultUpdate.Success)
-            return OperationResult<Game>.Error(resultUpdate.ErrorMsg);
+            return resultUpdate.ConvertToOperationResult<Game>();
         
         var notification = new NewGameNotification(game);
         var operation = () => notificationService.NotifyGameRoomAsync(roomId, notification);
         var notifyResult = await operation.WithRetry(delay: TimeSpan.FromSeconds(0.15));
         
         return !notifyResult.Success 
-            ? OperationResult<Game>.Error(notifyResult.ErrorMsg) 
+            ? notifyResult.ConvertToOperationResult<Game>()
             : OperationResult<Game>.Ok(game);
     }
 
@@ -111,18 +107,18 @@ public class GameManager(
     public async Task<OperationResult<Room>> FinishGameAsync(Guid userId, Guid roomId, CancellationToken ct)
     {
         var getRoomResult = await roomRepository.GetByIdAsync(roomId, ct);
-        if (!getRoomResult.Success)
-            return OperationResult<Room>.Error(getRoomResult.ErrorMsg);
+        if (!getRoomResult.Success || getRoomResult.ResultObj == null)
+            return getRoomResult;
 
         if (!IsOwnerRoom(getRoomResult.ResultObj, userId))
-            return OperationResult<Room>.Error("You are not the owner");
-
+            return OperationResult<Room>.Error.InvalidOperation("Can't finish game, you are not the owner");
+            
         var notification = new ReturnToRoomNotification(getRoomResult.ResultObj);
         var operation = () => notificationService.NotifyGameRoomAsync(roomId, notification);
         var notifyResult = await operation.WithRetry(delay: TimeSpan.FromSeconds(0.15));
 
         return notifyResult.Success
             ? OperationResult<Room>.Ok(getRoomResult.ResultObj)
-            : OperationResult<Room>.Error(notifyResult.ErrorMsg);
+            : notifyResult.ConvertToOperationResult<Room>();
     }
 }

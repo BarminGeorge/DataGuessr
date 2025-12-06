@@ -1,27 +1,20 @@
 using Domain.Common;
-using Infrastructure.Interfaces;
 using Microsoft.EntityFrameworkCore;
 using Infrastructure.PostgreSQL;
 using Application.Interfaces;
 
 namespace Application.Services;
 
-public class GuestCleanupService : IGuestCleanupService
+public class GuestCleanupService(AppDbContext context) : IGuestCleanupService
 {
-    private readonly AppDbContext _context;
-
-    public GuestCleanupService(AppDbContext context)
-    {
-        _context = context;
-    }
-
     public async Task<OperationResult> CleanupOrphanedGuestsAsync(CancellationToken ct)
     {
         Func<Task<OperationResult>> operation = async () =>
         {
-            var orphanedGuests = await _context.Users
+            var orphanedGuests = await context.Users
                 .Where(u => u.IsGuest)
-                .Where(u => !_context.Players.Any(p => p.UserId == u.Id))
+                .Where(u => !context.Players.Any(p => p.UserId == u.Id))
+                .Include(user => user.Avatar)
                 .ToListAsync(ct);
 
             if (orphanedGuests.Count == 0)
@@ -31,12 +24,12 @@ public class GuestCleanupService : IGuestCleanupService
             {
                 if (guest.Avatar != null)
                 {
-                    _context.Avatars.Remove(guest.Avatar);
+                    context.Avatars.Remove(guest.Avatar);
                 }
-                _context.Users.Remove(guest);
+                context.Users.Remove(guest);
             }
 
-            await _context.SaveChangesAsync(ct);
+            await context.SaveChangesAsync(ct);
             return OperationResult.Ok();
         };
 
@@ -47,17 +40,16 @@ public class GuestCleanupService : IGuestCleanupService
     {
         Func<Task<OperationResult>> operation = async () =>
         {
-            var expiredRooms = await _context.Rooms
+            var expiredRooms = await context.Rooms
                 .Where(r => r.ClosedAt < DateTime.UtcNow)
                 .ToListAsync(ct);
 
             if (expiredRooms.Count == 0)
                 return OperationResult.Ok();
 
-            _context.Rooms.RemoveRange(expiredRooms);
-            await _context.SaveChangesAsync(ct);
+            context.Rooms.RemoveRange(expiredRooms);
+            await context.SaveChangesAsync(ct);
 
-            // Триггер автоматически удалит orphaned гостей
             return OperationResult.Ok();
         };
 

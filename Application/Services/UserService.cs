@@ -3,7 +3,7 @@ using Domain.Entities;
 using Infrastructure.Interfaces;
 
 namespace Application.Services;
- 
+
 public class UserService(
     IJwtProvider provider, 
     IUserRepository usersRepository, 
@@ -15,42 +15,46 @@ public class UserService(
         var hashedPassword = passwordHasher.GenerateAsync(password);
         var operation = () => avatarRepository.SaveUserAvatarAsync(image, ct);
         var result = await operation.WithRetry(3, TimeSpan.FromSeconds(0.15));
-        var avatar = result.ResultObj;
-        var user = new User(login, playerName, avatar, hashedPassword);
+        if (!result.Success || result.ResultObj == null)
+            return result;
+        
+        var user = new User(login, playerName, result.ResultObj, hashedPassword);
         return await usersRepository.AddAsync(user, ct);
     }
 
     public async Task<OperationResult<string>> Login(string login, string password, CancellationToken ct)
     {
-        var user = await usersRepository.GetByLoginAsync(login, ct);
-        if (user.ResultObj is null) return OperationResult<string>.Error(user.ErrorMsg);
-        var result = passwordHasher.VerifyAsync(password, user.ResultObj!.PasswordHash);
-        if (!result)
-            throw new ApplicationException("Invalid username or password");
+        var getUserResult = await usersRepository.GetByLoginAsync(login, ct);
+        if (getUserResult.ResultObj?.PasswordHash == null) 
+            return getUserResult.ConvertToOperationResult<string>();
         
-        var token = provider.GenerateTokenAsync(user.ResultObj);
+        var result = passwordHasher.VerifyAsync(password, getUserResult.ResultObj.PasswordHash);
+        if (!result)
+            return OperationResult<string>.Error.InternalError("Invalid username or password.");
+        
+        var token = provider.GenerateTokenAsync(getUserResult.ResultObj);
         
         return OperationResult<string>.Ok(token);
     }
     
-    public async Task<OperationResult> UpdateUser(Guid userId, string PlayerName, IFormFile avatar,  CancellationToken ct)
+    public async Task<OperationResult> UpdateUser(Guid userId, string playerName, IFormFile avatar,  CancellationToken ct)
     {
         var operation = () => avatarRepository.SaveUserAvatarAsync(avatar, ct);
         var avatarResult = await operation.WithRetry(3, TimeSpan.FromSeconds(0.2));
-        if (!avatarResult.Success)
-            return OperationResult.Error(avatarResult.ErrorMsg);
+        if (!avatarResult.Success || avatarResult.ResultObj == null)
+            return avatarResult;
 
         return await OperationResult.TryAsync(() =>
-            usersRepository.UpdateUserAsync(userId, avatarResult.ResultObj, PlayerName, ct));
+            usersRepository.UpdateUserAsync(userId, avatarResult.ResultObj, playerName, ct));
     }
 
     public async Task<OperationResult<User>> CreateGuest(string playerName, IFormFile image, CancellationToken ct)
     {
         var operation = () => avatarRepository.SaveUserAvatarAsync(image, ct);
         var result = await operation.WithRetry(3, TimeSpan.FromSeconds(0.2));
-        if (!result.Success)
-            return OperationResult<User>.Error(result.ErrorMsg);
-        
+        if (!result.Success || result.ResultObj == null)
+            return result.ConvertToOperationResult<User>();
+
         var avatar = result.ResultObj;
         var user = new User(playerName, avatar);
         await usersRepository.AddAsync(user, ct);

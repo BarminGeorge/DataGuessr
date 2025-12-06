@@ -9,7 +9,6 @@ namespace Application.Services;
 
 public class GameCoreService(
     INotificationService notificationService,
-    IGameRepository gameRepository,
     IQuestionService questionService,
     IEvaluationService evaluationService,
     IPlayerAnswerRepository answerRepository)
@@ -22,7 +21,7 @@ public class GameCoreService(
         
         var getQuestionsResult = await questionService.GetAllQuestionsAsync(game, ct);
         if (!getQuestionsResult.Success || getQuestionsResult.ResultObj == null)
-            return OperationResult.Error($"{getQuestionsResult.ErrorMsg}\n\n{getQuestionsResult.ResultObj}");
+            return getQuestionsResult;
         
         game.CurrentStatistic = new Statistic();
         
@@ -34,14 +33,13 @@ public class GameCoreService(
             
             var rawAnswer = await answerRepository.LoadAnswersAsync(game.Id, question.Id, ct);
             if (!rawAnswer.Success || rawAnswer.ResultObj == null) 
-                return OperationResult.Error($"{rawAnswer.ErrorMsg}\n\n{rawAnswer.ResultObj}");
+                return rawAnswer;
 
+            var oldStatistic = game.CurrentStatistic.Copy();
             UpdateStatistic(game, question, rawAnswer.ResultObj);
+            var diff = game.CurrentStatistic.Diff(oldStatistic);
             
-            var saveStatisticResult = await gameRepository.SaveStatisticAsync(game.Id, game.CurrentStatistic, ct);
-            if (!saveStatisticResult.Success) 
-                return OperationResult.Error(saveStatisticResult.ErrorMsg);
-
+            await NotifyRoomAboutResults(diff, roomId);
             await NotifyRoomAboutResults(game.CurrentStatistic, roomId);
         }
         
@@ -63,7 +61,7 @@ public class GameCoreService(
 
     private async Task NotifyRoomAboutCloseQuestion(Question question, Guid roomId)
     {
-        var closedQuestionNotification = new QuestionClosedNotification(question.Id, question.RightAnswer.Date);
+        var closedQuestionNotification = new QuestionClosedNotification(question.Id, question.RightAnswer);
         var operation = () => notificationService.NotifyGameRoomAsync(roomId,closedQuestionNotification);
         await operation.WithRetry(delay: TimeSpan.FromSeconds(0.2));
     }
@@ -71,7 +69,7 @@ public class GameCoreService(
     private void UpdateStatistic(Game game, Question question, Dictionary<Guid, Answer> answers)
     {
         var updateFunction = evaluationService.CalculateScore(game.Mode);
-        game.CurrentStatistic?.Update(answers, question.RightAnswer.Date, updateFunction);
+        game.CurrentStatistic?.Update(answers, question.RightAnswer, updateFunction);
     }
 
     private async Task NotifyRoomAboutResults(Statistic statistic, Guid roomId)

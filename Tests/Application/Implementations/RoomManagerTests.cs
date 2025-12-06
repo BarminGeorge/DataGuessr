@@ -80,7 +80,7 @@ public class CreateRoomTests : RoomManagerTests
     [Test]
     public async Task CreateRoomAsync_WithError()
     {
-        SetupRepositoryMock(OperationResult.Error("err"));
+        SetupRepositoryMock(OperationResult.Error.InternalError("err"));
         
         var result = await RoomManager.CreateRoomAsync(userId, privacy, cancellationToken, maxPlayers: maxPlayers);
 
@@ -152,7 +152,7 @@ public class JoinRoomTests : RoomManagerTests
     public async Task JoinRoomAsync_WhenRoomNotFound_ShouldReturnError()
     {
         A.CallTo(() => RoomRepository.GetByIdAsync(roomId, cancellationToken))
-            .Returns(OperationResult<Room>.Error("Room not found"));
+            .Returns(OperationResult<Room>.Error.NotFound("Room not found"));
 
         var result = await RoomManager.JoinRoomAsync(roomId, userId, cancellationToken);
 
@@ -160,7 +160,7 @@ public class JoinRoomTests : RoomManagerTests
         {
             Assert.That(result.Success, Is.False);
             Assert.That(result.ResultObj, Is.Null);
-            Assert.That(result.ErrorMsg, Is.EqualTo("Room not found"));
+            Assert.That(result.ErrorMessage, Is.EqualTo("Room not found"));
         });
     }
 
@@ -171,7 +171,7 @@ public class JoinRoomTests : RoomManagerTests
             .Returns(OperationResult<Room>.Ok(room));
         
         A.CallTo(() => PlayerRepository.GetPlayerByIdAsync(userId, cancellationToken))
-            .Returns(OperationResult<Player>.Error("Player not found"));
+            .Returns(OperationResult<Player>.Error.NotFound("Player not found"));
 
         var result = await RoomManager.JoinRoomAsync(roomId, userId, cancellationToken);
 
@@ -197,7 +197,7 @@ public class JoinRoomTests : RoomManagerTests
                 && notification.PlayerId == player.Id))).Returns(OperationResult.Ok());
         
         A.CallTo(() => RoomRepository.UpdateAsync(room, cancellationToken))
-            .Returns(OperationResult.Error("Update failed"));
+            .Returns(OperationResult.Error.InternalError("Update failed"));
 
         var result = await RoomManager.JoinRoomAsync(roomId, userId, cancellationToken);
 
@@ -287,14 +287,14 @@ public class LeaveRoomTests : RoomManagerTests
         var errorMessage = "Room not found";
 
         A.CallTo(() => RoomRepository.GetByIdAsync(roomId, cancellationToken))
-            .Returns(OperationResult<Room>.Error(errorMessage));
+            .Returns(OperationResult<Room>.Error.NotFound(errorMessage));
         
         var result = await RoomManager.LeaveRoomAsync(roomId, userId, cancellationToken);
         
         Assert.Multiple(() =>
         {
             Assert.That(result.Success, Is.False);
-            Assert.That(result.ErrorMsg, Is.EqualTo(errorMessage));
+            Assert.That(result.ErrorMessage, Is.EqualTo(errorMessage));
         });
 
         A.CallTo(() => RoomRepository.GetByIdAsync(roomId, cancellationToken))
@@ -315,14 +315,14 @@ public class LeaveRoomTests : RoomManagerTests
         A.CallTo(() => RoomRepository.GetByIdAsync(roomId, cancellationToken))
             .Returns(OperationResult<Room>.Ok(room));
         A.CallTo(() => PlayerRepository.GetPlayerByIdAsync(userId, cancellationToken))
-            .Returns(OperationResult<Player>.Error(errorMessage));
+            .Returns(OperationResult<Player>.Error.NotFound(errorMessage));
         
         var result = await RoomManager.LeaveRoomAsync(roomId, userId, cancellationToken);
         
         Assert.Multiple(() =>
         {
             Assert.That(result.Success, Is.False);
-            Assert.That(result.ErrorMsg, Is.EqualTo(errorMessage));
+            Assert.That(result.ErrorMessage, Is.EqualTo(errorMessage));
         });
         
         A.CallTo(() => RoomRepository.GetByIdAsync(roomId, cancellationToken))
@@ -345,14 +345,14 @@ public class LeaveRoomTests : RoomManagerTests
         A.CallTo(() => PlayerRepository.GetPlayerByIdAsync(userId, cancellationToken))
             .Returns(OperationResult<Player>.Ok(player));
         A.CallTo(() => NotificationService.NotifyGameRoomAsync(roomId, A<PlayerLeavedNotification>._))
-            .Returns(OperationResult.Error(notificationError));
+            .Returns(OperationResult.Error.InternalError(notificationError));
         
         var result = await RoomManager.LeaveRoomAsync(roomId, userId, cancellationToken);
 
         Assert.Multiple(() =>
         {
             Assert.That(result.Success, Is.False);
-            Assert.That(result.ErrorMsg, Is.EqualTo(notificationError));
+            Assert.That(result.ErrorMessage, Is.EqualTo(notificationError));
         });
         
         A.CallTo(() => RoomRepository.GetByIdAsync(roomId, cancellationToken)).MustHaveHappenedOnceExactly();
@@ -408,14 +408,14 @@ public class LeaveRoomTests : RoomManagerTests
         A.CallTo(() => NotificationService.NotifyGameRoomAsync(roomId, A<PlayerLeavedNotification>._))
             .Returns(OperationResult.Ok());
         A.CallTo(() => RoomRepository.UpdateAsync(room, cancellationToken))
-            .Returns(OperationResult.Error(updateError));
+            .Returns(OperationResult.Error.InternalError(updateError));
         
         var result = await RoomManager.LeaveRoomAsync(roomId, userId, cancellationToken);
 
         Assert.Multiple(() =>
         {
             Assert.That(result.Success, Is.False);
-            Assert.That(result.ErrorMsg, Is.EqualTo(updateError));
+            Assert.That(result.ErrorMessage, Is.EqualTo(updateError));
         });
         
         A.CallTo(() => RoomRepository.GetByIdAsync(roomId, cancellationToken))
@@ -438,8 +438,8 @@ public class LeaveRoomTests : RoomManagerTests
         
         A.CallTo(() => NotificationService.NotifyGameRoomAsync(roomId, A<PlayerLeavedNotification>._))
             .ReturnsNextFromSequence(
-                OperationResult.Error("First fail"),
-                OperationResult.Error("Second fail"),
+                OperationResult.Error.InternalError("First fail"),
+                OperationResult.Error.InternalError("Second fail"),
                 OperationResult.Ok()
             );
         A.CallTo(() => RoomRepository.UpdateAsync(room, cancellationToken))

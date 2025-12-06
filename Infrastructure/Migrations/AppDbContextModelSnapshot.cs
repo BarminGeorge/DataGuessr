@@ -119,8 +119,9 @@ namespace Infrastructure.Migrations
                         .ValueGeneratedOnAdd()
                         .HasColumnType("uuid");
 
-                    b.Property<DateTime>("Answer")
-                        .HasColumnType("timestamp with time zone");
+                    b.Property<Answer>("Answer")
+                        .IsRequired()
+                        .HasColumnType("jsonb");
 
                     b.Property<Guid>("GameId")
                         .HasColumnType("uuid");
@@ -161,10 +162,16 @@ namespace Infrastructure.Migrations
                         .HasMaxLength(1000)
                         .HasColumnType("character varying(1000)");
 
-                    b.Property<DateTime>("RightAnswer")
-                        .HasColumnType("timestamp with time zone");
+                    b.Property<int>("Mode")
+                        .HasColumnType("integer");
+
+                    b.Property<Answer>("RightAnswer")
+                        .IsRequired()
+                        .HasColumnType("jsonb");
 
                     b.HasKey("Id");
+
+                    b.HasIndex("Mode");
 
                     b.ToTable("questions", (string)null);
                 });

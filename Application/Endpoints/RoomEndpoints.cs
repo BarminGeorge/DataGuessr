@@ -1,4 +1,5 @@
 using Application.DtoUI;
+using Application.Filters;
 using Application.Interfaces;
 using Application.Mappers;
 using Domain.Common;
@@ -12,7 +13,8 @@ public static class RoomEndpoints
 {
     public static IEndpointRouteBuilder MapRoomEndpoints(this IEndpointRouteBuilder app)
     {
-        var group = app.MapGroup("rooms");
+        var group = app.MapGroup("api/rooms")
+            .AddEndpointFilter<ResultConversionFilter>();
         
         group.AddFluentValidationAutoValidation();
         
@@ -29,7 +31,7 @@ public static class RoomEndpoints
         return operationResult is { Success: true, ResultObj: not null }
             ? OperationResult<IEnumerable<RoomDto>>.Ok(operationResult.ResultObj
                 .Select(x => x.ToDto())) 
-            : OperationResult<IEnumerable<RoomDto>>.Error(operationResult.ErrorMsg);
+            : operationResult.ConvertToOperationResult<IEnumerable<RoomDto>>();
     }
 
     private static async Task<OperationResult<RoomPrivacy>> GetRoomPrivacy([FromRoute] Guid roomId, 

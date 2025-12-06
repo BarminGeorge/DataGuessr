@@ -1,9 +1,9 @@
 using System.Text;
 using Application.EndPoints;
-using Infrastructure.RegistrationUtils;
 using Microsoft.AspNetCore.Authentication.JwtBearer;
 using Microsoft.Extensions.Options;
 using Microsoft.IdentityModel.Tokens;
+using JwtOptions = Domain.ValueTypes.JwtOptions;
 
 namespace Application.Extensions;
 

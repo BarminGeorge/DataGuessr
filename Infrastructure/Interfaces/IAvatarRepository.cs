@@ -6,7 +6,7 @@ namespace Infrastructure.Interfaces;
 
 public interface IAvatarRepository
 {
-    public Task<OperationResult<Avatar>> SaveUserAvatarAsync(IFormFile avatar, CancellationToken ct);
+    public Task<OperationResult<Avatar>> SaveUserAvatarAsync(IFormFile avatarFile, CancellationToken ct);
     // не сохраняется в бд, файл преносится на диск, возвращает объект Avatar 
-    Task<OperationResult> DeleteUserAvatarAsync(string filename, CancellationToken ct);
+    //Task<OperationResult> DeleteUserAvatarAsync(string filename, CancellationToken ct);
 }

@@ -1,5 +1,4 @@
 ﻿using Domain.Entities;
-using Domain.ValueTypes;
 using Microsoft.EntityFrameworkCore;
 
 namespace Infrastructure.PostgreSQL;
@@ -137,11 +136,14 @@ public class AppDbContext : DbContext
                 .HasMaxLength(1000);
 
             entity.Property(q => q.RightAnswer)
-                .HasConversion(
-                    answer => answer.Date,
-                    value => new Answer(value)
-                )
+                .HasColumnType("jsonb")
                 .IsRequired();
+
+            entity.Property(q => q.Mode)
+                .IsRequired()
+                .HasConversion<int>();  // Enum сохраняется как int
+
+            entity.HasIndex(q => q.Mode);
 
             entity.HasMany(q => q.Games)
                 .WithMany(g => g.Questions)
@@ -230,10 +232,7 @@ public class AppDbContext : DbContext
             entity.Property(pa => pa.QuestionId).IsRequired();
 
             entity.Property(pa => pa.Answer)
-                .HasConversion(
-                    answer => answer.Date,
-                    value => new Answer(value)
-                )
+                .HasColumnType("jsonb")
                 .IsRequired();
 
             // Один ответ на вопрос от одного игрока в игре

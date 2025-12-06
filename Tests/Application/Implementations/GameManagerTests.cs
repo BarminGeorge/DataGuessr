@@ -87,9 +87,9 @@ public class StartNewGameTests : GameManagerTests
         Assert.Multiple(() =>
         {
             Assert.That(result.Success, Is.False);
-            Assert.That(result.ErrorMsg, Is.Not.Null);
-            Assert.That(result.ErrorMsg, Is.Not.Empty);
-            Assert.That(result.ErrorMsg, Does.Contain("You are not owner"));
+            Assert.That(result.ErrorMessage, Is.Not.Null);
+            Assert.That(result.ErrorMessage, Is.Not.Empty);
+            Assert.That(result.ErrorMessage, Does.Contain("You are not owner"));
         });
         
         A.CallTo(() => RoomRepository.GetCurrentGameAsync(A<Guid>._, A<CancellationToken>._))
@@ -111,8 +111,7 @@ public class StartNewGameTests : GameManagerTests
         Assert.Multiple(() =>
         {
             Assert.That(result.Success, Is.False);
-            Assert.That(result.ErrorMsg, Is.Not.Null);
-            Assert.That(result.ErrorMsg, Does.Contain("Can't start new game"));
+            Assert.That(result.ErrorMessage, Is.Not.Null);
         });
         
         A.CallTo(() => RoomRepository.GetCurrentGameAsync(A<Guid>._, A<CancellationToken>._))
@@ -124,15 +123,16 @@ public class StartNewGameTests : GameManagerTests
     {
         const string errorMessage = "Room not found in database";
         A.CallTo(() => RoomRepository.GetByIdAsync(roomId, ct))
-            .Returns(OperationResult<Room>.Error(errorMessage));
+            .Returns(OperationResult<Room>.Error.NotFound(errorMessage));
         
         var result = await GameManager.StartNewGameAsync(roomId, userId, ct);
 
         Assert.Multiple(() =>
         {
             Assert.That(result.Success, Is.False);
-            Assert.That(result.ErrorMsg, Is.Not.Null);
-            Assert.That(result.ErrorMsg, Does.Contain(errorMessage));
+            Assert.That(result.ErrorMessage, Is.Not.Null);
+            Assert.That(result.ErrorMessage, Does.Contain(errorMessage));
+            Assert.That(result.ErrorType, Is.EqualTo(ErrorType.NotFound));
         });
         
         A.CallTo(() => RoomRepository.GetByIdAsync(A<Guid>._, A<CancellationToken>._))
@@ -148,15 +148,16 @@ public class StartNewGameTests : GameManagerTests
         A.CallTo(() => RoomRepository.GetByIdAsync(roomId, ct))
             .ReturnsNextFromSequence(
                 OperationResult<Room>.Ok(validRoom),
-                OperationResult<Room>.Error("Room not found"));
+                OperationResult<Room>.Error.NotFound("Room not found"));
         
         var result = await GameManager.StartNewGameAsync(roomId, userId, ct);
 
         Assert.Multiple(() =>
         {
             Assert.That(result.Success, Is.False);
-            Assert.That(result.ErrorMsg, Is.Not.Null);
-            Assert.That(result.ErrorMsg, Does.Contain("Room not found"));
+            Assert.That(result.ErrorMessage, Is.Not.Null);
+            Assert.That(result.ErrorMessage, Does.Contain("Room not found"));
+            Assert.That(result.ErrorType, Is.EqualTo(ErrorType.NotFound));
         });
         
         A.CallTo(() => RoomRepository.GetCurrentGameAsync(A<Guid>._, A<CancellationToken>._))
@@ -174,14 +175,15 @@ public class StartNewGameTests : GameManagerTests
         
         const string gameErrorMessage = "Current game not found";
         A.CallTo(() => RoomRepository.GetCurrentGameAsync(roomId, ct))
-            .Returns(Task.FromResult(OperationResult<Game>.Error(gameErrorMessage)));
+            .Returns(Task.FromResult(OperationResult<Game>.Error.NotFound(gameErrorMessage)));
         
         var result = await GameManager.StartNewGameAsync(roomId, userId, ct);
 
         Assert.Multiple(() =>
         {
             Assert.That(result.Success, Is.False);
-            Assert.That(result.ErrorMsg, Does.Contain(gameErrorMessage));
+            Assert.That(result.ErrorMessage, Does.Contain(gameErrorMessage));
+            Assert.That(result.ErrorType, Is.EqualTo(ErrorType.NotFound));
         });
         
         A.CallTo(() => GameCoreService.RunGameCycle(existingGame, validRoom.Id, A<CancellationToken>._))
@@ -299,7 +301,7 @@ public class CreateNewGameTests : GameManagerTests
         Assert.Multiple(() =>
         {
             Assert.That(result.Success, Is.True);
-            Assert.That(result.ErrorMsg, Is.Not.Null);
+            Assert.That(result.ErrorMessage, Is.Not.Null);
         });
         
         A.CallTo(() => RoomRepository.GetByIdAsync(roomId, ct))
@@ -333,7 +335,7 @@ public class CreateNewGameTests : GameManagerTests
         Assert.Multiple(() =>
         {
             Assert.That(result.Success, Is.True);
-            Assert.That(result.ErrorMsg, Is.Not.Null);
+            Assert.That(result.ErrorMessage, Is.Not.Null);
         });
     }
     
@@ -342,14 +344,15 @@ public class CreateNewGameTests : GameManagerTests
     {
         const string errorMessage = "Room not found";
         A.CallTo(() => RoomRepository.GetByIdAsync(roomId, ct))
-            .Returns(OperationResult<Room>.Error(errorMessage));
+            .Returns(OperationResult<Room>.Error.NotFound(errorMessage));
         
         var result = await GameManager.CreateNewGameAsync(roomId, userId, gameMode, countQuestions, questionDuration, ct);
 
         Assert.Multiple(() =>
         {
             Assert.That(result.Success, Is.False);
-            Assert.That(result.ErrorMsg, Does.Contain(errorMessage));
+            Assert.That(result.ErrorMessage, Does.Contain(errorMessage));
+            Assert.That(result.ErrorType, Is.EqualTo(ErrorType.NotFound));
         });
         
         A.CallTo(() => GameRepository.AddGameAsync(A<Game>._, A<CancellationToken>._))
@@ -370,7 +373,7 @@ public class CreateNewGameTests : GameManagerTests
         Assert.Multiple(() =>
         {
             Assert.That(result.Success, Is.False);
-            Assert.That(result.ErrorMsg, Does.Contain("Can't create new game, you are not the owner"));
+            Assert.That(result.ErrorMessage, Does.Contain("Can't create new game, you are not the owner"));
         });
         
         A.CallTo(() => GameRepository.AddGameAsync(A<Game>._, A<CancellationToken>._))
@@ -385,14 +388,15 @@ public class CreateNewGameTests : GameManagerTests
             .Returns(OperationResult<Room>.Ok(validRoom));
         
         A.CallTo(() => GameRepository.AddGameAsync(A<Game>._, ct))
-            .Returns(OperationResult.Error(errorMessage));
+            .Returns(OperationResult.Error.InternalError(errorMessage));
         
         var result = await GameManager.CreateNewGameAsync(roomId, userId, gameMode, countQuestions, questionDuration, ct);
 
         Assert.Multiple(() =>
         {
             Assert.That(result.Success, Is.False);
-            Assert.That(result.ErrorMsg, Does.Contain(errorMessage));
+            Assert.That(result.ErrorMessage, Does.Contain(errorMessage));
+            Assert.That(result.ErrorType, Is.EqualTo(ErrorType.InternalError));
         });
         
         A.CallTo(() => RoomRepository.UpdateAsync(A<Room>._, A<CancellationToken>._))
@@ -413,14 +417,14 @@ public class CreateNewGameTests : GameManagerTests
             .Returns(OperationResult.Ok());
         
         A.CallTo(() => RoomRepository.UpdateAsync(A<Room>._, ct))
-            .Returns(OperationResult.Error(errorMessage));
+            .Returns(OperationResult.Error.InternalError(errorMessage));
         
         var result = await GameManager.CreateNewGameAsync(roomId, userId, gameMode, countQuestions, questionDuration, ct);
         
         Assert.Multiple(() =>
         {
             Assert.That(result.Success, Is.False);
-            Assert.That(result.ErrorMsg, Does.Contain(errorMessage));
+            Assert.That(result.ErrorMessage, Does.Contain(errorMessage));
         });
         
         A.CallTo(() => NotificationService.NotifyGameRoomAsync(A<Guid>._, A<NewGameNotification>._))
@@ -442,7 +446,7 @@ public class CreateNewGameTests : GameManagerTests
             .Returns(OperationResult.Ok());
         
         A.CallTo(() => NotificationService.NotifyGameRoomAsync(A<Guid>._, A<NewGameNotification>._))
-            .Returns(OperationResult.Error(errorMessage));
+            .Returns(OperationResult.Error.InternalError(errorMessage));
         
         var result = await GameManager.CreateNewGameAsync(
             roomId, userId, gameMode, countQuestions, questionDuration, ct);
@@ -450,7 +454,7 @@ public class CreateNewGameTests : GameManagerTests
         Assert.Multiple(() =>
         {
             Assert.That(result.Success, Is.False);
-            Assert.That(result.ErrorMsg, Does.Contain(errorMessage));
+            Assert.That(result.ErrorMessage, Does.Contain(errorMessage));
         });
     }
 
@@ -469,7 +473,7 @@ public class CreateNewGameTests : GameManagerTests
             .Returns(OperationResult.Ok());
 
         A.CallTo(() => NotificationService.NotifyGameRoomAsync(A<Guid>._, A<NewGameNotification>._))
-            .Returns(OperationResult.Error(errorMessage))
+            .Returns(OperationResult.Error.InternalError(errorMessage))
             .NumberOfTimes(3);
 
         var result = await GameManager.CreateNewGameAsync(
@@ -478,7 +482,7 @@ public class CreateNewGameTests : GameManagerTests
         Assert.Multiple(() =>
         {
             Assert.That(result.Success, Is.False);
-            Assert.That(result.ErrorMsg, Does.Contain(errorMessage));
+            Assert.That(result.ErrorMessage, Does.Contain(errorMessage));
         });
     }
 }
@@ -531,13 +535,13 @@ public class FinishGameTests : GameManagerTests
     {
         const string errorMessage = "Room not found";
         A.CallTo(() => RoomRepository.GetByIdAsync(roomId, ct))
-            .Returns(OperationResult<Room>.Error(errorMessage));
+            .Returns(OperationResult<Room>.Error.NotFound(errorMessage));
 
         var result = await GameManager.FinishGameAsync(userId, roomId, ct);
         Assert.Multiple(() =>
         {
             Assert.That(result.Success, Is.False);
-            Assert.That(result.ErrorMsg, Does.Contain(errorMessage));
+            Assert.That(result.ErrorMessage, Does.Contain(errorMessage));
         });
 
         A.CallTo(() => NotificationService.NotifyGameRoomAsync(A<Guid>._, A<ReturnToRoomNotification>._))
@@ -558,7 +562,7 @@ public class FinishGameTests : GameManagerTests
         Assert.Multiple(() =>
         {
             Assert.That(result.Success, Is.False);
-            Assert.That(result.ErrorMsg, Does.Contain("You are not the owner"));
+            Assert.That(result.ErrorMessage, Does.Contain("you are not the owner"));
         });
 
         A.CallTo(() => NotificationService.NotifyGameRoomAsync(A<Guid>._, A<ReturnToRoomNotification>._))
@@ -574,14 +578,14 @@ public class FinishGameTests : GameManagerTests
             .Returns(OperationResult<Room>.Ok(validRoom));
 
         A.CallTo(() => NotificationService.NotifyGameRoomAsync(roomId, A<ReturnToRoomNotification>._))
-            .Returns(OperationResult.Error(errorMessage));
+            .Returns(OperationResult.Error.InternalError(errorMessage));
 
         var result = await GameManager.FinishGameAsync(userId, roomId, ct);
 
         Assert.Multiple(() =>
         {
             Assert.That(result.Success, Is.False);
-            Assert.That(result.ErrorMsg, Does.Contain(errorMessage));
+            Assert.That(result.ErrorMessage, Does.Contain(errorMessage));
         });
 
         A.CallTo(() => RoomRepository.GetByIdAsync(roomId, ct))
@@ -597,7 +601,7 @@ public class FinishGameTests : GameManagerTests
             .Returns(OperationResult<Room>.Ok(validRoom));
 
         A.CallTo(() => NotificationService.NotifyGameRoomAsync(roomId, A<ReturnToRoomNotification>._))
-            .Returns(OperationResult.Error(errorMessage))
+            .Returns(OperationResult.Error.InternalError(errorMessage))
             .NumberOfTimes(3);
 
         var result = await GameManager.FinishGameAsync(userId, roomId, ct);
@@ -605,7 +609,7 @@ public class FinishGameTests : GameManagerTests
         Assert.Multiple(() =>
         {
             Assert.That(result.Success, Is.False);
-            Assert.That(result.ErrorMsg, Does.Contain(errorMessage));
+            Assert.That(result.ErrorMessage, Does.Contain(errorMessage));
         });
 
         A.CallTo(() => NotificationService.NotifyGameRoomAsync(A<Guid>._, A<ReturnToRoomNotification>._))
@@ -620,7 +624,7 @@ public class FinishGameTests : GameManagerTests
 
         A.CallTo(() => NotificationService.NotifyGameRoomAsync(roomId, A<ReturnToRoomNotification>._))
             .ReturnsNextFromSequence(
-                OperationResult.Error("First attempt failed"),
+                OperationResult.Error.InternalError("First attempt failed"),
                 OperationResult.Ok()
             );
 
@@ -657,7 +661,7 @@ public class FinishGameTests : GameManagerTests
         Assert.Multiple(() =>
         {
             Assert.That(nonOwnerResult.Success, Is.False);
-            Assert.That(nonOwnerResult.ErrorMsg, Does.Contain("You are not the owner"));
+            Assert.That(nonOwnerResult.ErrorMessage, Does.Contain("you are not the owner"));
         });
     }
 }

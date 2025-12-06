@@ -7,7 +7,6 @@ public class Room : IEntity<Guid>
 {
     public Guid Id { get; private set; }
 
-    // Навигационные свойства для EF Core
     public virtual ICollection<Player> Players { get; private set; } = new List<Player>();
     public virtual ICollection<Game> Games { get; private set; } = new List<Game>();
 
@@ -19,15 +18,9 @@ public class Room : IEntity<Guid>
 
     public DateTime ClosedAt { get; private set; }
 
-    // Конструктор для EF Core
     protected Room() { }
 
-    public Room(
-        Guid ownerId,
-        RoomPrivacy privacy,
-        int maxPlayers,
-        string? password = null,
-        TimeSpan? duration = null)
+    public Room(Guid ownerId, RoomPrivacy privacy, int maxPlayers, string? password = null, TimeSpan? duration = null)
     {
         Id = Guid.NewGuid();
         Owner = ownerId;
@@ -40,6 +33,7 @@ public class Room : IEntity<Guid>
     }
 
     public bool IsExpired => DateTime.UtcNow > ClosedAt;
+    
     public void AddPlayer(Player player)
     {
         if (Status == RoomStatus.Archived)
@@ -54,7 +48,7 @@ public class Room : IEntity<Guid>
     {
         if (Status == RoomStatus.Archived)
             throw new InvalidOperationException("Комната архивирована");
-        ArgumentNullException.ThrowIfNull(player);
+        
         Players.Remove(player);
     }
 
