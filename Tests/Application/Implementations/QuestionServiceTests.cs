@@ -30,7 +30,7 @@ public class QuestionServiceTests
         answersRepository = A.Fake<IPlayerAnswerRepository>();
         
         questionService = new QuestionService(questionRepository, answersRepository);
-        A.CallTo(() => questionRepository.GetUniqQuestionsAsync(A<int>.That.Matches(x => x >= 0),
+        A.CallTo(() => questionRepository.GetUniqQuestionsAsync(A<int>.That.Matches(x => x >= 0), GameMode.DefaultMode,
                 A<CancellationToken>.Ignored))
             .Returns(OperationResult<IEnumerable<Question>>.Ok(A.CollectionOfFake<Question>(questionsCount)));
     }
@@ -46,7 +46,7 @@ public class QuestionServiceTests
         
         Assert.That(result.ResultObj, Is.EqualTo(gameWithQuestions.Questions));
         
-        A.CallTo(() => questionRepository.GetUniqQuestionsAsync(A<int>._, A<CancellationToken>._))
+        A.CallTo(() => questionRepository.GetUniqQuestionsAsync(A<int>._, GameMode.DefaultMode, A<CancellationToken>._))
             .MustNotHaveHappened();
     }
 
@@ -59,7 +59,7 @@ public class QuestionServiceTests
         Assert.That(result.ResultObj, Is.Not.Null);
         Assert.That(result.ResultObj!.Count(), Is.EqualTo(questionsCount));
         
-        A.CallTo(() => questionRepository.GetUniqQuestionsAsync(questionsCount, A<CancellationToken>._))
+        A.CallTo(() => questionRepository.GetUniqQuestionsAsync(questionsCount, GameMode.DefaultMode, A<CancellationToken>._))
             .MustHaveHappenedOnceExactly();
     }
 }

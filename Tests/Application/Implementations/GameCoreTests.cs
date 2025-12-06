@@ -53,7 +53,7 @@ public class GameCoreServiceTests
     {
         var questions = Enumerable.Range(0, questionsCount)
             .Select<int, Question>(i => new Question(new DateTimeAnswer(DateTime.UtcNow.AddMinutes(1)), 
-                $"Test Question{i}", $"FakeUrl{i}"))
+                $"Test Question{i}", $"FakeUrl{i}", GameMode.DefaultMode))
             .ToList();
         return questions;
     }
