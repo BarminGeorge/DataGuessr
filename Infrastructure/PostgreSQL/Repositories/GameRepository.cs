@@ -1,4 +1,4 @@
-using Domain.Common;
+п»їusing Domain.Common;
 using Domain.Entities;
 using Domain.ValueTypes;
 using Infrastructure.Interfaces;
@@ -21,24 +21,24 @@ public class GameRepository : IGameRepository
         var operation = new Func<Task<OperationResult>>(async () =>
         {
             if (gameId == Guid.Empty)
-                return OperationResult.Error.Validation("GameId не может быть пустым GUID");
+                return OperationResult.Error.Validation("GameId РЅРµ РјРѕР¶РµС‚ Р±С‹С‚СЊ РїСѓСЃС‚С‹Рј GUID");
 
             if (statistic == null)
-                return OperationResult.Error.Validation("Статистика не может быть null");
+                return OperationResult.Error.Validation("РЎС‚Р°С‚РёСЃС‚РёРєР° РЅРµ РјРѕР¶РµС‚ Р±С‹С‚СЊ null");
 
             var game = await db.Games
                 .Include(g => g.CurrentStatistic)
                 .FirstOrDefaultAsync(g => g.Id == gameId, cancellationToken: ct);
 
             if (game == null)
-                return OperationResult.Error.NotFound($"Игра с ID '{gameId}' не найдена");
+                return OperationResult.Error.NotFound($"РРіСЂР° СЃ ID '{gameId}' РЅРµ РЅР°Р№РґРµРЅР°");
 
             game.CurrentStatistic = statistic;
             db.Games.Update(game);
 
             var affectedRows = await db.SaveChangesAsync(ct);
             if (affectedRows == 0)
-                return OperationResult.Error.InternalError("Не удалось сохранить статистику");
+                return OperationResult.Error.InternalError("РќРµ СѓРґР°Р»РѕСЃСЊ СЃРѕС…СЂР°РЅРёС‚СЊ СЃС‚Р°С‚РёСЃС‚РёРєСѓ");
 
             return OperationResult.Ok();
         });
@@ -51,16 +51,16 @@ public class GameRepository : IGameRepository
         var operation = new Func<Task<OperationResult>>(async () =>
         {
             if (game == null)
-                return OperationResult.Error.Validation("Игра не может быть null");
+                return OperationResult.Error.Validation("РРіСЂР° РЅРµ РјРѕР¶РµС‚ Р±С‹С‚СЊ null");
 
             if (game.Id == Guid.Empty)
-                return OperationResult.Error.Validation("Id игры не может быть пустым GUID");
+                return OperationResult.Error.Validation("Id РёРіСЂС‹ РЅРµ РјРѕР¶РµС‚ Р±С‹С‚СЊ РїСѓСЃС‚С‹Рј GUID");
 
             await db.Games.AddAsync(game, ct);
             var affectedRows = await db.SaveChangesAsync(ct);
 
             if (affectedRows == 0)
-                return OperationResult.Error.InternalError("Не удалось добавить игру");
+                return OperationResult.Error.InternalError("РќРµ СѓРґР°Р»РѕСЃСЊ РґРѕР±Р°РІРёС‚СЊ РёРіСЂСѓ");
 
             return OperationResult.Ok();
         });

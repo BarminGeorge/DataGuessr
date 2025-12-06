@@ -1,4 +1,4 @@
-using Domain.Common;
+п»їusing Domain.Common;
 using Domain.Entities;
 using Infrastructure.Interfaces;
 using Microsoft.EntityFrameworkCore;
@@ -20,7 +20,7 @@ public class QuestionRepository : IQuestionRepository
         var operation = new Func<Task<OperationResult<IEnumerable<Question>>>>(async () =>
         {
             if (count <= 0)
-                return OperationResult<IEnumerable<Question>>.Error.Validation("Количество вопросов должно быть больше нуля");
+                return OperationResult<IEnumerable<Question>>.Error.Validation("РљРѕР»РёС‡РµСЃС‚РІРѕ РІРѕРїСЂРѕСЃРѕРІ РґРѕР»Р¶РЅРѕ Р±С‹С‚СЊ Р±РѕР»СЊС€Рµ РЅСѓР»СЏ");
 
             var allIds = await db.Questions
                 .AsNoTracking()
@@ -28,7 +28,7 @@ public class QuestionRepository : IQuestionRepository
                 .ToListAsync(ct);
 
             if (allIds.Count == 0)
-                return OperationResult<IEnumerable<Question>>.Error.NotFound("Вопросы не найдены в базе данных");
+                return OperationResult<IEnumerable<Question>>.Error.NotFound("Р’РѕРїСЂРѕСЃС‹ РЅРµ РЅР°Р№РґРµРЅС‹ РІ Р±Р°Р·Рµ РґР°РЅРЅС‹С…");
 
             if (count > allIds.Count)
                 count = allIds.Count;
