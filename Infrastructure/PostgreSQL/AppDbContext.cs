@@ -139,6 +139,12 @@ public class AppDbContext : DbContext
                 .HasColumnType("jsonb")
                 .IsRequired();
 
+            entity.Property(q => q.Mode)
+                .IsRequired()
+                .HasConversion<int>();  // Enum сохраняется как int
+
+            entity.HasIndex(q => q.Mode);
+
             entity.HasMany(q => q.Games)
                 .WithMany(g => g.Questions)
                 .UsingEntity<Dictionary<string, object>>(

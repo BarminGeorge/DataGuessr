@@ -1,5 +1,6 @@
 ﻿using Domain.Common;
 using Domain.Entities;
+using Domain.Enums;
 using Infrastructure.Interfaces;
 using Microsoft.EntityFrameworkCore;
 
@@ -15,7 +16,10 @@ public class QuestionRepository : IQuestionRepository
         this.db = db ?? throw new ArgumentNullException(nameof(db));
     }
 
-    public async Task<OperationResult<IEnumerable<Question>>> GetUniqQuestionsAsync(int count, CancellationToken ct)
+    public async Task<OperationResult<IEnumerable<Question>>> GetUniqQuestionsAsync(
+        int count,
+        GameMode mode,
+        CancellationToken ct)
     {
         var operation = new Func<Task<OperationResult<IEnumerable<Question>>>>(async () =>
         {
@@ -24,11 +28,13 @@ public class QuestionRepository : IQuestionRepository
 
             var allIds = await db.Questions
                 .AsNoTracking()
+                .Where(q => q.Mode == mode)
                 .Select(q => q.Id)
                 .ToListAsync(ct);
 
             if (allIds.Count == 0)
-                return OperationResult<IEnumerable<Question>>.Error.NotFound("Вопросы не найдены в базе данных");
+                return OperationResult<IEnumerable<Question>>.Error.NotFound(
+                    $"Вопросы для режима {mode} не найдены в базе данных");
 
             if (count > allIds.Count)
                 count = allIds.Count;
@@ -42,7 +48,6 @@ public class QuestionRepository : IQuestionRepository
                 .ToListAsync(ct);
 
             return OperationResult<IEnumerable<Question>>.Ok(questions);
-
         });
 
         return await operation.WithRetry(maxRetries: 3, delay: retryDelay);
