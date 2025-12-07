@@ -37,10 +37,10 @@ public static class UserEndpoints
     private static async Task<IResult> Login(LoginUserRequest request, UserService userService, HttpContext context, CancellationToken ct)
     {
         var loginResult = await userService.Login(request.Login, request.Password, ct);
-        if (!loginResult.Success || loginResult.ResultObj is null)
+        if (!loginResult.Success)
             return loginResult.ToResult();
-        context.Response.Cookies.Append("", loginResult.ResultObj);
-        return Results.Ok();
+        context.Response.Cookies.Append("", loginResult.ResultObj.token);
+        return Results.Ok(loginResult.ResultObj.userId);
     }
 
     private static async Task<IResult> UpdateUser([FromForm] UpdateUserRequest request, UserService userService, CancellationToken ct)

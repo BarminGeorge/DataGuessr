@@ -22,19 +22,19 @@ public class UserService(
         return await usersRepository.AddAsync(user, ct);
     }
 
-    public async Task<OperationResult<string>> Login(string login, string password, CancellationToken ct)
+    public async Task<OperationResult<(string token, Guid userId)>> Login(string login, string password, CancellationToken ct)
     {
         var getUserResult = await usersRepository.GetByLoginAsync(login, ct);
         if (getUserResult.ResultObj?.PasswordHash == null) 
-            return getUserResult.ConvertToOperationResult<string>();
+            return getUserResult.ConvertToOperationResult<(string, Guid)>();
         
-        var result = passwordHasher.VerifyAsync(password, getUserResult.ResultObj.PasswordHash);
-        if (!result)
-            return OperationResult<string>.Error.InternalError("Invalid username or password.");
+        var resultVerify = passwordHasher.VerifyAsync(password, getUserResult.ResultObj.PasswordHash);
+        if (!resultVerify)
+            return OperationResult<(string, Guid)>.Error.Unauthorized("Invalid username or password.");
         
         var token = provider.GenerateTokenAsync(getUserResult.ResultObj);
-        
-        return OperationResult<string>.Ok(token);
+        var result = (token, getUserResult.ResultObj.Id);
+        return OperationResult<(string token, Guid userId)>.Ok(result);
     }
     
     public async Task<OperationResult> UpdateUser(Guid userId, string playerName, IFormFile avatar,  CancellationToken ct)
