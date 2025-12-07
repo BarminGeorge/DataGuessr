@@ -1,16 +1,23 @@
 ﻿version: '3.8'
 
 services:
-  postgres:
-    image: timescale/timescaledb:latest-pg17
-    environment:
-      POSTGRES_DB: DataGuessrDB
-      POSTGRES_USER: dataguessr_user
-      POSTGRES_PASSWORD: YourStrongPassword123
-      TIMESCALEDB_TELEMETRY: off
-    volumes:
-      - postgres_data:/var/lib/postgresql/data
-    restart: always
+postgres:
+  image: timescale/timescaledb:latest-pg17
+  environment:
+    POSTGRES_DB: DataGuessrDB
+    POSTGRES_USER: dataguessr_user
+    POSTGRES_PASSWORD: YourStrongPassword123
+    TIMESCALEDB_TELEMETRY: off
+  healthcheck:
+    test: ["CMD-SHELL", "pg_isready -U dataguessr_user -d DataGuessrDB"]
+    interval: 5s
+    timeout: 5s
+    retries: 10
+
+app:
+  depends_on:
+    postgres:
+      condition: service_healthy
 
   app:
     build: .

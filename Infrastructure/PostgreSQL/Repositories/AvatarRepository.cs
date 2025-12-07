@@ -34,8 +34,8 @@ public class AvatarRepository : IAvatarRepository
                 await avatarFile.CopyToAsync(stream, ct);
             }
 
-            await db.Avatars.AddAsync(avatar, ct);
-            await db.SaveChangesAsync(ct);
+            // await db.Avatars.AddAsync(avatar, ct);
+            // await db.SaveChangesAsync(ct);
 
             return avatar;
         });
