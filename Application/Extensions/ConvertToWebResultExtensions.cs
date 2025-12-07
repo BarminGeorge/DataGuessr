@@ -5,14 +5,11 @@ namespace Application.Extensions;
 
 public static class ResultExtensions
 {
-    public static IResult ToResult<T>(this OperationResult<T> result)
+    private static IResult CreateErrorResult(string errorMessage, ErrorType errorType)
     {
-        if (result.Success)
-            return Results.Ok(result.ResultObj);
-
-        var errorResponse = new { error = result.ErrorMessage };
+        var errorResponse = new { error = errorMessage };
         
-        return result.ErrorType switch
+        return errorType switch
         {
             ErrorType.Validation => Results.BadRequest(errorResponse),
             ErrorType.Unauthorized => Results.Json(errorResponse, statusCode: 401),
@@ -26,24 +23,17 @@ public static class ResultExtensions
         };
     }
 
+    public static IResult ToResult<T>(this OperationResult<T> result)
+    {
+        return result.Success 
+            ? Results.Ok(result.ResultObj) 
+            : CreateErrorResult(result.ErrorMessage, result.ErrorType);
+    }
+
     public static IResult ToResult(this OperationResult result)
     {
-        if (result.Success)
-            return Results.Ok();
-
-        var errorResponse = new { error = result.ErrorMessage };
-        
-        return result.ErrorType switch
-        {
-            ErrorType.Validation => Results.BadRequest(errorResponse),
-            ErrorType.Unauthorized => Results.Json(errorResponse, statusCode: 401),
-            ErrorType.Forbidden => Results.Json(errorResponse, statusCode: 403),
-            ErrorType.NotFound => Results.NotFound(errorResponse),
-            ErrorType.AlreadyExists => Results.Conflict(errorResponse),
-            ErrorType.InvalidOperation => Results.BadRequest(errorResponse),
-            ErrorType.ExternalServiceError => Results.Json(errorResponse, statusCode: 502),
-            ErrorType.ServiceUnavailable => Results.Json(errorResponse, statusCode: 503),
-            _ => Results.Json(errorResponse, statusCode: 500)
-        };
+        return result.Success 
+            ? Results.Ok() 
+            : CreateErrorResult(result.ErrorMessage, result.ErrorType);
     }
 }

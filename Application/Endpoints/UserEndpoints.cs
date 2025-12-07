@@ -1,9 +1,6 @@
 using Application.Extensions;
-using Application.Filters;
 using Application.Requests;
 using Application.Services;
-using Domain.Common;
-using Domain.Entities;
 using Microsoft.AspNetCore.Mvc;
 using SharpGrip.FluentValidation.AutoValidation.Endpoints.Extensions;
 
@@ -13,9 +10,8 @@ public static class UserEndpoints
 {
     public static IEndpointRouteBuilder MapUserEndpoints(this IEndpointRouteBuilder app)
     {
-        var usersGroup = app.MapGroup("api")
-            .AddEndpointFilter<ResultConversionFilter>();
-        
+        var usersGroup = app.MapGroup("api");
+            
         usersGroup.AddFluentValidationAutoValidation();
         
         usersGroup.MapPost("register", Register)
@@ -32,27 +28,30 @@ public static class UserEndpoints
         return app;
     }
 
-    private static async Task<OperationResult> Register([FromForm] RegisterUserRequest request, UserService userService, CancellationToken ct)
+    private static async Task<IResult> Register([FromForm] RegisterUserRequest request, UserService userService, CancellationToken ct)
     {
-        return await userService.Register(request.Login, request.Password, request.PlayerName, request.Avatar, ct);
+        return (await userService.Register(request.Login, request.Password, request.PlayerName, request.Avatar, ct))
+            .ToResult();
     }
 
-    private static async Task<OperationResult> Login(LoginUserRequest request, UserService userService, HttpContext context, CancellationToken ct)
+    private static async Task<IResult> Login(LoginUserRequest request, UserService userService, HttpContext context, CancellationToken ct)
     {
         var loginResult = await userService.Login(request.Login, request.Password, ct);
         if (!loginResult.Success || loginResult.ResultObj is null)
-            return loginResult;
+            return loginResult.ToResult();
         context.Response.Cookies.Append("", loginResult.ResultObj);
-        return OperationResult.Ok();
+        return Results.Ok();
     }
 
-    private static async Task<OperationResult> UpdateUser([FromForm] UpdateUserRequest request, UserService userService, CancellationToken ct)
+    private static async Task<IResult> UpdateUser([FromForm] UpdateUserRequest request, UserService userService, CancellationToken ct)
     {
-        return await userService.UpdateUser(request.UserId, request.PlayerName, request.Avatar, ct);
+        return (await userService.UpdateUser(request.UserId, request.PlayerName, request.Avatar, ct))
+            .ToResult();
     }
 
-    private static async Task<OperationResult<User>> CreateGuest([FromForm] CreateGuestRequest request, UserService userService, CancellationToken ct)
+    private static async Task<IResult> CreateGuest([FromForm] CreateGuestRequest request, UserService userService, CancellationToken ct)
     {
-        return await userService.CreateGuest(request.PlayerName, request.Avatar, ct);
+        return (await userService.CreateGuest(request.PlayerName, request.Avatar, ct))
+            .ToResult();
     }
 }

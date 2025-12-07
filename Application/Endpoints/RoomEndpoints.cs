@@ -1,9 +1,8 @@
 using Application.DtoUI;
-using Application.Filters;
+using Application.Extensions;
 using Application.Interfaces;
 using Application.Mappers;
 using Domain.Common;
-using Domain.Enums;
 using Microsoft.AspNetCore.Mvc;
 using SharpGrip.FluentValidation.AutoValidation.Endpoints.Extensions;
 
@@ -13,9 +12,8 @@ public static class RoomEndpoints
 {
     public static IEndpointRouteBuilder MapRoomEndpoints(this IEndpointRouteBuilder app)
     {
-        var group = app.MapGroup("api/rooms")
-            .AddEndpointFilter<ResultConversionFilter>();
-        
+        var group = app.MapGroup("api/rooms");
+            
         group.AddFluentValidationAutoValidation();
         
         group.MapGet("", GetAvailableRooms);
@@ -24,19 +22,19 @@ public static class RoomEndpoints
         return app;
     }
 
-    private static async Task<OperationResult<IEnumerable<RoomDto>>> GetAvailableRooms(IRoomManager roomManager, 
+    private static async Task<IResult> GetAvailableRooms(IRoomManager roomManager, 
         HttpContext context, CancellationToken ct)
     {
         var operationResult = await roomManager.GetAvailablePublicRoomsAsync(ct);
         return operationResult is { Success: true, ResultObj: not null }
             ? OperationResult<IEnumerable<RoomDto>>.Ok(operationResult.ResultObj
-                .Select(x => x.ToDto())) 
-            : operationResult.ConvertToOperationResult<IEnumerable<RoomDto>>();
+                .Select(x => x.ToDto())).ToResult() 
+            : operationResult.ConvertToOperationResult<IEnumerable<RoomDto>>().ToResult();
     }
 
-    private static async Task<OperationResult<RoomPrivacy>> GetRoomPrivacy([FromRoute] Guid roomId, 
+    private static async Task<IResult> GetRoomPrivacy([FromRoute] Guid roomId, 
         IRoomManager roomManager, HttpContext context, CancellationToken ct)
     {
-        return await roomManager.GetRoomPrivacyAsync(roomId, ct);
+        return (await roomManager.GetRoomPrivacyAsync(roomId, ct)).ToResult();
     }
 }
