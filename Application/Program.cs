@@ -3,14 +3,11 @@ using Application.DI;
 using Application.EndPoints;
 using Application.Interfaces;
 using Application.Endpoints.Hubs;
-using Domain.Common;
 using Domain.ValueTypes;
 using Hangfire;
 using Hangfire.PostgreSql;
 using Infrastructure.DI;
 using Microsoft.AspNetCore.CookiePolicy;
-using Microsoft.EntityFrameworkCore;
-using Infrastructure.PostgreSQL;
 
 var builder = WebApplication.CreateBuilder(args);
 var services = builder.Services;
@@ -23,9 +20,9 @@ services.AddInfrastructure(configuration);
 
 services.AddAntiforgery();
 
-//services.AddHangfire(config => config.UsePostgreSqlStorage(configuration.GetConnectionString("DefaultConnection")));
+services.AddHangfire(config => config.UsePostgreSqlStorage(configuration.GetConnectionString("DefaultConnection")));
 
-//services.AddHangfireServer();
+services.AddHangfireServer();
 
 services.AddCors(options =>
 {
@@ -33,9 +30,15 @@ services.AddCors(options =>
 });
 
 
-services.AddSignalR(options => { options.EnableDetailedErrors = builder.Environment.IsDevelopment(); });
+services.AddSignalR(options =>
+{
+    options.EnableDetailedErrors = builder.Environment.IsDevelopment();
+});
 
-services.AddAuthentication(_ => { })
+services.AddAuthentication(_ =>
+    {
+    
+    })
     .AddCookie(options =>
     {
         options.Cookie.HttpOnly = true;
@@ -44,18 +47,17 @@ services.AddAuthentication(_ => { })
     });
 
 services.AddEndpointsApiExplorer();
-services.AddSwaggerGen(options => { options.UseInlineDefinitionsForEnums(); });
+services.AddSwaggerGen(options =>
+{
+    options.UseInlineDefinitionsForEnums();
+});
 services.AddControllers()
-    .AddJsonOptions(options => { options.JsonSerializerOptions.Converters.Add(new JsonStringEnumConverter()); });
+    .AddJsonOptions(options =>
+    {
+        options.JsonSerializerOptions.Converters.Add(new JsonStringEnumConverter());
+    });
 
 var app = builder.Build();
-
-using (var scope = app.Services.CreateScope())
-{
-    var db = scope.ServiceProvider.GetRequiredService<AppDbContext>();
-    db.Database.Migrate();
-}
-
 
 if (app.Environment.IsDevelopment())
 {
@@ -71,7 +73,7 @@ app.UseCors("AllowAll"); // TODO
 
 app.UseHttpsRedirection();
 
-app.UseCookiePolicy(new CookiePolicyOptions
+app.UseCookiePolicy(new CookiePolicyOptions 
 {
     MinimumSameSitePolicy = SameSiteMode.Strict,
     HttpOnly = HttpOnlyPolicy.Always,
@@ -82,7 +84,7 @@ app.UseAuthentication();
 app.UseAuthorization();
 app.UseAntiforgery();
 
-//app.UseHangfireDashboard("/hangfire");
+app.UseHangfireDashboard("/hangfire");
 
 app.MapGet("/api", () => "Hello World!");
 app.MapUserEndpoints();
@@ -91,14 +93,14 @@ app.MapHub<AppHub>("/appHub");
 
 app.MapControllers();
 
-// RecurringJob.AddOrUpdate<IGuestCleanupService>(
-//    "cleanup-orphaned-guests",
-//     service => service.CleanupOrphanedGuestsAsync(CancellationToken.None),
-//     Cron.Hourly);
-//
-// RecurringJob.AddOrUpdate<IGuestCleanupService>(
-//     "cleanup-expired-rooms",
-//     service => service.CleanupExpiredRoomsAsync(CancellationToken.None),
-//     Cron.Daily);
+RecurringJob.AddOrUpdate<IGuestCleanupService>(
+   "cleanup-orphaned-guests",
+    service => service.CleanupOrphanedGuestsAsync(CancellationToken.None),
+    Cron.Hourly);
+
+RecurringJob.AddOrUpdate<IGuestCleanupService>(
+    "cleanup-expired-rooms",
+    service => service.CleanupExpiredRoomsAsync(CancellationToken.None),
+    Cron.Daily);
 
 app.Run();
