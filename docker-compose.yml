@@ -2,11 +2,12 @@
 
 services:
   postgres:
-    image: postgres:16
+    image: timescale/timescaledb:latest-pg17
     environment:
       POSTGRES_DB: DataGuessrDB
       POSTGRES_USER: dataguessr_user
       POSTGRES_PASSWORD: YourStrongPassword123
+      TIMESCALEDB_TELEMETRY: off
     volumes:
       - postgres_data:/var/lib/postgresql/data
     restart: always

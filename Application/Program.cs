@@ -9,6 +9,8 @@ using Hangfire;
 using Hangfire.PostgreSql;
 using Infrastructure.DI;
 using Microsoft.AspNetCore.CookiePolicy;
+using Microsoft.EntityFrameworkCore;
+using Infrastructure.PostgreSQL;
 
 var builder = WebApplication.CreateBuilder(args);
 var services = builder.Services;
@@ -31,15 +33,9 @@ services.AddCors(options =>
 });
 
 
-services.AddSignalR(options =>
-{
-    options.EnableDetailedErrors = builder.Environment.IsDevelopment();
-});
+services.AddSignalR(options => { options.EnableDetailedErrors = builder.Environment.IsDevelopment(); });
 
-services.AddAuthentication(_ =>
-    {
-    
-    })
+services.AddAuthentication(_ => { })
     .AddCookie(options =>
     {
         options.Cookie.HttpOnly = true;
@@ -48,17 +44,18 @@ services.AddAuthentication(_ =>
     });
 
 services.AddEndpointsApiExplorer();
-services.AddSwaggerGen(options =>
-{
-    options.UseInlineDefinitionsForEnums();
-});
+services.AddSwaggerGen(options => { options.UseInlineDefinitionsForEnums(); });
 services.AddControllers()
-    .AddJsonOptions(options =>
-    {
-        options.JsonSerializerOptions.Converters.Add(new JsonStringEnumConverter());
-    });
+    .AddJsonOptions(options => { options.JsonSerializerOptions.Converters.Add(new JsonStringEnumConverter()); });
 
 var app = builder.Build();
+
+using (var scope = app.Services.CreateScope())
+{
+    var db = scope.ServiceProvider.GetRequiredService<AppDbContext>();
+    db.Database.Migrate();
+}
+
 
 if (app.Environment.IsDevelopment())
 {
@@ -74,7 +71,7 @@ app.UseCors("AllowAll"); // TODO
 
 app.UseHttpsRedirection();
 
-app.UseCookiePolicy(new CookiePolicyOptions 
+app.UseCookiePolicy(new CookiePolicyOptions
 {
     MinimumSameSitePolicy = SameSiteMode.Strict,
     HttpOnly = HttpOnlyPolicy.Always,
