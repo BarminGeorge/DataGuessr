@@ -1,34 +1,33 @@
 ﻿version: '3.8'
 
 services:
-postgres:
-  image: timescale/timescaledb:latest-pg17
-  environment:
-    POSTGRES_DB: DataGuessrDB
-    POSTGRES_USER: dataguessr_user
-    POSTGRES_PASSWORD: YourStrongPassword123
-    TIMESCALEDB_TELEMETRY: off
-  healthcheck:
-    test: ["CMD-SHELL", "pg_isready -U dataguessr_user -d DataGuessrDB"]
-    interval: 5s
-    timeout: 5s
-    retries: 10
-
-app:
-  depends_on:
-    postgres:
-      condition: service_healthy
+  postgres:
+    image: timescale/timescaledb:latest-pg17
+    environment:
+      POSTGRES_DB: DataGuessrDB
+      POSTGRES_USER: dataguessr_user
+      POSTGRES_PASSWORD: YourStrongPassword123
+      TIMESCALEDB_TELEMETRY: off
+    volumes:
+      - postgres_data:/var/lib/postgresql/data
+    restart: always
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U dataguessr_user -d DataGuessrDB"]
+      interval: 5s
+      timeout: 5s
+      retries: 10
 
   app:
     build: .
     environment:
-      - ASPNETCORE_ENVIRONMENT=Development
-      - ASPNETCORE_URLS=http://+:8080
-      - ConnectionStrings__DefaultConnection=Host=postgres;Port=5432;Database=DataGuessrDB;Username=dataguessr_user;Password=YourStrongPassword123
+      ASPNETCORE_ENVIRONMENT: Development
+      ASPNETCORE_URLS: http://+:8080
+      ConnectionStrings__DefaultConnection: Host=postgres;Port=5432;Database=DataGuessrDB;Username=dataguessr_user;Password=YourStrongPassword123;Include Error Detail=true
     ports:
-      - "5000:8080" 
+      - "5000:8080"
     depends_on:
-      - postgres
+      postgres:
+        condition: service_healthy
     restart: always
 
   caddy:
