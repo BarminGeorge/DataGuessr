@@ -4,5 +4,5 @@ namespace Infrastructure.Interfaces;
 
 public interface IJwtProvider
 {
-    string GenerateTokenAsync(User user);
+    string GenerateToken(User user);
 }

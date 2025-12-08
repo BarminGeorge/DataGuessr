@@ -13,7 +13,7 @@ public class JwtProvider(IOptions<JwtOptions> options) : IJwtProvider
 {
     private readonly JwtOptions options = options.Value;
 
-    public string GenerateTokenAsync(User user)
+    public string GenerateToken(User user)
     {
         // TODO: пока небезопасно храниться в appsettings.json, переделать
 

@@ -2,6 +2,6 @@ namespace Infrastructure.Interfaces;
 
 public interface IPasswordHasher
 {
-    string GenerateAsync(string password);
-    bool VerifyAsync(string password, string hashedPassword);
+    string Generate(string password);
+    bool Verify(string password, string hashedPassword);
 }
