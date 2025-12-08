@@ -47,7 +47,7 @@ public static class AddApplicationExtensions
 
     private static IServiceCollection AddServices(this IServiceCollection services)
     {
-        services.AddScoped<UserService>();
+        services.AddScoped<IUserService, UserService>();
         services.AddScoped<IRoomManager, RoomManager>();
         services.AddScoped<IGameManager, GameManager>();
         services.AddScoped<IConnectionService, ConnectionService>();

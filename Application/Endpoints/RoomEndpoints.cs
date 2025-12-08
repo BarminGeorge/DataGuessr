@@ -34,7 +34,7 @@ public static class RoomEndpoints
     }
 
     private static async Task<IResult> GetRoomPrivacy([FromRoute] Guid roomId, 
-        IRoomManager roomManager, HttpContext context, CancellationToken ct)
+        [FromServices] IRoomManager roomManager, HttpContext context, CancellationToken ct)
     {
         return (await roomManager.GetRoomPrivacyAsync(roomId, ct))
             .ToResult();

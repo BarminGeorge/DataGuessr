@@ -1,4 +1,5 @@
 using System.Text.Json.Serialization;
+using Application.DI;
 using Application.EndPoints;
 using Application.Endpoints.Hubs;
 using Domain.ValueTypes;
@@ -7,6 +8,7 @@ using Microsoft.AspNetCore.CookiePolicy;
 using Microsoft.AspNetCore.Http;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Hosting;
+using SharpGrip.FluentValidation.AutoValidation.Endpoints.Extensions;
 
 namespace Tests.Application.Integration;
 
@@ -19,6 +21,9 @@ public static class TestProgram
 
         services.Configure<JwtOptions>(configuration.GetSection(nameof(JwtOptions)));
 
+        services.AddApplication();
+        services.AddFluentValidationAutoValidation();
+        
         services.AddAntiforgery();
         services.AddCors(options =>
         {
@@ -64,6 +69,7 @@ public static class TestProgram
         app.UseAuthorization();
         app.UseAntiforgery();
 
+        app.MapUserEndpoints();
         app.MapRoomEndpoints();
         app.MapHub<AppHub>("/appHub");
         app.MapControllers();

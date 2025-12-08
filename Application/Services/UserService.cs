@@ -1,3 +1,4 @@
+using Application.Interfaces;
 using Domain.Common;
 using Domain.Entities;
 using Infrastructure.Interfaces;
@@ -9,6 +10,7 @@ public class UserService(
     IUserRepository userRepository, 
     IAvatarRepository avatarRepository,
     IPasswordHasher passwordHasher)
+    : IUserService
 {
     public async Task<OperationResult> Register(string login, string password, string playerName, IFormFile image, CancellationToken ct)
     {
