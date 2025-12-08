@@ -28,13 +28,15 @@ public static class RoomEndpoints
         var operationResult = await roomManager.GetAvailablePublicRoomsAsync(ct);
         return operationResult is { Success: true, ResultObj: not null }
             ? OperationResult<IEnumerable<RoomDto>>.Ok(operationResult.ResultObj
-                .Select(x => x.ToDto())).ToResult() 
-            : operationResult.ConvertToOperationResult<IEnumerable<RoomDto>>().ToResult();
+                .Select(x => x.ToDto()))
+                .ToResult() 
+            : operationResult.ToResult();
     }
 
     private static async Task<IResult> GetRoomPrivacy([FromRoute] Guid roomId, 
         IRoomManager roomManager, HttpContext context, CancellationToken ct)
     {
-        return (await roomManager.GetRoomPrivacyAsync(roomId, ct)).ToResult();
+        return (await roomManager.GetRoomPrivacyAsync(roomId, ct))
+            .ToResult();
     }
 }
