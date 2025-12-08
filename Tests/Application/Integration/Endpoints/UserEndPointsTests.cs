@@ -1,4 +1,5 @@
 using System.Net;
+using System.Text;
 using Application.Interfaces;
 using Domain.Common;
 using Domain.Entities;
@@ -220,8 +221,6 @@ public class UserEndpointsTests
     [Test]
     public async Task CreateGuest_ReturnsInternalError()
     {
-        var avatar = new Avatar("filename", "mimetype");
-        var user = new User("playerName", avatar);
         A.CallTo(() => userServiceFake.CreateGuest(A<string>._, A<IFormFile>._, A<CancellationToken>._))
             .Returns(OperationResult<User>.Error.InternalError());
 
@@ -244,5 +243,44 @@ public class UserEndpointsTests
         var response = await client.PostAsync("/api/guest", formData);
 
         Assert.That(response.StatusCode, Is.EqualTo(HttpStatusCode.InternalServerError));
+    }
+    
+    [Test]
+    public async Task Login_ReturnsInternalError()
+    {
+        A.CallTo(() => userServiceFake.Login(A<string>._, A<string>._, A<CancellationToken>._))
+            .Returns(OperationResult<(string, Guid)>.Error.InternalError());
+
+        using var client = factory.CreateClient();
+    
+        var loginRequest = new { Login = "Testuser", Password = "testPass22" };
+        var jsonContent = new StringContent(
+            System.Text.Json.JsonSerializer.Serialize(loginRequest),
+            Encoding.UTF8,
+            "application/json");
+        
+        var response = await client.PostAsync("/api/login", jsonContent);
+
+        Assert.That(response.StatusCode, Is.EqualTo(HttpStatusCode.InternalServerError));
+    }
+    
+    [Test]
+    public async Task Login_ReturnsSuccess()
+    {
+        var result = ("avnk.aivna.l", Guid.NewGuid());
+        A.CallTo(() => userServiceFake.Login(A<string>._, A<string>._, A<CancellationToken>._))
+            .Returns(OperationResult<(string, Guid)>.Ok(result));
+
+        using var client = factory.CreateClient();
+    
+        var loginRequest = new { Login = "Testuser", Password = "testPass22" };
+        var jsonContent = new StringContent(
+            System.Text.Json.JsonSerializer.Serialize(loginRequest),
+            Encoding.UTF8,
+            "application/json");
+        
+        var response = await client.PostAsync("/api/login", jsonContent);
+
+        response.EnsureSuccessStatusCode();
     }
 }

@@ -41,7 +41,7 @@ public static class UserEndpoints
         var loginResult = await userService.Login(request.Login, request.Password, ct);
         if (!loginResult.Success)
             return loginResult.ToResult();
-        context.Response.Cookies.Append("", loginResult.ResultObj.token);
+        context.Response.Cookies.Append("token", loginResult.ResultObj.token);
         return Results.Ok(loginResult.ResultObj.userId);
     }
 
