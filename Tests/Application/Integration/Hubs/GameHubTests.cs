@@ -1,82 +1,80 @@
 using Application.DtoUI;
-using Application.Interfaces;
 using Application.Requests;
 using Domain.Common;
 using Domain.Entities;
 using Domain.Enums;
+using Domain.ValueTypes;
 using FakeItEasy;
-using Microsoft.AspNetCore.Hosting;
-using Microsoft.AspNetCore.Mvc.Testing;
 using Microsoft.AspNetCore.SignalR.Client;
-using Microsoft.Extensions.DependencyInjection;
-using Microsoft.Extensions.Logging;
 
 namespace Tests.Application.Integration.Hubs;
 
-public class GameHubTests
+[TestFixture]
+public class GameHubTests: HubTests
 {
-    private WebApplicationFactory<TestEntryPoint> factory;
-    private IRoomManager roomManagerFake;
-    private IGameManager gameManagerFake;
-    private IConnectionService connectionServiceFake;
-    
-    private HubConnection hubConnection;
+    private Guid userId = Guid.NewGuid();
+    private Guid roomId = Guid.NewGuid();
+    private GameMode gameMode = GameMode.BoolMode;
+    private Guid gameId = Guid.NewGuid();
+    private Guid playerId = Guid.NewGuid();
+    private Guid questionId = Guid.NewGuid();
 
-    [SetUp]
-    public void Setup()
-    {
-        roomManagerFake = A.Fake<IRoomManager>();
-        gameManagerFake = A.Fake<IGameManager>();
-        connectionServiceFake = A.Fake<IConnectionService>();
-        
-        factory = new WebApplicationFactory<TestEntryPoint>()
-            .WithWebHostBuilder(builder =>
+    [Test]
+    public async Task CreateGame_RequestWithQuestion_ReturnGame()
+        {
+            var questionDuraction = TimeSpan.FromSeconds(30);
+            var questions = new List<Question>(){new(new BoolAnswer(true), "", "", GameMode.BoolMode)};
+            var questionsCount = questions.Count;
+            
+            var game = new Game(roomId, gameMode, questionDuraction, questionsCount);
+            game.AddQuestions(questions);
+            
+            A.CallTo(() =>
+                GameManagerFake.CreateNewGameAsync(
+                    roomId,
+                    userId, 
+                    gameMode, 
+                    questionsCount,
+                    questionDuraction,
+                    A<CancellationToken>._, 
+                    A<List<Question>>.That.Matches(q => q.Count == questionsCount))).Returns(OperationResult<Game>.Ok(game));
+            
+            await HubConnection.StartAsync();
+            var result = await HubConnection.InvokeAsync<OperationResult<GameDto>>("CreateGame", 
+                new CreateGameRequest(userId, roomId, gameMode, questionsCount, questionDuraction, questions),
+                CancellationToken.None);
+            
+            Assert.Multiple(() =>
             {
-                builder.UseEnvironment("Test");
-                
-                builder.ConfigureServices(services =>
-                {
-                    services.AddSingleton(roomManagerFake);
-                    services.AddSingleton(gameManagerFake);
-                    services.AddSingleton(connectionServiceFake);
-
-                    services.AddSignalR(hubOptions =>
-                    {
-                        hubOptions.EnableDetailedErrors = true;
-                    });
-                });
-                builder.ConfigureLogging(logging => 
-                {
-                    logging.ClearProviders(); 
-                });
-
+                Assert.That(result.ResultObj, Is.Not.Null);
+                Assert.That(result.Success, Is.EqualTo(true));
             });
-        hubConnection = new HubConnectionBuilder()
-            .WithUrl("http://localhost/appHub", options => 
-                options.HttpMessageHandlerFactory = _ => factory.Server.CreateHandler())
-            .WithAutomaticReconnect()
-            .Build();
-    }
-
-    [TearDown]
-    public void TearDown()
-    {
-        factory.Dispose();
-        hubConnection.DisposeAsync();
-    }
-
+            
+            Assert.Multiple(() =>
+            {
+                Assert.That(result.ResultObj.QuestionsCount, Is.EqualTo(questionsCount));
+                Assert.That(result.ResultObj.QuestionDuration, Is.EqualTo(questionDuraction));
+                Assert.That(result.ResultObj.Mode, Is.EqualTo(gameMode));
+                Assert.That(result.ResultObj.Status, Is.EqualTo(GameStatus.NotStarted));
+                Assert.That(result.ResultObj.Questions.Count, Is.EqualTo(questions.Count));
+                
+                var expectedQuestion = questions.First();
+                var actualQuestion = result.ResultObj.Questions.First();
+                Assert.That(actualQuestion.Id, Is.EqualTo(expectedQuestion.Id));
+                Assert.That(actualQuestion.RightAnswer, Is.EqualTo(expectedQuestion.RightAnswer));
+                Assert.That(actualQuestion.Formulation, Is.EqualTo(expectedQuestion.Formulation));
+            });
+        }
+    
     [Test]
     public async Task CreateGame_RequestWithoutQuestion_ReturnGame()
     {
-        var userId = Guid.NewGuid();
-        var roomId = Guid.NewGuid();
-        var gameMode = GameMode.DefaultMode;
         var questionsCount = 10;
         var questionDuraction = TimeSpan.FromMicroseconds(1);
         
         var game = new Game(roomId, gameMode, questionDuraction, questionsCount);
         A.CallTo(() =>
-             gameManagerFake.CreateNewGameAsync(
+             GameManagerFake.CreateNewGameAsync(
                 roomId,
                 userId, 
                 gameMode, 
@@ -84,8 +82,8 @@ public class GameHubTests
                 questionDuraction,  
                 A<CancellationToken>._, null)).Returns(OperationResult<Game>.Ok(game));
         
-        await hubConnection.StartAsync();
-        var result = await hubConnection.InvokeAsync<OperationResult<GameDto>>("CreateGame", 
+        await HubConnection.StartAsync();
+        var result = await HubConnection.InvokeAsync<OperationResult<GameDto>>("CreateGame", 
                 new CreateGameRequest(userId, roomId, gameMode, questionsCount, questionDuraction),
             CancellationToken.None);
         
@@ -104,17 +102,14 @@ public class GameHubTests
     }
 
     [Test]
-    public async Task CreateGame_RequestWithIncorrectQuestionCount_ReturnsError()
+    public async Task CreateGame_RequestWithIncorrectQuestionCount_ValidationError()
     {
-        var userId = Guid.NewGuid();
-        var roomId = Guid.NewGuid();
-        var gameMode = GameMode.DefaultMode;
         var invalidQuestionsCount = -1;
         var questionDuraction = TimeSpan.FromMicroseconds(1);
         
         var game = new Game(roomId, gameMode, questionDuraction, invalidQuestionsCount);
         A.CallTo(() =>
-            gameManagerFake.CreateNewGameAsync(
+            GameManagerFake.CreateNewGameAsync(
                 roomId,
                 userId, 
                 gameMode, 
@@ -122,11 +117,11 @@ public class GameHubTests
                 questionDuraction,  
                 A<CancellationToken>._, null)).Returns(OperationResult<Game>.Ok(game));
         
-        await hubConnection.StartAsync();
-        var result = await hubConnection.InvokeAsync<OperationResult<GameDto>>("CreateGame", 
+        await HubConnection.StartAsync();
+        var result = await HubConnection.InvokeAsync<OperationResult<GameDto>>("CreateGame", 
             new CreateGameRequest(userId, roomId, gameMode, invalidQuestionsCount, questionDuraction),
             CancellationToken.None);
-        Console.WriteLine(result);
+
         Assert.Multiple(() =>
         {
             Assert.That(result.ResultObj, Is.Null);
@@ -136,16 +131,99 @@ public class GameHubTests
     }
 
     [Test]
-    public async Task StartGame_CorrectRequest_StartsGame()
+    public async Task StartGame_CorrectRequest_ReturnSuccess()
     {
-        var userId = Guid.NewGuid();
-        var roomId = Guid.NewGuid();
-
-        A.CallTo(() => gameManagerFake.StartNewGameAsync(roomId, userId, A<CancellationToken>._))
+        A.CallTo(() => GameManagerFake.StartNewGameAsync(roomId, userId, A<CancellationToken>._))
             .Returns(OperationResult.Ok());
         
-        await hubConnection.StartAsync();
-        var result = await hubConnection.InvokeAsync<OperationResult>("StartGame", new StartGameRequest(userId, roomId));
-        Console.WriteLine(result);
+        await HubConnection.StartAsync();
+        var result = await HubConnection.InvokeAsync<OperationResult>("StartGame", new StartGameRequest(userId, roomId));
+        
+        Assert.That(result.Success, Is.EqualTo(true));
+    }
+    
+    [Test]
+    public async Task StartGame_IncorrectRequest_ReturnError()
+    {
+        A.CallTo(() => GameManagerFake.StartNewGameAsync(roomId, userId, A<CancellationToken>._))
+            .Returns(OperationResult.Error);
+        
+        await HubConnection.StartAsync();
+        var result = await HubConnection.InvokeAsync<OperationResult>("StartGame", new StartGameRequest(userId, roomId));
+        
+        Assert.That(result.Success, Is.False);
+    }
+    
+    [Test]
+    public async Task SubmitAnswer_CorrectRequest_ReturnSuccess()
+    {
+        var answer = new BoolAnswer(true);
+        
+        A.CallTo(() => GameManagerFake.SubmitAnswerAsync(gameId, questionId, playerId, answer, A<CancellationToken>._))
+            .Returns(OperationResult.Ok());
+        A.CallTo(() => QuestionServiceFake.SubmitAnswerAsync(gameId, questionId, playerId, answer, A<CancellationToken>._))
+            .Returns(OperationResult.Ok());
+        
+        await HubConnection.StartAsync();
+        var result = await HubConnection.InvokeAsync<OperationResult>("SubmitAnswer", 
+            new SubmitAnswerRequest(gameId, questionId, playerId, answer));
+        
+        Assert.That(result.Success, Is.True);
+    }
+    
+    [Test]
+    public async Task SubmitAnswer_WhenReturnError()
+    {
+        var answer = new BoolAnswer(true);
+        
+        A.CallTo(() => GameManagerFake.SubmitAnswerAsync(gameId, questionId, playerId, answer, A<CancellationToken>._))
+            .Returns(OperationResult.Error);
+        A.CallTo(() => QuestionServiceFake.SubmitAnswerAsync(gameId, questionId, playerId, answer, A<CancellationToken>._))
+            .Returns(OperationResult.Ok());
+        
+        await HubConnection.StartAsync();
+        var result = await HubConnection.InvokeAsync<OperationResult>("SubmitAnswer", 
+            new SubmitAnswerRequest(gameId, questionId, playerId, answer));
+        
+        Assert.That(result.Success, Is.False);
+    }
+    
+    [Test]
+    public async Task FinishGame_CorrectRequest_ReturnRoom()
+    {
+        var room = new Room(userId, RoomPrivacy.Private, 10);
+        A.CallTo(() => GameManagerFake.FinishGameAsync(userId, room.Id, A<CancellationToken>._))
+            .Returns(new OperationResult<Room>(true, room));
+                                                
+        await HubConnection.StartAsync();
+        var result = await HubConnection.InvokeAsync<OperationResult<RoomDto>>("FinishGame", new FinishGameRequest(userId, room.Id));
+        
+        Assert.Multiple(() =>
+        {
+            Assert.That(result.ResultObj, Is.Not.Null);
+            Assert.That(result.Success, Is.EqualTo(true));
+        });
+        Assert.Multiple(() =>
+        {
+            Assert.That(result.ResultObj.Id, Is.EqualTo(room.Id));
+            Assert.That(result.ResultObj.Host, Is.EqualTo(userId));
+        });
+    }
+    
+    [Test]
+    public async Task FinishGame_WhenReturnError()
+    {
+        var room = new Room(userId, RoomPrivacy.Private, 10);
+        A.CallTo(() => GameManagerFake.FinishGameAsync(userId, room.Id, A<CancellationToken>._))
+            .Returns(OperationResult<Room>.Error.NotFound("Room not found"));
+                                                
+        await HubConnection.StartAsync();
+        var result = await HubConnection.InvokeAsync<OperationResult<RoomDto>>("FinishGame", new FinishGameRequest(userId, room.Id));
+        
+        Assert.Multiple(() =>
+        {
+            Assert.That(result.ResultObj, Is.Null);
+            Assert.That(result.Success, Is.False);
+        });
     }
 }

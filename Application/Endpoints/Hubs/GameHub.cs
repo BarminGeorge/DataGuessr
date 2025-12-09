@@ -3,7 +3,6 @@ using Application.Extensions;
 using Application.Mappers;
 using Application.Requests;
 using Domain.Common;
-using Microsoft.AspNetCore.Authorization.Infrastructure;
 
 namespace Application.Endpoints.Hubs;
 
