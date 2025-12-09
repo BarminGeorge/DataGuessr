@@ -3,13 +3,15 @@ using Application.Extensions;
 using Application.Mappers;
 using Application.Requests;
 using Domain.Common;
+using Microsoft.AspNetCore.Authorization.Infrastructure;
 
 namespace Application.Endpoints.Hubs;
 
 public partial class AppHub
 {
-    public async Task<OperationResult<GameDto>> CreateGame(CreateGameRequest request, CancellationToken ct = default)
+    public async Task<OperationResult<GameDto>> CreateGame(CreateGameRequest request)
     {
+        var ct = Context.ConnectionAborted;
         if (await this.ValidateRequestAsync(request, ct) is { } error)
             return OperationResult<GameDto>.Error.Validation(error);
         
@@ -27,24 +29,27 @@ public partial class AppHub
             : result.ConvertToOperationResult<GameDto>();
     }
 
-    public async Task<OperationResult> StartGame(StartGameRequest request, CancellationToken ct = default)
+    public async Task<OperationResult> StartGame(StartGameRequest request)
     {
+        var ct = Context.ConnectionAborted;
         if (await this.ValidateRequestAsync(request, ct) is { } error)
             return OperationResult.Error.Validation(error);
         
         return await gameManager.StartNewGameAsync(request.RoomId, request.UserId, ct);
     }
 
-    public async Task<OperationResult> SubmitAnswer(SubmitAnswerRequest request, CancellationToken ct = default)
+    public async Task<OperationResult> SubmitAnswer(SubmitAnswerRequest request)
     {
+        var ct = Context.ConnectionAborted;
         if (await this.ValidateRequestAsync(request, ct) is { } error)
             return OperationResult.Error.Validation(error);
         
         return await gameManager.SubmitAnswerAsync(request.GameId, request.QuestionId, request.PlayerId, request.Answer, ct);
     }
 
-    public async Task<OperationResult<RoomDto>> FinishGame(FinishGameRequest request, CancellationToken ct = default)
+    public async Task<OperationResult<RoomDto>> FinishGame(FinishGameRequest request)
     {
+        var ct = Context.ConnectionAborted;
         if (await this.ValidateRequestAsync(request, ct) is { } error)
             return OperationResult<RoomDto>.Error.Validation(error);
         

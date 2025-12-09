@@ -1,3 +1,5 @@
+using System.Text.Json.Serialization;
+
 namespace Domain.ValueTypes;
 
 public abstract record Answer;
