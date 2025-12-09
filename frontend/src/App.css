@@ -5,11 +5,21 @@
   font-family: "Dm Sans", sans-serif;
 }
 
-.acсent-text {
+.title-accent-text {
+  font-size: 1.5rem;
+  font-weight: 700;
+  color: #161E64;
+  font-family: "Dm Sans", sans-serif;
+  white-space: nowrap;
+}
+
+
+.accent-text {
   font-size: 1rem;
   font-weight: 500;
-  color: #423FE5;
+  color: #161E64;
   font-family: "Dm Sans", sans-serif;
+  white-space: nowrap;
 }
 
 
@@ -122,6 +132,30 @@
     padding: 1rem 2rem; 
 
 }
+
+.picture-xl-container {
+  background-color: #FFFFFF;
+  min-width: 30vw;
+  min-height: 50vh;
+  max-height: 65vh;
+  border-radius: 2rem;
+  
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  overflow: hidden;
+  
+}
+
+.default-picture {
+
+  max-width: 100%;
+  max-height: 100%;
+  object-fit: contain;
+  display: block;
+ 
+}
+
 
 .main-container {
     display: flex;

@@ -6,18 +6,8 @@ import RegistrationPage from "./pages/RegistrationPage";
 import { usePage } from "./PageContext";
 import ProfilePage from "./pages/ProfilePage";
 import LobbyPage from "./pages/game/LobbyPage";
+import GameRoundPage from "./pages/game/GameRoundPage";
 
-// export default function App() {
-//   return (
-//     <BrowserRouter>
-//       <Routes>
-//         <Route path="/" element={<Home />} />
-//         <Route path="/login" element={<LoginPage />} />
-//         <Route path="/register" element={<RegistrationPage />} />
-//       </Routes>
-//     </BrowserRouter>
-//   );
-// }
 
 export default function App() {
   const { page, setPage } = usePage();
@@ -29,6 +19,7 @@ export default function App() {
       {page === "registration" && <RegistrationPage />}
       {page === "profile" && <ProfilePage />}
       {page === "room" && <LobbyPage />}
+      {page === "game" && <GameRoundPage />}
     </div>
   );
 }

@@ -19,7 +19,6 @@ async function handleLogin(
       {})
 
     if (res.success === true) {
-      localStorage.setItem("token", res.token);
       setPage("home");
     } else {
       alert("Упс, что-то пошло не так");
@@ -86,7 +85,7 @@ export default function LoginPage() {
         <button className="button-primary" 
           onClick={() => handleLogin(login, password, setPage)}>
             Войти
-        </button>;
+        </button>
 
     </div>
     </div>

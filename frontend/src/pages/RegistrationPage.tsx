@@ -1,6 +1,6 @@
 import React from "react";
 import Header from "../components/Header";
-import { http } from "../api/http";
+import { api, http } from "../api/http";
 
 import { useState } from "react";
 import { usePage } from "../PageContext";
@@ -22,13 +22,14 @@ async function handleRegistration(
     formData.append("playerName", playerName);
     formData.append("avatar", avatar);
 
-    const res: any = await http.post(
+    const res: any = await api.post(
       "/register", 
       formData)
 
-
-    localStorage.setItem("token", res.token);
     setPage("home");
+    console.log(123);
+
+
     } catch (e) {
       alert(e);
     }
@@ -91,7 +92,7 @@ export default function RegistrationPage() {
 
         
         <button className="button-primary" 
-        onClick={() => handleRegistration(login, password, playerName, avatar, setPage)}>Зарегистрироваться</button>;
+        onClick={() => handleRegistration(login, password, playerName, avatar, setPage)}>Зарегистрироваться</button>
 
     </div>
     </div>

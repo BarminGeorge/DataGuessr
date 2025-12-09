@@ -1,7 +1,7 @@
 
 import { createContext, useContext, useState } from "react";
 
-type Page = "home" | "login" | "room" | "registration" | "profile";
+type Page = "home" | "login" | "room" | "game" | "registration" | "profile";
 
 interface PageContextValue {
   page: Page;

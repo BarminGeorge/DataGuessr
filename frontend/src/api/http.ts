@@ -1,22 +1,9 @@
 import axios, { type AxiosInstance, type  AxiosRequestConfig, type InternalAxiosRequestConfig, type AxiosResponse } from "axios";
 
-const api: AxiosInstance = axios.create({
-baseURL: "http://localhost:5209", // поменяй на свой URL API
+export const api: AxiosInstance = axios.create({
+baseURL: "https://fiitguesser.ru/api", // поменяй на свой URL API
 timeout: 10000,
 });
-
-
-// Перехватчик запросов — можно добавлять токены
-api.interceptors.request.use(
-    (config) => {
-// Пример: добавить Authorization
-    const token = localStorage.getItem("token");
-    if (token && config.headers) config.headers.Authorization = `Bearer  ${token}`;
-
-    return config;
-    },
-(error) => Promise.reject(error)
-);
 
 
 // Перехватчик ответов — можно ловить 401, логировать ошибки

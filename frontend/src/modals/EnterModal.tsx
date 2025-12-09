@@ -80,13 +80,13 @@ export default function EnterModal() {
         <div className="modal-container">  
         <div className="centered-vertical-aligment">       
         <div className="secondary-container">
-        <p className="secondary-text">
+        <div className="secondary-text">
             Войдите, для того чтобы:
             <ul>
               <li>Создавать лобби</li>
               <li>Сохранять статистику</li>
             </ul>
-        </p>
+        </div>
        
         <div className="centered-aligment">
        <button className="button-primary" onClick={() => setPage("login")}>Войти</button> 
