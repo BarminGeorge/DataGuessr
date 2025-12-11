@@ -8,7 +8,6 @@ public record GameDto(
     Guid Id,
     GameMode Mode,
     GameStatus Status,
-    Statistic CurrentStatistic,
-    IReadOnlyList<Question> Questions,
+    IReadOnlyList<QuestionDto> Questions,
     int QuestionsCount,
     TimeSpan QuestionDuration);
