@@ -1,5 +1,6 @@
 using Application.Extensions;
 using Application.Interfaces;
+using Application.Mappers;
 using Application.Requests;
 using Microsoft.AspNetCore.Mvc;
 using SharpGrip.FluentValidation.AutoValidation.Endpoints.Extensions;
@@ -42,7 +43,7 @@ public static class UserEndpoints
         if (!loginResult.Success)
             return loginResult.ToResult();
         context.Response.Cookies.Append("token", loginResult.ResultObj.token);
-        return Results.Ok(loginResult.ResultObj.userId);
+        return Results.Ok(loginResult.ResultObj.user.ToDto());
     }
 
     private static async Task<IResult> UpdateUser([FromForm] UpdateUserRequest request, 

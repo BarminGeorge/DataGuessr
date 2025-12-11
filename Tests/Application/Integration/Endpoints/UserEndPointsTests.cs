@@ -249,7 +249,7 @@ public class UserEndpointsTests
     public async Task Login_ReturnsInternalError()
     {
         A.CallTo(() => userServiceFake.Login(A<string>._, A<string>._, A<CancellationToken>._))
-            .Returns(OperationResult<(string, Guid)>.Error.InternalError());
+            .Returns(OperationResult<(string, User)>.Error.InternalError());
 
         using var client = factory.CreateClient();
     
@@ -267,9 +267,9 @@ public class UserEndpointsTests
     [Test]
     public async Task Login_ReturnsSuccess()
     {
-        var result = ("avnk.aivna.l", Guid.NewGuid());
+        var result = ("avnk.aivna.l", new User("test", new Avatar("filename", "mimeType")));
         A.CallTo(() => userServiceFake.Login(A<string>._, A<string>._, A<CancellationToken>._))
-            .Returns(OperationResult<(string, Guid)>.Ok(result));
+            .Returns(OperationResult<(string, User)>.Ok(result));
 
         using var client = factory.CreateClient();
     
