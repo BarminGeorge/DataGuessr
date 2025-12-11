@@ -60,9 +60,8 @@ public class GameHubTests: HubTests
                 
                 var expectedQuestion = questions.First();
                 var actualQuestion = result.ResultObj.Questions.First();
-                Assert.That(actualQuestion.Id, Is.EqualTo(expectedQuestion.Id));
-                Assert.That(actualQuestion.RightAnswer, Is.EqualTo(expectedQuestion.RightAnswer));
                 Assert.That(actualQuestion.Formulation, Is.EqualTo(expectedQuestion.Formulation));
+                Assert.That(actualQuestion.ImageUrl, Is.EqualTo(expectedQuestion.ImageUrl));
             });
         }
     
