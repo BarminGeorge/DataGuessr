@@ -1,6 +1,7 @@
 using Application.Interfaces;
 using Domain.Common;
 using Domain.Entities;
+using Domain.Enums;
 using Infrastructure.Interfaces;
 
 namespace Application.Services;
@@ -12,17 +13,19 @@ public class UserService(
     IPasswordHasher passwordHasher)
     : IUserService
 {
-    public async Task<OperationResult> Register(string login, string password, string playerName, IFormFile image, CancellationToken ct)
+    public async Task<OperationResult<User>> Register(string login, string password, string playerName, IFormFile image, CancellationToken ct)
     {
         var hashedPassword = passwordHasher.Generate(password);
         var operation = () => avatarRepository.SaveUserAvatarAsync(image, ct);
         var result = await operation.WithRetry(3, TimeSpan.FromSeconds(0.15));
         if (!result.Success || result.ResultObj == null)
-            return result;
+            return OperationResult<User>.Error.InternalError(result.ErrorMessage);
         
         var user = new User(login, playerName, result.ResultObj, hashedPassword);
         var addOperation = () => userRepository.AddAsync(user, ct);
-        return await addOperation.WithRetry(3, TimeSpan.FromSeconds(0.15));
+        var resultAddUser = await addOperation.WithRetry(3, TimeSpan.FromSeconds(0.15));
+        return resultAddUser.Success ? OperationResult<User>.Ok(user)
+            : resultAddUser.ConvertToOperationResult<User>();
     }
 
     public async Task<OperationResult<(string token, User user)>> Login(string login, string password, CancellationToken ct)

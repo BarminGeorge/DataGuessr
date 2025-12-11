@@ -42,9 +42,10 @@ public class UserEndpointsTests
     [Test]
     public async Task Register_ReturnsSuccess()
     {
+        var user = new User("Player1", new Avatar("filename", "mimeType"));
         A.CallTo(() => userServiceFake.Register(A<string>._, A<string>._,  
                 A<string>._, A<IFormFile>._, A<CancellationToken>._))
-            .Returns(OperationResult.Ok());
+            .Returns(OperationResult<User>.Ok(user));
 
         using var client = factory.CreateClient();
     
@@ -74,7 +75,7 @@ public class UserEndpointsTests
     {
         A.CallTo(() => userServiceFake.Register(A<string>._, A<string>._,  
                 A<string>._, A<IFormFile>._, A<CancellationToken>._))
-            .Returns(OperationResult.Error.InternalError());
+            .Returns(OperationResult<User>.Error.InternalError());
 
         using var client = factory.CreateClient();
     
