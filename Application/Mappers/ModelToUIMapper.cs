@@ -25,4 +25,12 @@ public static class ModelToUiMapper
             game.QuestionsCount,
             game.QuestionDuration);
     }
+
+    public static UserDto ToDto(this User user)
+    {
+        return new UserDto(
+            user.Id,
+            user.PlayerName,
+            user.Avatar.Filename);
+    }
 }
