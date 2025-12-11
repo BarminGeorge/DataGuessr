@@ -25,10 +25,12 @@ function checkLogging() {
 
 export default function HomePage() {
   const { setPage } = usePage();
+
   return (
     
     <div className="global-container">
-      <button className="button-primary" onClick={() => setPage("game")}>В Игре</button>;  
+      
+      {/* <button className="button-primary" onClick={() => setPage("game")}>В Игре</button>;   */}
       <div className={`modal centered-vertical-aligment ${checkLogging() ? 'hide': ''}`}>
       <EnterModal />
       </div>

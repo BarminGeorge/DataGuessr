@@ -22,6 +22,13 @@
   white-space: nowrap;
 }
 
+.accent-title-text {
+  font-size: 1rem;
+  font-weight: 700;
+  color: #161E64;
+  font-family: "Dm Sans", sans-serif;
+  white-space: nowrap;
+}
 
 .link-text {
   font-size: 1rem;
@@ -34,6 +41,13 @@
 
 .title-text {
   font-size: 1.5rem;
+  font-weight: 700;
+  color: #5E5BFB;
+  font-family: "Dm Sans", sans-serif;
+}
+
+.title-text-2 {
+  font-size: 2rem;
   font-weight: 700;
   color: #5E5BFB;
   font-family: "Dm Sans", sans-serif;
@@ -133,6 +147,43 @@
 
 }
 
+.score-card {
+    display: flex;
+    flex-direction: row;
+    justify-content: space-between;
+    align-items: center;
+    gap: 1rem;
+    background-color: #FFFFFF;
+    color: #676767;
+    padding: 1rem;
+    border-radius: 1rem;
+    width: 40vw;
+
+	position: relative; 
+}
+
+.score {
+  color: #A78000;
+  font-weight: 700;
+  font-family: "Dm Sans", inherit;
+  font-size: 1.2rem;
+}
+
+.score-default {
+  color: #676767;
+  font-weight: 700;
+  font-family: "Dm Sans", inherit;
+  font-size: 1.2rem;
+}
+
+.centered {
+	position: absolute;
+	top: 50%;
+	left: 50%;
+	transform: translate(-50%, -50%);
+
+}
+
 .picture-xl-container {
   background-color: #FFFFFF;
   min-width: 30vw;
@@ -147,13 +198,16 @@
   
 }
 
-.default-picture {
 
+
+.default-picture {
   max-width: 100%;
   max-height: 100%;
   object-fit: contain;
   display: block;
- 
+  margin-left: auto;
+  margin-right: auto;
+  border-radius: 2rem;
 }
 
 
@@ -219,9 +273,47 @@
     left: 0;
     width: 100%;
     height: 100%;
-
+    pointer-events: none;
     backdrop-filter: blur(5px);
     z-index: 1;
+}
+
+
+.row-template {
+  display: flex;
+  flex-direction: row;
+  overflow: hidden;
+  gap: 2.5rem;
+}
+
+.row-column {
+	flex: 1;	
+}
+
+.up-element {
+	margin-left: auto;
+	margin-right: auto;
+}
+
+
+.centered-element {
+	margin-top: 15vh;
+	margin-left: auto;
+	margin-right: auto;
+	position: relative;
+}
+
+.down-element {
+	margin-top: 40vh;
+	margin-left: auto;
+	margin-right: auto;
+}
+
+.list-container {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 1rem;
 }
 
 .global-container {
@@ -242,4 +334,62 @@
 
 .modal {
   z-index: 2;
+}
+
+
+/* Property 1=Avatar_with_triangle */
+.Avatar-with-triangle {
+	position: absolute;
+	width: 80px;
+	height: 163px;
+	left: 242px;
+	top: 20px;
+
+	filter: drop-shadow(0px 4px 4px rgba(0, 0, 0, 0.25));
+}
+
+
+/* Polygon 1 */
+.Avatar-with-triangle-poly1 {
+	position: absolute;
+	width: 80px;
+	height: 83px;
+	left: 0px;
+	top: 40px;
+
+	background: #FFFFFF;
+	transform: matrix(1, 0, 0, -1, 0, 0);
+}
+
+
+.avatar-xl {
+/* Avatar */
+	width: 20vh;
+	height: 20vh;
+	border-radius: 9999px;
+}
+
+
+.avatar {
+/* Avatar */
+
+	position: absolute;
+	width: 80px;
+	height: 80px;
+	left: 0px;
+	top: 0px;
+
+	border-radius: 9999px;
+}
+
+
+/* Shape */
+.avatar-shape {
+	position: absolute;
+	width: 80px;
+	height: 80px;
+	left: calc(50% - 80px/2);
+	top: calc(50% - 80px/2);
+
+	background-color: red;
 }

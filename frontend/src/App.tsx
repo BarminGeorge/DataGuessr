@@ -7,6 +7,8 @@ import { usePage } from "./PageContext";
 import ProfilePage from "./pages/ProfilePage";
 import LobbyPage from "./pages/game/LobbyPage";
 import GameRoundPage from "./pages/game/GameRoundPage";
+import GameLeaderboard from "./pages/game/GameLeaderboard";
+import GameLeaderboardFinal from "./pages/game/GameLeaderboardFinal";
 
 
 export default function App() {
@@ -19,7 +21,9 @@ export default function App() {
       {page === "registration" && <RegistrationPage />}
       {page === "profile" && <ProfilePage />}
       {page === "room" && <LobbyPage />}
-      {page === "game" && <GameRoundPage />}
+      {page === "game_round" && <GameRoundPage />}
+      {page === "game_leaderboard" && <GameLeaderboard />}
+      {page === "game_leaderboard_final" && <GameLeaderboardFinal />}
     </div>
   );
 }

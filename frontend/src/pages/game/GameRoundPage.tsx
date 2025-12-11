@@ -11,7 +11,7 @@ export default function GameRoundPage() {
   const [year, setYear] = useState(1966)
   return (
     <div className="global-container">
-    <Header />
+    <Header variant="logo-and-timer"/>
     <div className="main-container">  
     <div className="secondary-container">
     {/* question */}
@@ -40,6 +40,11 @@ export default function GameRoundPage() {
       max={2025}
       valueLabelDisplay="auto"
       color="secondary"
+      sx={{
+        '& .MuiSlider-thumb': {
+          borderRadius: '1px',
+        },
+      }}
     />
 
     <span className="accent-text">{year} год</span>
