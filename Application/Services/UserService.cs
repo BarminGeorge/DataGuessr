@@ -1,7 +1,6 @@
 using Application.Interfaces;
 using Domain.Common;
 using Domain.Entities;
-using Domain.Enums;
 using Infrastructure.Interfaces;
 
 namespace Application.Services;

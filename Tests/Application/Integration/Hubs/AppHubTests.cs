@@ -50,8 +50,8 @@ public class AppHubTests : HubTests
     {
         A.CallTo(() => ConnectionServiceFake.GetPlayerByConnection(A<string>._))
             .Returns(OperationResult<(Guid, Guid)>.Error);
-
-
+        
+        
         await HubConnection.StartAsync();
         var connectionId = HubConnection.ConnectionId;
         

@@ -5,7 +5,7 @@ namespace Infrastructure.Interfaces;
 
 public interface IUserRepository
 {
-    Task<OperationResult<User>> GetById(Guid userId, CancellationToken ct = default);
+    Task<OperationResult<IEnumerable<User>>> GetUsersByIds(IEnumerable<Guid> usersId, CancellationToken ct);
     Task<OperationResult> AddAsync(User user, CancellationToken ct);
     Task<OperationResult<User>> GetByLoginAsync(string login, CancellationToken ct);
     Task<OperationResult> UpdateUserAsync(Guid userId, Avatar avatar, string playerName, CancellationToken ct);

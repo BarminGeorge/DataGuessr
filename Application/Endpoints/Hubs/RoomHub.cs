@@ -20,7 +20,7 @@ public partial class AppHub
         {
             await connectionService.AddConnection(Context.ConnectionId, request.UserId, result.ResultObj.Id, ct);
             await Groups.AddToGroupAsync(Context.ConnectionId, $"room-{result.ResultObj.Id}", ct);
-            return OperationResult<RoomDto>.Ok(await result.ResultObj.ToDto(userRepository));
+            return OperationResult<RoomDto>.Ok(result.ResultObj.ToDto());
         }
         
         return result.ConvertToOperationResult<RoomDto>();
@@ -38,7 +38,7 @@ public partial class AppHub
         {
             await connectionService.AddConnection(Context.ConnectionId, request.UserId, request.RoomId, ct);
             await Groups.AddToGroupAsync(Context.ConnectionId, $"room-{request.RoomId}", ct);
-            return OperationResult<RoomDto>.Ok(await result.ResultObj.ToDto(userRepository));
+            return OperationResult<RoomDto>.Ok(result.ResultObj.ToDto());
         }
 
         return result.ConvertToOperationResult<RoomDto>();
@@ -74,7 +74,7 @@ public partial class AppHub
         {
             await connectionService.AddConnection(Context.ConnectionId, request.UserId, result.ResultObj.Id, ct);
             await Groups.AddToGroupAsync(Context.ConnectionId, $"room-{result.ResultObj.Id}", ct);
-            return OperationResult<RoomDto>.Ok(await result.ResultObj.ToDto(userRepository));
+            return OperationResult<RoomDto>.Ok(result.ResultObj.ToDto());
         }
 
         return result.ConvertToOperationResult<RoomDto>();

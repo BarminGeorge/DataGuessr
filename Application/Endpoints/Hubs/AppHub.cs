@@ -1,10 +1,9 @@
 using Application.Interfaces;
-using Infrastructure.Interfaces;
 using Microsoft.AspNetCore.SignalR;
 
 namespace Application.Endpoints.Hubs;
 
-public partial class AppHub(IGameManager gameManager, IRoomManager roomManager, IConnectionService connectionService, IUserRepository userRepository) 
+public partial class AppHub(IGameManager gameManager, IRoomManager roomManager, IConnectionService connectionService) 
     : Hub
 {
     public override async Task OnDisconnectedAsync(Exception? exception)

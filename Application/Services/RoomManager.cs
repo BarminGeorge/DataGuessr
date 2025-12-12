@@ -1,4 +1,5 @@
 using Application.Interfaces;
+using Application.Mappers;
 using Application.Notifications;
 using Domain.Common;
 using Domain.Entities;
@@ -9,7 +10,6 @@ namespace Application.Services;
 
 public class RoomManager(
     IRoomRepository roomRepository, 
-    ILogger<RoomManager> logger, 
     INotificationService notificationService,
     IPlayerRepository playerRepository,
     IUserRepository usersRepository) : IRoomManager
@@ -23,9 +23,7 @@ public class RoomManager(
         if (!addRoomResult.Success)
             return addRoomResult.ConvertToOperationResult<Room>();
         
-        logger.LogInformation($"Room {room.Id} created by user {userId}");
-        
-        return OperationResult<Room>.Ok(room);
+        return await JoinRoomAsync(room.Id, userId, ct, password);
     }
 
     public async Task<OperationResult<Room>> JoinRoomAsync(Guid roomId, Guid userId, CancellationToken ct, string? password = null)
@@ -45,11 +43,12 @@ public class RoomManager(
         var player = getPlayerResult.ResultObj;
         room.AddPlayer(player);
 
-        var playerNameResult = await usersRepository.GetPlayerNameByIdAsync(userId, ct);
-        if (!playerNameResult.Success || playerNameResult.ResultObj == null)
-            return playerNameResult.ConvertToOperationResult<Room>();
-        
-        var notification = new NewPlayerNotification(player.Id, playerNameResult.ResultObj);
+        var getUsersResult = await usersRepository.GetUsersByIds([userId], ct);
+        if (!getUsersResult.Success || getUsersResult.ResultObj == null)
+            return getUsersResult.ConvertToOperationResult<Room>();
+        player.SetUserInfo(getUsersResult.ResultObj.First());
+            
+        var notification = new NewPlayerNotification(player.ToDto());
         var operation = () => notificationService.NotifyGameRoomAsync(roomId, notification);
         var notifyResult = await operation.WithRetry(delay: TimeSpan.FromSeconds(0.15));
         if (!notifyResult.Success)
@@ -59,7 +58,11 @@ public class RoomManager(
         if (!updateResult.Success)
             return updateResult.ConvertToOperationResult<Room>();
         
-        logger.LogInformation($"User {userId} joined room {roomId}");
+        var usersResult = await usersRepository.GetUsersByIds(room.Players.Select(x => x.UserId), ct);
+        if (!usersResult.Success || usersResult.ResultObj == null)
+            return usersResult.ConvertToOperationResult<Room>();
+        room.FillPlayersWithUserInfo(usersResult.ResultObj);
+        
         return OperationResult<Room>.Ok(room);
     }
 

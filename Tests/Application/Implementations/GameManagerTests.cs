@@ -18,8 +18,7 @@ public class GameManagerTests
     protected INotificationService NotificationService;
     protected IQuestionService QuestionService;
     protected IGameRepository GameRepository;
-    protected ILogger<GameManager> Logger;
-    
+
     protected GameManager GameManager;
     
     [SetUp]
@@ -30,9 +29,9 @@ public class GameManagerTests
         NotificationService = A.Fake<INotificationService>();
         QuestionService = A.Fake<IQuestionService>();
         GameRepository = A.Fake<IGameRepository>();
-        Logger = A.Fake<ILogger<GameManager>>();
+        A.Fake<ILogger<GameManager>>();
 
-        GameManager = new GameManager(GameCoreService, RoomRepository, NotificationService, QuestionService, GameRepository, Logger);
+        GameManager = new GameManager(GameCoreService, RoomRepository, NotificationService, QuestionService, GameRepository);
     }
 }
 

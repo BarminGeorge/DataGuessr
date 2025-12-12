@@ -1,6 +1,6 @@
 namespace Application.DtoUI;
 
-public record UserDto(
+public record PlayerDto(
     Guid Id,
     string PlayerName,
     string AvatarUrl);

@@ -56,4 +56,16 @@ public class Room : IEntity<Guid>
     {
         Games.Add(game);
     }
+    
+    public void FillPlayersWithUserInfo(IEnumerable<User> users)
+    {
+        if (Players.Count == 0)
+            return;
+
+        var userDict = users.ToDictionary(u => u.Id, u => u);
+            
+        foreach (var player in Players)
+            if (userDict.TryGetValue(player.UserId, out var user))
+                player.SetUserInfo(user);
+    }
 }

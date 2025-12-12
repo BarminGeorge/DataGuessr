@@ -1,5 +1,6 @@
 using System.Text.Json.Serialization;
 using Application.DI;
+using Application.Endpoints;
 using Application.EndPoints;
 using Application.Interfaces;
 using Application.Endpoints.Hubs;
@@ -26,7 +27,8 @@ services.AddAntiforgery();
 
 services.AddCors(options =>
 {
-    options.AddPolicy("AllowAll", policy => policy.AllowAnyOrigin().AllowAnyMethod().AllowAnyHeader());
+    options.AddPolicy("ProductionPolicy", policy =>
+        policy.WithOrigins("https://fiitguesser.ru").AllowAnyHeader().AllowAnyMethod());
 });
 
 
@@ -69,7 +71,7 @@ else
     app.UseHsts();
 }
 
-app.UseCors("AllowAll"); // TODO
+app.UseCors("ProductionPolicy");
 
 app.UseHttpsRedirection();
 
@@ -86,9 +88,9 @@ app.UseAntiforgery();
 
 //app.UseHangfireDashboard("/hangfire");
 
-app.MapGet("/api", () => "Hello World!");
 app.MapUserEndpoints();
 app.MapRoomEndpoints();
+app.MapImageEndpoints();
 app.MapHub<AppHub>("/appHub");
 
 app.MapControllers();

@@ -15,8 +15,9 @@ public class UserRepository : IUserRepository
         this.db = db ?? throw new ArgumentNullException(nameof(db));
     }
 
+
     // TODO
-    public Task<OperationResult<User>> GetById(Guid userId, CancellationToken ct = default)
+    public Task<OperationResult<IEnumerable<User>>> GetUsersByIds(IEnumerable<Guid> usersId, CancellationToken ct)
     {
         throw new NotImplementedException();
     }

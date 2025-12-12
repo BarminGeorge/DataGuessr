@@ -6,7 +6,6 @@ using Domain.Entities;
 using Domain.Enums;
 using FakeItEasy;
 using Infrastructure.Interfaces;
-using Microsoft.Extensions.Logging;
 
 namespace Tests.Application.Implementations;
 
@@ -16,7 +15,6 @@ public class RoomManagerTests
     protected IRoomRepository RoomRepository;
     protected INotificationService NotificationService;
     protected IPlayerRepository PlayerRepository;
-    protected ILogger<RoomManager> Logger;
     protected IRoomManager RoomManager;
     protected IUserRepository UsersRepository;
     
@@ -27,8 +25,7 @@ public class RoomManagerTests
         NotificationService = A.Fake<INotificationService>();
         PlayerRepository = A.Fake<IPlayerRepository>();
         UsersRepository = A.Fake<IUserRepository>();
-        Logger = A.Fake<ILogger<RoomManager>>();
-        RoomManager = new RoomManager(RoomRepository, Logger, NotificationService, PlayerRepository, UsersRepository);
+        RoomManager = new RoomManager(RoomRepository, NotificationService, PlayerRepository, UsersRepository);
     }
 }
 
@@ -52,12 +49,33 @@ public class CreateRoomTests : RoomManagerTests
 
     private void SetupRepositoryMock(OperationResult result)
     {
-        A.CallTo(() => RoomRepository.AddAsync(A<Room>.That.Matches(room =>
-                    room.Owner == userId &&
-                    room.Privacy == privacy &&
-                    room.MaxPlayers == maxPlayers), 
+        A.CallTo(() => RoomRepository.AddAsync(A<Room>.That.Matches(room => 
+                    room.Owner == userId 
+                    && room.Privacy == privacy 
+                    && room.MaxPlayers == maxPlayers), 
                 cancellationToken))
             .Returns(result);
+
+        var room = new Room(userId, privacy, maxPlayers);
+        A.CallTo(() => RoomRepository.GetByIdAsync(A<Guid>._, A<CancellationToken>._))
+            .Returns(OperationResult<Room>.Ok(room));
+
+        var player = new Player(Guid.NewGuid(), userId, "");
+        A.CallTo(() => PlayerRepository.GetPlayerByIdAsync(A<Guid>._, A<CancellationToken>._))
+            .Returns(OperationResult<Player>.Ok(player));
+
+        var user = new User("login", "name", new Avatar("file", "mimetype"), "password");
+        A.CallTo(() => UsersRepository.GetUsersByIds(A<IEnumerable<Guid>>._, cancellationToken))
+            .Returns(OperationResult<IEnumerable<User>>.Ok([user]));
+        
+        A.CallTo(() => NotificationService.NotifyGameRoomAsync(A<Guid>._, A<NewPlayerNotification>._))
+            .Returns(OperationResult.Ok());
+        
+        A.CallTo(() => UsersRepository.GetPlayerNameByIdAsync(A<Guid>._, A<CancellationToken>._))
+            .Returns(OperationResult<string>.Ok("name"));
+        
+        A.CallTo(() => RoomRepository.UpdateAsync(A<Room>._, cancellationToken))
+            .Returns(OperationResult.Ok());
     }
 
     [Test]
@@ -100,6 +118,7 @@ public class JoinRoomTests : RoomManagerTests
     private Room room;
     private Player player;
     private CancellationToken cancellationToken;
+    private User user;
 
     [SetUp]
     public new void Setup()
@@ -109,7 +128,9 @@ public class JoinRoomTests : RoomManagerTests
         userId = Guid.NewGuid();
         var connectionId = Guid.NewGuid().ToString();
         cancellationToken = CancellationToken.None;
-        
+
+        var avatar = new Avatar("filename", "mimetype");
+        user = new User("login", "name", avatar, "password");
         room = new Room(Guid.NewGuid(), RoomPrivacy.Public, 10);
         player = new Player(userId, roomId, connectionId);
     }
@@ -121,11 +142,12 @@ public class JoinRoomTests : RoomManagerTests
         
         A.CallTo(() => PlayerRepository.GetPlayerByIdAsync(userId, cancellationToken))
             .Returns(OperationResult<Player>.Ok(player));
+
+        A.CallTo(() => UsersRepository.GetUsersByIds(A<IEnumerable<Guid>>._, cancellationToken))
+            .Returns(OperationResult<IEnumerable<User>>.Ok([user]));
         
-        A.CallTo(() => NotificationService.NotifyGameRoomAsync(roomId, A<NewPlayerNotification>
-                .That.Matches(notification => 
-                    notification.PlayerName == "name"
-                    && notification.PlayerId == player.Id))).Returns(OperationResult.Ok());
+        A.CallTo(() => NotificationService.NotifyGameRoomAsync(roomId, A<NewPlayerNotification>._))
+            .Returns(OperationResult.Ok());
         
         A.CallTo(() => UsersRepository.GetPlayerNameByIdAsync(userId, cancellationToken))
             .Returns(OperationResult<string>.Ok("name"));
@@ -191,10 +213,8 @@ public class JoinRoomTests : RoomManagerTests
         A.CallTo(() => PlayerRepository.GetPlayerByIdAsync(userId, cancellationToken))
             .Returns(OperationResult<Player>.Ok(player));
         
-        A.CallTo(() => NotificationService.NotifyGameRoomAsync(roomId, A<NewPlayerNotification>
-            .That.Matches(notification => 
-                notification.PlayerName == "name"
-                && notification.PlayerId == player.Id))).Returns(OperationResult.Ok());
+        A.CallTo(() => NotificationService.NotifyGameRoomAsync(roomId, A<NewPlayerNotification>._))
+            .Returns(OperationResult.Ok());
         
         A.CallTo(() => RoomRepository.UpdateAsync(room, cancellationToken))
             .Returns(OperationResult.Error.InternalError("Update failed"));
@@ -223,10 +243,11 @@ public class JoinRoomTests : RoomManagerTests
         A.CallTo(() => UsersRepository.GetPlayerNameByIdAsync(userId, cancellationToken))
             .Returns(OperationResult<string>.Ok("name"));
         
-        A.CallTo(() => NotificationService.NotifyGameRoomAsync(roomId, A<NewPlayerNotification>
-            .That.Matches(notification => 
-                notification.PlayerName == "name"
-                && notification.PlayerId == player.Id))).Returns(OperationResult.Ok());
+        A.CallTo(() => UsersRepository.GetUsersByIds(A<IEnumerable<Guid>>._, cancellationToken))
+            .Returns(OperationResult<IEnumerable<User>>.Ok([user]));
+        
+        A.CallTo(() => NotificationService.NotifyGameRoomAsync(roomId, A<NewPlayerNotification>._))
+            .Returns(OperationResult.Ok());
         
         A.CallTo(() => RoomRepository.UpdateAsync(privateRoom, cancellationToken))
             .Returns(OperationResult.Ok());

@@ -3,5 +3,5 @@ namespace Application.DtoUI;
 public record RoomDto(
     Guid Id,
     Guid Host,
-    List<UserDto> Players,
+    IEnumerable<PlayerDto> Players,
     DateTime ClosedAt);

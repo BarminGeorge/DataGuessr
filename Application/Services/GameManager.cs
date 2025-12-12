@@ -13,8 +13,7 @@ public class GameManager(
     IRoomRepository roomRepository, 
     INotificationService notificationService,
     IQuestionService questionService,
-    IGameRepository gameRepository,
-    ILogger<GameManager> logger)
+    IGameRepository gameRepository)
     : IGameManager
 {
     private static bool IsOwnerRoom(Room room, Guid userId) => room.Owner == userId;
@@ -50,13 +49,7 @@ public class GameManager(
         var game = getGameResult.ResultObj;
 
         Task.Run(() => gameCoreService.RunGameCycle(game, roomId, ct))
-            .ContinueWith(t =>
-            {
-                if (t is { IsFaulted: true, Exception: not null })
-                    logger.LogError(t.Exception, $"Game cycle failed for game {game.Id}");
-            }, TaskContinuationOptions.OnlyOnFaulted);
-        
-        logger.LogInformation($"Match {game.Id} started in room {roomId} by user {startedByUserId}");
+            .ContinueWith(t => { }, TaskContinuationOptions.OnlyOnFaulted);
         
         return OperationResult.Ok();
     }

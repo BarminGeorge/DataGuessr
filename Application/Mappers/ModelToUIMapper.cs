@@ -1,29 +1,18 @@
 using System.Collections.ObjectModel;
 using Application.DtoUI;
-using Domain.Common;
+using Application.Extensions;
 using Domain.Entities;
-using Infrastructure.Interfaces;
 
 namespace Application.Mappers;
 
 public static class ModelToUiMapper
 {
-    // TODO: переделать
-    public static async Task<RoomDto> ToDto(this Room room, IUserRepository userRepository)
+    public static RoomDto ToDto(this Room room)
     {
-        var players = new List<UserDto>();
-        foreach (var player in room.Players)
-        {
-            var getUserOperation = () => userRepository.GetById(player.UserId);
-            var userResult = await getUserOperation.WithRetry(delay: TimeSpan.FromSeconds(0.10));
-            if (!userResult.Success || userResult.ResultObj is null)
-                continue;
-            players.Add(userResult.ResultObj.ToDto());
-        }
         return new RoomDto(
             room.Id, 
             room.Owner, 
-            players,
+            room.Players.Select(x => x.ToDto()),
             room.ClosedAt);
     }
 
@@ -40,9 +29,9 @@ public static class ModelToUiMapper
             game.QuestionDuration);
     }
 
-    public static UserDto ToDto(this User user)
+    public static PlayerDto ToDto(this User user)
     {
-        return new UserDto(
+        return new PlayerDto(
             user.Id,
             user.PlayerName,
             user.Avatar.Filename);
@@ -54,5 +43,13 @@ public static class ModelToUiMapper
             question.Mode,
             question.Formulation,
             question.ImageUrl);
+    }
+
+    public static PlayerDto ToDto(this Player player)
+    {
+        return new PlayerDto(
+            player.Id,
+            player.Name,
+            player.Avatar.GetUrl());
     }
 }

@@ -54,7 +54,7 @@ public partial class AppHub
         
         var result = await gameManager.FinishGameAsync(request.UserId, request.RoomId, ct);
         return result is { Success: true, ResultObj: not null }
-            ? OperationResult<RoomDto>.Ok(await result.ResultObj.ToDto(userRepository))
+            ? OperationResult<RoomDto>.Ok(result.ResultObj.ToDto())
             : result.ConvertToOperationResult<RoomDto>();
     }
 }

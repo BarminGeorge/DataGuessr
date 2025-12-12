@@ -1,8 +1,9 @@
+using Application.DtoUI;
 using Domain.Entities;
 
 namespace Application.Notifications;
 
-public record NewPlayerNotification(Guid PlayerId, string PlayerName)
+public record NewPlayerNotification(PlayerDto Player)
     : GameNotification
 {
     public override string MethodName => "NewPlayerEntered";
