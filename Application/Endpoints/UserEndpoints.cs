@@ -1,6 +1,6 @@
 using Application.Extensions;
+using Application.Interfaces;
 using Application.Requests;
-using Application.Services;
 using Microsoft.AspNetCore.Mvc;
 using SharpGrip.FluentValidation.AutoValidation.Endpoints.Extensions;
 
@@ -18,7 +18,7 @@ public static class UserEndpoints
             .DisableAntiforgery()
             .WithFormUpload();
         usersGroup.MapPost("login", Login);
-        usersGroup.MapPost("{id:guid}/userUpdate", UpdateUser)
+        usersGroup.MapPost("userUpdate", UpdateUser)
             .DisableAntiforgery()
             .WithFormUpload();
         usersGroup.MapPost("guest", CreateGuest)
@@ -28,28 +28,32 @@ public static class UserEndpoints
         return app;
     }
 
-    private static async Task<IResult> Register([FromForm] RegisterUserRequest request, UserService userService, CancellationToken ct)
+    private static async Task<IResult> Register([FromForm] RegisterUserRequest request, 
+        [FromServices] IUserService userService, CancellationToken ct)
     {
         return (await userService.Register(request.Login, request.Password, request.PlayerName, request.Avatar, ct))
             .ToResult();
     }
 
-    private static async Task<IResult> Login(LoginUserRequest request, UserService userService, HttpContext context, CancellationToken ct)
+    private static async Task<IResult> Login(LoginUserRequest request, 
+        [FromServices] IUserService userService, HttpContext context, CancellationToken ct)
     {
         var loginResult = await userService.Login(request.Login, request.Password, ct);
         if (!loginResult.Success)
             return loginResult.ToResult();
-        context.Response.Cookies.Append("", loginResult.ResultObj.token);
+        context.Response.Cookies.Append("token", loginResult.ResultObj.token);
         return Results.Ok(loginResult.ResultObj.userId);
     }
 
-    private static async Task<IResult> UpdateUser([FromForm] UpdateUserRequest request, UserService userService, CancellationToken ct)
+    private static async Task<IResult> UpdateUser([FromForm] UpdateUserRequest request, 
+        [FromServices] IUserService userService, CancellationToken ct)
     {
         return (await userService.UpdateUser(request.UserId, request.PlayerName, request.Avatar, ct))
             .ToResult();
     }
 
-    private static async Task<IResult> CreateGuest([FromForm] CreateGuestRequest request, UserService userService, CancellationToken ct)
+    private static async Task<IResult> CreateGuest([FromForm] CreateGuestRequest request, 
+        [FromServices] IUserService userService, CancellationToken ct)
     {
         return (await userService.CreateGuest(request.PlayerName, request.Avatar, ct))
             .ToResult();

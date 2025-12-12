@@ -8,8 +8,9 @@ namespace Application.Endpoints.Hubs;
 
 public partial class AppHub
 {
-    public async Task<OperationResult<RoomDto>> CreateRoom(CreateRoomRequest request, CancellationToken ct = default)
+    public async Task<OperationResult<RoomDto>> CreateRoom(CreateRoomRequest request)
     {
+        var ct = Context.ConnectionAborted;
         if (await this.ValidateRequestAsync(request, ct) is { } error)
             return OperationResult<RoomDto>.Error.Validation(error);
         
@@ -25,8 +26,9 @@ public partial class AppHub
         return result.ConvertToOperationResult<RoomDto>();
     }
 
-    public async Task<OperationResult<RoomDto>> JoinRoom(JoinRoomRequest request, CancellationToken ct = default)
+    public async Task<OperationResult<RoomDto>> JoinRoom(JoinRoomRequest request)
     {
+        var ct = Context.ConnectionAborted;
         if (await this.ValidateRequestAsync(request, ct) is { } error)
             return OperationResult<RoomDto>.Error.Validation(error);
         
@@ -42,8 +44,9 @@ public partial class AppHub
         return result.ConvertToOperationResult<RoomDto>();
     }
 
-    public async Task<OperationResult> LeaveRoom(LeaveRoomRequest request, CancellationToken ct = default)
+    public async Task<OperationResult> LeaveRoom(LeaveRoomRequest request)
     {
+        var ct = Context.ConnectionAborted;
         if (await this.ValidateRequestAsync(request, ct) is { } error)
             return OperationResult.Error.Validation(error);
         
@@ -59,8 +62,9 @@ public partial class AppHub
         return result;
     }
 
-    public async Task<OperationResult<RoomDto>> FindQuickRoom(FindQuickRoomRequest request, CancellationToken ct = default)
+    public async Task<OperationResult<RoomDto>> FindQuickRoom(FindQuickRoomRequest request)
     {
+        var ct = Context.ConnectionAborted;
         if (await this.ValidateRequestAsync(request, ct) is { } error)
             return OperationResult<RoomDto>.Error.Validation(error);
         
@@ -76,8 +80,9 @@ public partial class AppHub
         return result.ConvertToOperationResult<RoomDto>();
     }
 
-    public async Task<OperationResult> KickPlayerFromRoom(KickPlayerRequest request, CancellationToken ct = default)
+    public async Task<OperationResult> KickPlayerFromRoom(KickPlayerRequest request)
     {
+        var ct = Context.ConnectionAborted;
         if (await this.ValidateRequestAsync(request, ct) is { } error)
             return OperationResult.Error.Validation(error);
         

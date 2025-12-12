@@ -20,7 +20,7 @@ public class Room : IEntity<Guid>
 
     protected Room() { }
 
-    public Room(Guid ownerId, RoomPrivacy privacy, int maxPlayers, string? password = null, TimeSpan? duration = null)
+    public Room(Guid ownerId, RoomPrivacy privacy, int maxPlayers, string? password = null, TimeSpan? ttl = null)
     {
         Id = Guid.NewGuid();
         Owner = ownerId;
@@ -29,7 +29,7 @@ public class Room : IEntity<Guid>
         Password = password;
         MaxPlayers = maxPlayers;
 
-        ClosedAt = DateTime.UtcNow + (duration ?? TimeSpan.FromDays(1));
+        ClosedAt = DateTime.UtcNow + (ttl ?? TimeSpan.FromDays(1));
     }
 
     public bool IsExpired => DateTime.UtcNow > ClosedAt;
