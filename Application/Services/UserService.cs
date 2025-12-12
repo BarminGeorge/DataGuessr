@@ -1,6 +1,7 @@
 using Application.Interfaces;
 using Domain.Common;
 using Domain.Entities;
+using Domain.Enums;
 using Infrastructure.Interfaces;
 
 namespace Application.Services;
@@ -12,33 +13,35 @@ public class UserService(
     IPasswordHasher passwordHasher)
     : IUserService
 {
-    public async Task<OperationResult> Register(string login, string password, string playerName, IFormFile image, CancellationToken ct)
+    public async Task<OperationResult<User>> Register(string login, string password, string playerName, IFormFile image, CancellationToken ct)
     {
         var hashedPassword = passwordHasher.Generate(password);
         var operation = () => avatarRepository.SaveUserAvatarAsync(image, ct);
         var result = await operation.WithRetry(3, TimeSpan.FromSeconds(0.15));
         if (!result.Success || result.ResultObj == null)
-            return result;
+            return OperationResult<User>.Error.InternalError(result.ErrorMessage);
         
         var user = new User(login, playerName, result.ResultObj, hashedPassword);
         var addOperation = () => userRepository.AddAsync(user, ct);
-        return await addOperation.WithRetry(3, TimeSpan.FromSeconds(0.15));
+        var resultAddUser = await addOperation.WithRetry(3, TimeSpan.FromSeconds(0.15));
+        return resultAddUser.Success ? OperationResult<User>.Ok(user)
+            : resultAddUser.ConvertToOperationResult<User>();
     }
 
-    public async Task<OperationResult<(string token, Guid userId)>> Login(string login, string password, CancellationToken ct)
+    public async Task<OperationResult<(string token, User user)>> Login(string login, string password, CancellationToken ct)
     {
         var operation = () => userRepository.GetByLoginAsync(login, ct);
         var getUserResult = await operation.WithRetry(3, TimeSpan.FromSeconds(0.15));
         if (getUserResult.ResultObj?.PasswordHash == null) 
-            return getUserResult.ConvertToOperationResult<(string, Guid)>();
+            return getUserResult.ConvertToOperationResult<(string, User)>();
         
         var resultVerify = passwordHasher.Verify(password, getUserResult.ResultObj.PasswordHash);
         if (!resultVerify)
-            return OperationResult<(string, Guid)>.Error.Unauthorized("Invalid username or password.");
+            return OperationResult<(string, User)>.Error.Unauthorized("Invalid username or password.");
         
         var token = provider.GenerateToken(getUserResult.ResultObj);
-        var result = (token, getUserResult.ResultObj.Id);
-        return OperationResult<(string token, Guid userId)>.Ok(result);
+        var result = (token, getUserResult.ResultObj);
+        return OperationResult<(string token, User userId)>.Ok(result);
     }
     
     public async Task<OperationResult> UpdateUser(Guid userId, string playerName, IFormFile avatar,  CancellationToken ct)

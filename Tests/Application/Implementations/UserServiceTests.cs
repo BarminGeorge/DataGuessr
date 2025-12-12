@@ -145,7 +145,7 @@ public class LoginTests : UserServiceTests
         Assert.Multiple(() =>
         {
             Assert.That(result.Success, Is.True);
-            Assert.That(result.ResultObj.userId, Is.EqualTo(user.Id));
+            Assert.That(result.ResultObj.user, Is.EqualTo(user));
         });
     }
     
@@ -169,7 +169,7 @@ public class LoginTests : UserServiceTests
         Assert.Multiple(() =>
         {
             Assert.That(result.Success, Is.True);
-            Assert.That(result.ResultObj.userId, Is.EqualTo(user.Id));
+            Assert.That(result.ResultObj.user, Is.EqualTo(user));
         });
     }
     

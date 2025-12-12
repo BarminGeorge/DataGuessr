@@ -1,3 +1,4 @@
+using System.Collections.ObjectModel;
 using Application.DtoUI;
 using Domain.Entities;
 
@@ -20,9 +21,26 @@ public static class ModelToUiMapper
             game.Id,
             game.Mode,
             game.Status,
-            game.CurrentStatistic,
-            game.Questions.ToList(),
+            new ReadOnlyCollection<QuestionDto>(
+                game.Questions.Select(q => q.ToDto())
+                              .ToList()),
             game.QuestionsCount,
             game.QuestionDuration);
+    }
+
+    public static UserDto ToDto(this User user)
+    {
+        return new UserDto(
+            user.Id,
+            user.PlayerName,
+            user.Avatar.Filename);
+    }
+
+    public static QuestionDto ToDto(this Question question)
+    {
+        return new QuestionDto(
+            question.Mode,
+            question.Formulation,
+            question.ImageUrl);
     }
 }
