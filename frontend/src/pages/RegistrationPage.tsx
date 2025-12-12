@@ -1,0 +1,103 @@
+import React from "react";
+import Header from "../components/Header";
+import { api, http } from "../api/http";
+
+import { useState } from "react";
+import { usePage } from "../PageContext";
+import { validateLogin, validatePassword, validateUsername } from "../utils/validations";
+
+async function handleRegistration(
+  login: string, 
+  password: string, 
+  playerName: string,
+  avatar: any,
+  setPage: (page:any) => void) {
+  
+  try {
+
+    const formData = new FormData();
+    
+    formData.append("login", login);
+    formData.append("password", password);
+    formData.append("playerName", playerName);
+    formData.append("avatar", avatar);
+
+    const res: any = await api.post(
+      "/register", 
+      formData)
+
+    setPage("home");
+    console.log(123);
+
+
+    } catch (e) {
+      alert(e);
+    }
+}
+
+export default function RegistrationPage() {
+  const { setPage } = usePage();
+  const [login, setLogin] = useState("");
+  const [password, setPassword] = useState("");
+  const [playerName, setPlayerName] = useState("");
+  const [avatar, setAvatar] = useState<File | null>(null);
+  
+
+  return (
+    <div className="global-container">
+      <Header />
+      <div className="main-container">  
+        <div className="title-text">  
+        Регистрация
+        </div>
+
+
+        <div className="secondary-container">
+        <input 
+          type="text"
+          className="text-input-primary"
+          placeholder={"Придумайте логин"}
+          onChange={(e) => setLogin(e.target.value)}
+          />
+          <span className="acсent-text">
+            {validateLogin(login)}
+          </span>
+        </div>
+        <div className="secondary-container">
+        <input 
+          type="text"
+          className="text-input-primary"
+          placeholder={"Придумайте пароль"}
+          onChange={(e) => setPassword(e.target.value)}/>
+        <span className="acсent-text">
+                    {validatePassword(password)}
+                  </span>
+        </div>
+        <div className="secondary-container">
+        <input 
+          type="text"
+          className="text-input-primary"
+          placeholder={"Придумайте имя пользователя"}
+          onChange={(e) => setPlayerName(e.target.value)}/>
+        <span className="acсent-text">
+          {validateUsername(playerName)}
+        </span>
+        </div>
+
+        <input 
+          type="file"
+          className="text-input-primary"
+          placeholder={"Выберите аватар"}
+          onChange={(e) => setAvatar(e.target.files && e.target.files[0] ? e.target.files[0] : null)}/>
+
+        
+        <button className="button-primary" 
+        onClick={() => handleRegistration(login, password, playerName, avatar, setPage)}>Зарегистрироваться</button>
+
+    </div>
+    </div>
+  );
+}
+
+
+
