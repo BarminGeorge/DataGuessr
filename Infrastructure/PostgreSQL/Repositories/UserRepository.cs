@@ -15,6 +15,12 @@ public class UserRepository : IUserRepository
         this.db = db ?? throw new ArgumentNullException(nameof(db));
     }
 
+    // TODO
+    public Task<OperationResult<User>> GetById(Guid userId, CancellationToken ct = default)
+    {
+        throw new NotImplementedException();
+    }
+
     public async Task<OperationResult> AddAsync(User user, CancellationToken ct)
     {
         var operation = new Func<Task<OperationResult>>(async () =>

@@ -1,9 +1,7 @@
-using Domain.Entities;
-
 namespace Application.DtoUI;
 
 public record RoomDto(
     Guid Id,
     Guid Host,
-    List<Player> Players,
+    List<UserDto> Players,
     DateTime ClosedAt);

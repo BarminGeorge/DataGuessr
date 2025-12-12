@@ -3,6 +3,7 @@ using Application.Extensions;
 using Application.Interfaces;
 using Application.Mappers;
 using Domain.Common;
+using Infrastructure.Interfaces;
 using Microsoft.AspNetCore.Mvc;
 using SharpGrip.FluentValidation.AutoValidation.Endpoints.Extensions;
 
@@ -22,15 +23,20 @@ public static class RoomEndpoints
         return app;
     }
 
-    private static async Task<IResult> GetAvailableRooms(IRoomManager roomManager, 
-        HttpContext context, CancellationToken ct)
+    private static async Task<IResult> GetAvailableRooms([FromServices] IRoomManager roomManager, 
+        [FromServices] IUserRepository userRepository, HttpContext context, CancellationToken ct)
     {
         var operationResult = await roomManager.GetAvailablePublicRoomsAsync(ct);
-        return operationResult is { Success: true, ResultObj: not null }
-            ? OperationResult<IEnumerable<RoomDto>>.Ok(operationResult.ResultObj
-                .Select(x => x.ToDto()))
-                .ToResult() 
-            : operationResult.ToResult();
+    
+        if (operationResult is not { Success: true, ResultObj: not null })
+            return operationResult.ToResult();
+    
+        var roomDtoTasks = operationResult.ResultObj
+            .Select(room => room.ToDto(userRepository));
+    
+        var roomDtos = await Task.WhenAll(roomDtoTasks);
+    
+        return OperationResult<IEnumerable<RoomDto>>.Ok(roomDtos).ToResult();
     }
 
     private static async Task<IResult> GetRoomPrivacy([FromRoute] Guid roomId, 

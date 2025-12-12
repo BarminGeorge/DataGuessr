@@ -1,5 +1,6 @@
 using Application.Interfaces;
 using FakeItEasy;
+using Infrastructure.Interfaces;
 using Microsoft.AspNetCore.Hosting;
 using Microsoft.AspNetCore.Mvc.Testing;
 using Microsoft.AspNetCore.SignalR.Client;
@@ -16,6 +17,7 @@ public abstract class HubTests
     protected IGameManager GameManagerFake;
     protected IConnectionService ConnectionServiceFake;
     protected IQuestionService QuestionServiceFake;
+    protected IUserRepository UserRepositoryFake;
 
     [SetUp]
     public void Setup()
@@ -24,6 +26,8 @@ public abstract class HubTests
         GameManagerFake = A.Fake<IGameManager>();
         ConnectionServiceFake = A.Fake<IConnectionService>();
         QuestionServiceFake = A.Fake<IQuestionService>();
+        UserRepositoryFake = A.Fake<IUserRepository>();
+        
         factory = new WebApplicationFactory<TestEntryPoint>()
             .WithWebHostBuilder(builder =>
             {
@@ -35,6 +39,7 @@ public abstract class HubTests
                     services.AddSingleton(GameManagerFake);
                     services.AddSingleton(ConnectionServiceFake);
                     services.AddSingleton(QuestionServiceFake);
+                    services.AddSingleton(UserRepositoryFake);
 
                     services.AddSignalR(hubOptions =>
                     {

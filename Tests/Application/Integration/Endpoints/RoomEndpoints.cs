@@ -4,6 +4,7 @@ using Domain.Common;
 using Domain.Entities;
 using Domain.Enums;
 using FakeItEasy;
+using Infrastructure.Interfaces;
 using Microsoft.AspNetCore.Hosting;
 using Microsoft.AspNetCore.Mvc.Testing;
 using Microsoft.Extensions.DependencyInjection;
@@ -15,11 +16,13 @@ public class RoomEndpointsIntegrationTests
 {
     private WebApplicationFactory<TestEntryPoint> factory;
     private IRoomManager roomManagerFake;
+    private IUserRepository userRepositoryFake;
 
     [SetUp]
     public void Setup()
     {
         roomManagerFake = A.Fake<IRoomManager>();
+        userRepositoryFake = A.Fake<IUserRepository>();
         
         factory = new WebApplicationFactory<TestEntryPoint>()
             .WithWebHostBuilder(builder =>
@@ -29,6 +32,7 @@ public class RoomEndpointsIntegrationTests
                 builder.ConfigureServices(services =>
                 {
                     services.AddSingleton(roomManagerFake);
+                    services.AddSingleton(userRepositoryFake);
                 });
             });
     }

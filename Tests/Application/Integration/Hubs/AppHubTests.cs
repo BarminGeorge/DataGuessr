@@ -30,7 +30,7 @@ public class AppHubTests : HubTests
  
         await HubConnection.StopAsync(); 
         
-        await Task.Delay(100); 
+        await Task.Delay(10); 
         Assert.That(connectionId, Is.Not.Null);
         Assert.Multiple(() =>
         {
@@ -56,7 +56,7 @@ public class AppHubTests : HubTests
         var connectionId = HubConnection.ConnectionId;
         
         await HubConnection.StopAsync();
-        await Task.Delay(100); 
+        await Task.Delay(10); 
 
         Assert.Multiple(() =>
         {

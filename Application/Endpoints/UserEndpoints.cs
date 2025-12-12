@@ -1,10 +1,7 @@
-using Application.DtoUI;
 using Application.Extensions;
 using Application.Interfaces;
 using Application.Mappers;
 using Application.Requests;
-using Domain.Common;
-using Domain.Entities;
 using Microsoft.AspNetCore.Mvc;
 using SharpGrip.FluentValidation.AutoValidation.Endpoints.Extensions;
 
@@ -35,11 +32,11 @@ public static class UserEndpoints
     private static async Task<IResult> Register([FromForm] RegisterUserRequest request, 
         [FromServices] IUserService userService, CancellationToken ct)
     {
-        var result =
-            await userService.Register(request.Login, request.Password, request.PlayerName, request.Avatar, ct);
+        var result = await userService.Register(request.Login, request.Password, request.PlayerName, request.Avatar, ct);
         
-        return result.Success ? Results.Ok(result.ResultObj!.ToDto()) : 
-                result.ToResult();
+        return result is { Success: true, ResultObj: not null }
+            ? Results.Ok(result.ResultObj.ToDto()) 
+            : result.ToResult();
     }
 
     private static async Task<IResult> Login(LoginUserRequest request, 

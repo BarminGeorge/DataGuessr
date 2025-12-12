@@ -19,7 +19,7 @@ public class UserService(
         var operation = () => avatarRepository.SaveUserAvatarAsync(image, ct);
         var result = await operation.WithRetry(3, TimeSpan.FromSeconds(0.15));
         if (!result.Success || result.ResultObj == null)
-            return OperationResult<User>.Error.InternalError(result.ErrorMessage);
+            return result.ConvertToOperationResult<User>();
         
         var user = new User(login, playerName, result.ResultObj, hashedPassword);
         var addOperation = () => userRepository.AddAsync(user, ct);

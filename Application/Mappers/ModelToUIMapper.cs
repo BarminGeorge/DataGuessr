@@ -1,17 +1,29 @@
 using System.Collections.ObjectModel;
 using Application.DtoUI;
+using Domain.Common;
 using Domain.Entities;
+using Infrastructure.Interfaces;
 
 namespace Application.Mappers;
 
 public static class ModelToUiMapper
 {
-    public static RoomDto ToDto(this Room room)
+    // TODO: переделать
+    public static async Task<RoomDto> ToDto(this Room room, IUserRepository userRepository)
     {
+        var players = new List<UserDto>();
+        foreach (var player in room.Players)
+        {
+            var getUserOperation = () => userRepository.GetById(player.UserId);
+            var userResult = await getUserOperation.WithRetry(delay: TimeSpan.FromSeconds(0.10));
+            if (!userResult.Success || userResult.ResultObj is null)
+                continue;
+            players.Add(userResult.ResultObj.ToDto());
+        }
         return new RoomDto(
             room.Id, 
             room.Owner, 
-            room.Players.ToList(),
+            players,
             room.ClosedAt);
     }
 
