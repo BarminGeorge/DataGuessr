@@ -13,8 +13,7 @@ public interface IGameManager
         GameMode mode, 
         int countQuestions, 
         TimeSpan questionDuration, 
-        CancellationToken ct,
-        IEnumerable<Question>? questions = null);
+        CancellationToken ct);
     
     Task<OperationResult> SubmitAnswerAsync(Guid gameId, Guid questionId, Guid playerId, Answer answer, CancellationToken ct);
     Task<OperationResult<Room>> FinishGameAsync(Guid userId, Guid roomId, CancellationToken ct);

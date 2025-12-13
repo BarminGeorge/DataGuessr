@@ -18,52 +18,6 @@ public class GameHubTests: HubTests
     private Guid gameId = Guid.NewGuid();
     private Guid playerId = Guid.NewGuid();
     private Guid questionId = Guid.NewGuid();
-
-    [Test]
-    public async Task CreateGame_RequestWithQuestion_ReturnGame()
-        {
-            var questionDuraction = TimeSpan.FromSeconds(30);
-            var questions = new List<Question>(){new(new BoolAnswer(true), "", "", GameMode.BoolMode)};
-            var questionsCount = questions.Count;
-            
-            var game = new Game(roomId, gameMode, questionDuraction, questionsCount);
-            game.AddQuestions(questions);
-            
-            A.CallTo(() =>
-                GameManagerFake.CreateNewGameAsync(
-                    roomId,
-                    userId, 
-                    gameMode, 
-                    questionsCount,
-                    questionDuraction,
-                    A<CancellationToken>._, 
-                    A<List<Question>>.That.Matches(q => q.Count == questionsCount))).Returns(OperationResult<Game>.Ok(game));
-            
-            await HubConnection.StartAsync();
-            var result = await HubConnection.InvokeAsync<OperationResult<GameDto>>("CreateGame", 
-                new CreateGameRequest(userId, roomId, gameMode, questionsCount, questionDuraction, questions),
-                CancellationToken.None);
-            
-            Assert.Multiple(() =>
-            {
-                Assert.That(result.ResultObj, Is.Not.Null);
-                Assert.That(result.Success, Is.EqualTo(true));
-            });
-            
-            Assert.Multiple(() =>
-            {
-                Assert.That(result.ResultObj.QuestionsCount, Is.EqualTo(questionsCount));
-                Assert.That(result.ResultObj.QuestionDuration, Is.EqualTo(questionDuraction));
-                Assert.That(result.ResultObj.Mode, Is.EqualTo(gameMode));
-                Assert.That(result.ResultObj.Status, Is.EqualTo(GameStatus.NotStarted));
-                Assert.That(result.ResultObj.Questions.Count, Is.EqualTo(questions.Count));
-                
-                var expectedQuestion = questions.First();
-                var actualQuestion = result.ResultObj.Questions.First();
-                Assert.That(actualQuestion.Formulation, Is.EqualTo(expectedQuestion.Formulation));
-                Assert.That(actualQuestion.ImageUrl, Is.EqualTo(expectedQuestion.ImageUrl));
-            });
-        }
     
     [Test]
     public async Task CreateGame_RequestWithoutQuestion_ReturnGame()
@@ -79,7 +33,7 @@ public class GameHubTests: HubTests
                 gameMode, 
                 questionsCount,
                 questionDuraction,  
-                A<CancellationToken>._, null)).Returns(OperationResult<Game>.Ok(game));
+                A<CancellationToken>._)).Returns(OperationResult<Game>.Ok(game));
         
         await HubConnection.StartAsync();
         var result = await HubConnection.InvokeAsync<OperationResult<GameDto>>("CreateGame", 
@@ -114,7 +68,7 @@ public class GameHubTests: HubTests
                 gameMode, 
                 invalidQuestionsCount,
                 questionDuraction,  
-                A<CancellationToken>._, null)).Returns(OperationResult<Game>.Ok(game));
+                A<CancellationToken>._)).Returns(OperationResult<Game>.Ok(game));
         
         await HubConnection.StartAsync();
         var result = await HubConnection.InvokeAsync<OperationResult<GameDto>>("CreateGame", 

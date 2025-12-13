@@ -16,4 +16,9 @@ public class ImageService(IImageRepository imageRepository) : IImageService
     {
         return imageRepository.GetImageFile(id, ImageType.Question);
     }
+
+    public Task<OperationResult> SaveQuestionImages(IEnumerable<IFormFile> images)
+    {
+        throw new NotImplementedException();
+    }
 }

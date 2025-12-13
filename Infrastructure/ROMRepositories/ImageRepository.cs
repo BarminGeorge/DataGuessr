@@ -4,21 +4,18 @@ using Domain.Enums;
 using Infrastructure.Interfaces;
 using Microsoft.AspNetCore.Http;
 
-namespace Infrastructure.PostgreSQL.Repositories;
+namespace Infrastructure.ROMRepositories;
 
 public class ImageRepository : IImageRepository
 {
-    private readonly AppDbContext db;
-
     //TODO: get path from json or .env
     private static readonly string avatarsRoot = Path.Combine(Directory.GetCurrentDirectory(), "files", "avatars");
     private static readonly string questionsImagesRoot = Path.Combine(Directory.GetCurrentDirectory(), "files", "questions");
     
-    public ImageRepository(AppDbContext db)
+    public ImageRepository()
     {
         Directory.CreateDirectory(avatarsRoot);
         Directory.CreateDirectory(questionsImagesRoot);
-        this.db = db ?? throw new ArgumentNullException(nameof(db));
     }
 
     public async Task<OperationResult<Avatar>> SaveUserAvatarAsync(IFormFile avatarFile, CancellationToken ct)

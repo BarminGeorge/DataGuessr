@@ -131,10 +131,6 @@ public class AppDbContext : DbContext
                 .IsRequired()
                 .HasMaxLength(500);
 
-            entity.Property(q => q.ImageUrl)
-                .IsRequired()
-                .HasMaxLength(1000);
-
             entity.Property(q => q.RightAnswer)
                 .HasColumnType("jsonb")
                 .IsRequired();

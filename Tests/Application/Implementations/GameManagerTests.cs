@@ -314,31 +314,6 @@ public class CreateNewGameTests : GameManagerTests
     }
     
     [Test]
-    public async Task CreateNewGameAsync_WhenValidParametersWithQuestions_CreatesGameWithQuestions()
-    {
-        A.CallTo(() => RoomRepository.GetByIdAsync(roomId, ct))
-            .Returns(OperationResult<Room>.Ok(validRoom));
-        
-        A.CallTo(() => GameRepository.AddGameAsync(A<Game>.That.Matches(g => 
-            g.Questions.Count == testQuestions.Count()), ct))
-            .Returns(OperationResult.Ok());
-        
-        A.CallTo(() => RoomRepository.UpdateAsync(A<Room>._, ct))
-            .Returns(OperationResult.Ok());
-        
-        A.CallTo(() => NotificationService.NotifyGameRoomAsync(A<Guid>._, A<NewGameNotification>._))
-            .Returns(OperationResult.Ok());
-        
-        var result = await GameManager.CreateNewGameAsync(roomId, userId, gameMode, countQuestions, questionDuration, ct, testQuestions);
-
-        Assert.Multiple(() =>
-        {
-            Assert.That(result.Success, Is.True);
-            Assert.That(result.ErrorMessage, Is.Not.Null);
-        });
-    }
-    
-    [Test]
     public async Task CreateNewGameAsync_WhenRoomNotFound_ReturnsError()
     {
         const string errorMessage = "Room not found";

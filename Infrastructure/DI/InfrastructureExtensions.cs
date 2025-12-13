@@ -2,6 +2,7 @@
 using Infrastructure.PostgreSQL;
 using Infrastructure.PostgreSQL.Repositories;
 using Infrastructure.Providers;
+using Infrastructure.ROMRepositories;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;

@@ -5,4 +5,6 @@ namespace Application.DtoUI;
 public record QuestionDto(
     GameMode GameMode,
     string Formulation,
-    string ImageUrl);
+    string ImageUrl,
+    DateTime EndTime,
+    int DurationInSeconds);

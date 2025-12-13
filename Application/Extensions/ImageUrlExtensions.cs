@@ -8,5 +8,9 @@ public static class ImageUrlExtensions
     {
         return $"/api/avatars/{avatar.Id}";
     }
-    
+
+    public static string GetUrl(this Question question)
+    {
+        return $"/api/questions/{question.Id}";
+    }
 }

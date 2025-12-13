@@ -21,9 +21,6 @@ public static class ModelToUiMapper
             game.Id,
             game.Mode,
             game.Status,
-            game.Questions.Select(q => q.ToDto())
-                .ToList()
-                .AsReadOnly(),
             game.QuestionsCount,
             game.QuestionDuration);
     }
@@ -36,12 +33,14 @@ public static class ModelToUiMapper
             user.Avatar.GetUrl());
     }
 
-    public static QuestionDto ToDto(this Question question)
+    public static QuestionDto ToDto(this Question question, DateTime endTime, int durationSeconds)
     {
         return new QuestionDto(
             question.Mode,
             question.Formulation,
-            question.ImageUrl);
+            question.GetUrl(),
+            endTime,
+            durationSeconds);
     }
 
     public static PlayerDto ToDto(this Player player)

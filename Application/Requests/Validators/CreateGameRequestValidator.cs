@@ -22,11 +22,5 @@ public class CreateGameRequestValidator : AbstractValidator<CreateGameRequest>
         RuleFor(x => x.QuestionDuration)
             .GreaterThan(TimeSpan.Zero).WithMessage("Question duration must be positive")
             .LessThanOrEqualTo(TimeSpan.FromMinutes(5)).WithMessage("Question duration cannot exceed 5 minutes");
-
-        RuleFor(x => x.Questions)
-            .Must(questions => questions == null || questions.Any())
-            .WithMessage("Questions list cannot be empty if provided")
-            .Must(questions => questions == null || questions.Count() <= 100)
-            .WithMessage("Cannot have more than 100 questions");
     }
 }
