@@ -8,4 +8,5 @@ public static class ImageUrlExtensions
     {
         return $"/api/avatars/{avatar.Id}";
     }
+    
 }

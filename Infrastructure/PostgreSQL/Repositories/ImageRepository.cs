@@ -1,20 +1,23 @@
 using Domain.Common;
 using Domain.Entities;
+using Domain.Enums;
 using Infrastructure.Interfaces;
 using Microsoft.AspNetCore.Http;
 
 namespace Infrastructure.PostgreSQL.Repositories;
 
-public class AvatarRepository : IAvatarRepository
+public class ImageRepository : IImageRepository
 {
     private readonly AppDbContext db;
 
     //TODO: get path from json or .env
-    private readonly string avatarsRoot = Path.Combine(Directory.GetCurrentDirectory(), "files", "avatars");
-
-    public AvatarRepository(AppDbContext db)
+    private static readonly string avatarsRoot = Path.Combine(Directory.GetCurrentDirectory(), "files", "avatars");
+    private static readonly string questionsImagesRoot = Path.Combine(Directory.GetCurrentDirectory(), "files", "questions");
+    
+    public ImageRepository(AppDbContext db)
     {
         Directory.CreateDirectory(avatarsRoot);
+        Directory.CreateDirectory(questionsImagesRoot);
         this.db = db ?? throw new ArgumentNullException(nameof(db));
     }
 
@@ -44,5 +47,31 @@ public class AvatarRepository : IAvatarRepository
     public Task<OperationResult> DeleteUserAvatarAsync(string filename, CancellationToken ct)
     {
         throw new NotImplementedException();
+    }
+    
+    public Task<OperationResult<FileStream>> GetImageFile(Guid id, ImageType type, CancellationToken ct = default)
+    {
+        var directoryPath = GetPath(type);
+        if (!Directory.Exists(directoryPath))
+            return Task.FromResult(OperationResult<FileStream>.Error.NotFound());
+        
+        var files = Directory.GetFiles(directoryPath, $"{id}.*");
+        
+        if (files.Length == 0)
+            return Task.FromResult(OperationResult<FileStream>.Error.NotFound());
+
+        var filePath = files[0];
+        
+        return Task.FromResult(OperationResult<FileStream>.Ok(File.OpenRead(filePath)));
+    }
+
+    private static string GetPath(ImageType type)
+    {
+        return type switch
+        {
+            ImageType.Avatar => avatarsRoot,
+            ImageType.Question => questionsImagesRoot,
+            _ => throw new ArgumentOutOfRangeException(nameof(type), $"Неизвестный тип изображения: {type}")
+        };
     }
 }

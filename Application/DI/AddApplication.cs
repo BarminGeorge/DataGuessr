@@ -56,6 +56,7 @@ public static class AddApplicationExtensions
         services.AddScoped<IQuestionService, QuestionService>();
         services.AddScoped<IGuestCleanupService, GuestCleanupService>();
         services.AddScoped<INotificationService, SignalRNotificationService>();
+        services.AddScoped<IImageService, ImageService>();
         
         return services;
     }

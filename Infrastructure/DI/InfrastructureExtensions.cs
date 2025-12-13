@@ -19,7 +19,7 @@ public static class InfrastructureExtensions
         services.AddScoped<IUserRepository, UserRepository>();
         services.AddScoped<IRoomRepository, RoomRepository>();
         services.AddScoped<IQuestionRepository, QuestionRepository>();
-        services.AddScoped<IAvatarRepository, AvatarRepository>();
+        services.AddScoped<IImageRepository, ImageRepository>();
         services.AddScoped<IGameRepository, GameRepository>();
         services.AddScoped<IPlayerAnswerRepository, PlayerAnswerRepository>();
         
