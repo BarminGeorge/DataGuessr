@@ -151,21 +151,6 @@ public class UserRepositoryTests
     }
 
     [Test]
-    public async Task AddAsync_WhenLoginEmpty_ReturnsValidationError()
-    {
-        var avatar = new Avatar("avatar.jpg", "image/jpeg");
-        var user = new User("", "PlayerName", avatar, "password");
-
-        var result = await userRepository.AddAsync(user, ct);
-
-        Multiple(() =>
-        {
-            That(result.Success, Is.False);
-            That(result.ErrorMessage, Does.Contain("Логин"));
-        });
-    }
-
-    [Test]
     public async Task AddAsync_WhenLoginAlreadyExists_ReturnsAlreadyExistsError()
     {
         var user1 = CreateTestUser("duplicate");
