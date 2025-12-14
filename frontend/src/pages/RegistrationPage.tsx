@@ -22,6 +22,11 @@ async function handleRegistration(
         console.error(result.message);
         return;
     }
+    if (result.resultObj) {
+        localStorage.setItem("user_id", result.resultObj?.id);
+        localStorage.setItem("player_name", result.resultObj?.playerName);
+        localStorage.setItem("avatar_url", result.resultObj?.avatarUrl);
+    }
     setLoggingStatus(1);
     setPage("home");
 }

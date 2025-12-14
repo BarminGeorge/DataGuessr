@@ -32,8 +32,9 @@ export default function App() {
 
     const user_id = localStorage.getItem("user_id");
     const props = { loggingStatus, setLoggingStatus, user_id };
-    
-    
+    console.log(props);
+
+
     return (
         <div>
             {page === "home" && <Home props={props} />}

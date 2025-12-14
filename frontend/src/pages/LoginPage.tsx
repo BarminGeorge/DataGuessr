@@ -23,8 +23,12 @@ async function handleLogin(
         return;
     }
     setLoggingStatus(LoggingStatus.Logged);
-    if (result.resultObj)
-        localStorage.setItem("user_id", result.resultObj?.user.id);
+    console.log(result);
+    if (result.resultObj) {
+        localStorage.setItem("user_id", result.resultObj?.id);
+        localStorage.setItem("player_name", result.resultObj?.playerName);
+        localStorage.setItem("avatar_url", result.resultObj?.avatarUrl);
+    }
     setPage("home");
 }
 

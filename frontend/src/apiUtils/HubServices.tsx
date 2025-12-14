@@ -3,11 +3,14 @@ import type {
     CreateGameRequest, CreateRoomRequest, FindQuickRoomRequest,
     FinishGameRequest, JoinRoomRequest, KickPlayerRequest, LeaveRoomRequest,
     StartGameRequest,
-    SubmitAnswerRequest} from "./requests";
-import type {GameDto, OperationResult, RoomDto } from "./dto";
-import type {NewGameNotification, NewPlayerNotification,
+    SubmitAnswerRequest
+} from "./requests";
+import type { GameDto, OperationResult, RoomDto } from "./dto";
+import type {
+    NewGameNotification, NewPlayerNotification,
     NewQuestionNotification, PlayerLeavedNotification, QuestionClosedNotification, ReturnToRoomNotification,
-    StatisticNotification} from "./notifications";
+    StatisticNotification
+} from "./notifications";
 
 
 type NotificationCallback<T = any> = (data: T) => void;
@@ -25,7 +28,7 @@ class GameHubService {
 
         try {
             this.connection = new HubConnectionBuilder()
-                .withUrl('https://fiitguesser.ru/appHub', {
+                .withUrl('https://fiitguesser.ru/api/appHub', {
                     accessTokenFactory: () => token || '',
                     withCredentials: true
                 })

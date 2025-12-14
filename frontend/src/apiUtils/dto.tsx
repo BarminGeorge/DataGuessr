@@ -12,7 +12,9 @@ export interface UserDto {
 
 export interface LoginResponse {
     token: string;
-    user: UserDto;
+    id: string;
+    playerName: string;
+    avatarUrl: string;
 }
 
 export interface RegisterRequest {

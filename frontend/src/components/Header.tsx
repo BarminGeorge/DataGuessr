@@ -1,29 +1,26 @@
-import React from "react";
+import React, { useEffect, useState } from "react";
+
 import '../App.css';
 import { usePage } from "../PageContext";
 import { CircularProgress } from "@mui/material";
+import fetchImageUrl from "./ImageDownloader";
 
-export default function Header({ variant = "logo" }) {
-    if (variant === "logo-and-login-button") {
+export default function Header(props: any) {
+    if (props.variant === "logo-and-login-button") {
         return (
             <HeaderWithLogoAndLoginButton />
         );
-    }
-    else if (variant === "logo") {
+    } else if (props.variant === "logo-and-avatar-and-interactive") {
         return (
-            <HeaderWithOnlyLogo />
+            <HeaderWithLogoAndAvatarAndInteractive props={props} />
         );
-    } else if (variant === "logo-and-avatar-and-leave-room") {
-        return (
-            <HeaderWithLogoAndAvatarAndLeaveRoomButton />
-        );
-    } else if (variant === "logo-and-avatar-and-create-room") {
-        return (
-            <HeaderWithLogoAndAvatarAndCreateRoomButton />
-        );
-    } else if (variant === "logo-and-timer") {
+    } else if (props.variant === "logo-and-timer") {
         return (
             <HeaderWithLogoAndAvatarAndTimer />
+        );
+    } else {
+        return (
+            <HeaderWithOnlyLogo />
         );
     }
 }
@@ -51,35 +48,44 @@ function HeaderWithLogoAndLoginButton() {
     );
 }
 
-function HeaderWithLogoAndAvatarAndCreateRoomButton() {
-    const { setPage } = usePage();
-    return (
-        <div className="header-container">
-            <div className="title-text" onClick={() => setPage("home")}>FIITguesser</div>
-            <div className="left-aligment">
-                <div className="accent-title-text" onClick={() => setPage("room")}>Create lobby</div>
-                <div className="flex items-center gap-3">
-                    <img onClick={() => setPage("profile")}
-                        src="src/assets/defaultavatar.jpg"
-                        alt="avatar"
-                        className="w-10 h-10 rounded-full border border-gray-300"
-                    />
-                </div>
-            </div>
-        </div>
-    );
-}
+function HeaderWithLogoAndAvatarAndInteractive(props: any) {
 
-function HeaderWithLogoAndAvatarAndLeaveRoomButton() {
+    props = props.props;
+
     const { setPage } = usePage();
+    const playerName = localStorage.getItem("player_name");
+    const avatarUrl =
+        localStorage.getItem("avatar_url") ?? "";
+
+    const [avatar, setAvatar] = useState<string>("src/assets/defaultavatar.jpg");
+
+    useEffect(() => {
+        let cancelled = false;
+
+        fetchImageUrl(avatarUrl).then((url) => {
+            if (!cancelled) {
+                setAvatar(url);
+            }
+        });
+
+        return () => {
+            cancelled = true;
+        };
+    }, [avatarUrl]);
+
     return (
         <div className="header-container">
             <div className="title-text" onClick={() => setPage("home")}>FIITguesser</div>
             <div className="left-aligment">
-                <div className="accent-title-text" onClick={() => setPage("home")}>Leave lobby</div>
-                <div className="flex items-center gap-3">
+
+                <div className="accent-title-text"
+                    onClick={props.interact_action}>{props.interact_label}</div>
+
+                <div className="secondary-text">{playerName}</div>
+                <div className="flex items-center gap35">
+
                     <img onClick={() => setPage("profile")}
-                        src="src/assets/defaultavatar.jpg"
+                        src={avatar}
                         alt="avatar"
                         className="w-10 h-10 rounded-full border border-gray-300"
                     />

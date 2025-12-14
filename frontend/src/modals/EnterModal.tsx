@@ -32,7 +32,7 @@ async function urlToFile(url: string, filename: string): Promise<File> {
 }
 
 
-export default function EnterModal(props: any){
+export default function EnterModal(props: any) {
     const { setPage } = usePage();
     const [avatar, setAvatar] = useState(defaultImage);
     const [playerName, setName] = useState("");

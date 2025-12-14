@@ -5,6 +5,7 @@ import { usePage } from "../PageContext";
 import EnterModal from "../modals/EnterModal";
 import { LoggingStatus } from "../App";
 import { gameHubService } from "../apiUtils/HubServices";
+import { RoomPrivacy } from "../apiUtils/dto";
 
 
 async function findRandomRoom(
@@ -16,7 +17,8 @@ async function findRandomRoom(
     });
 
     if (!result.success || !result.resultObj) {
-        alert(result.message ?? "Не удалось найти комнату");
+        console.log(result.message);
+        alert("Не удалось найти комнату");
         return;
     }
 
@@ -39,13 +41,32 @@ async function joinRoomByCode(
     });
 
     if (!result.success || !result.resultObj) {
-        alert(result.message ?? "Не удалось войти в комнату");
+        console.log(result.message);
+        alert("Не удалось найти комнату");
         return;
     }
 
     setPage("room");
 }
 
+async function createRoom(
+    userId: string,
+    setPage: (page: any) => void) {
+
+    const result = await gameHubService.createRoom({
+        userId: userId,
+        privacy: RoomPrivacy.Public,
+        maxPlayers: 8
+    });
+    console.log(result.message);
+
+    if (!result.success || !result.resultObj) {    
+        alert("Не удалось создать комнату");
+        return;
+    }
+
+    setPage("room");
+}
 function checkLogging(loggingStatus: any) {
     if (loggingStatus == LoggingStatus.Guest) {
         return true;
@@ -74,7 +95,13 @@ export default function HomePage(props: any) {
             <div className={checkLogging(props.loggingStatus) ? "" : "blur"}>
 
 
-                <Header variant={checkLogging(props.loggingStatus) ? "logo-and-avatar-and-create-room" : "logo-and-login-button"} />
+                <Header variant={checkLogging(props.loggingStatus) ?
+                    "logo-and-avatar-and-interactive"
+                    : "logo-and-login-button"}
+                    interact_action={() => createRoom(props.user_id, setPage)}
+                    interact_label= {"Create lobby"}
+
+                />
                 <div className="main-container">
                     <div className="secondary-container">
                         <div className="left-aligment title-variant-1">Время</div>
