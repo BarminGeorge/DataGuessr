@@ -8,10 +8,10 @@ namespace Infrastructure.PostgreSQL.Repositories;
 
 public class QuestionRepository : IQuestionRepository
 {
-    private readonly AppDbContext db;
+    private readonly IDataContext db;
     private readonly TimeSpan retryDelay = TimeSpan.FromMilliseconds(100);
 
-    public QuestionRepository(AppDbContext db)
+    public QuestionRepository(IDataContext db)
     {
         this.db = db ?? throw new ArgumentNullException(nameof(db));
     }

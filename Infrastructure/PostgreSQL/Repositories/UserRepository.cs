@@ -7,10 +7,10 @@ namespace Infrastructure.PostgreSQL.Repositories;
 
 public class UserRepository : IUserRepository
 {
-    private readonly AppDbContext db;
+    private readonly IDataContext db;
     private readonly TimeSpan retryDelay = TimeSpan.FromMilliseconds(100);
 
-    public UserRepository(AppDbContext db)
+    public UserRepository(IDataContext db)
     {
         this.db = db ?? throw new ArgumentNullException(nameof(db));
     }

@@ -2,10 +2,11 @@ using Domain.Common;
 using Microsoft.EntityFrameworkCore;
 using Infrastructure.PostgreSQL;
 using Application.Interfaces;
+using Infrastructure.Interfaces;
 
 namespace Application.Services;
 
-public class GuestCleanupService(AppDbContext context) : IGuestCleanupService
+public class GuestCleanupService(IDataContext context) : IGuestCleanupService
 {
     public async Task<OperationResult> CleanupOrphanedGuestsAsync(CancellationToken ct)
     {

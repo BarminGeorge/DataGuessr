@@ -22,7 +22,7 @@ public class UserRepositoryTests
             .UseInMemoryDatabase($"TestDb_{Guid.NewGuid()}")
             .Options;
 
-        dbContext = new TestAppDbContext(options);
+        dbContext = new UserRepositoryTestContext(options);
         dbContext.Database.EnsureCreated();
 
         userRepository = new UserRepository(dbContext);

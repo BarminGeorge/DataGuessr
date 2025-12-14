@@ -7,10 +7,10 @@ namespace Infrastructure.PostgreSQL.Repositories;
 
 public class PlayerRepository : IPlayerRepository
 {
-    private readonly AppDbContext db;
+    private readonly IDataContext db;
     private readonly TimeSpan retryDelay = TimeSpan.FromMilliseconds(100);
 
-    public PlayerRepository(AppDbContext db)
+    public PlayerRepository(IDataContext db)
     {
         this.db = db ?? throw new ArgumentNullException(nameof(db));
     }
@@ -35,51 +35,6 @@ public class PlayerRepository : IPlayerRepository
         return await operation.WithRetry(maxRetries: 3, delay: retryDelay);
     }
 
-    public async Task<OperationResult<Player>> GetPlayerByUserIdAndRoomAsync(
-        Guid userId,
-        Guid roomId,
-        CancellationToken ct = default)
-    {
-        var operation = new Func<Task<OperationResult<Player>>>(async () =>
-        {
-            if (userId == Guid.Empty)
-                return OperationResult<Player>.Error.Validation("UserId не может быть пустым GUID");
-
-            if (roomId == Guid.Empty)
-                return OperationResult<Player>.Error.Validation("RoomId не может быть пустым GUID");
-
-            var player = await db.Players
-                .AsNoTracking()
-                .FirstOrDefaultAsync(p => p.UserId == userId && p.RoomId == roomId, ct);
-
-            if (player == null)
-                return OperationResult<Player>.Error.NotFound($"Игрок для пользователя '{userId}' в комнате '{roomId}' не найден");
-
-            return OperationResult<Player>.Ok(player);
-        });
-
-        return await operation.WithRetry(maxRetries: 3, delay: retryDelay);
-    }
-
-    public async Task<OperationResult<List<Player>>> GetPlayersByRoomAsync(
-        Guid roomId,
-        CancellationToken ct = default)
-    {
-        var operation = new Func<Task<OperationResult<List<Player>>>>(async () =>
-        {
-            if (roomId == Guid.Empty)
-                return OperationResult<List<Player>>.Error.Validation("RoomId не может быть пустым GUID");
-
-            var players = await db.Players
-                .AsNoTracking()
-                .Where(p => p.RoomId == roomId)
-                .ToListAsync(ct);
-
-            return OperationResult<List<Player>>.Ok(players);
-        });
-
-        return await operation.WithRetry(maxRetries: 3, delay: retryDelay);
-    }
 
     public async Task<OperationResult<(Guid playerId, Guid roomId)>> GetPlayerByConnectionIdAsync(string connectionId)
     {
@@ -152,27 +107,6 @@ public class PlayerRepository : IPlayerRepository
         return await operation.WithRetry(maxRetries: 3, delay: retryDelay);
     }
 
-    public async Task<OperationResult> DeletePlayerAsync(Guid playerId, CancellationToken ct = default)
-    {
-        var operation = new Func<Task<OperationResult>>(async () =>
-        {
-            if (playerId == Guid.Empty)
-                return OperationResult.Error.Validation("PlayerId не может быть пустым GUID");
-
-            var player = await db.Players
-                .FirstOrDefaultAsync(p => p.Id == playerId, ct);
-
-            if (player == null)
-                return OperationResult.Error.NotFound($"Игрок с ID '{playerId}' не найден");
-
-            db.Players.Remove(player);
-            await db.SaveChangesAsync(ct);
-
-            return OperationResult.Ok();
-        });
-
-        return await operation.WithRetry(maxRetries: 3, delay: retryDelay);
-    }
 
     public async Task<OperationResult> RemovePlayerByConnectionAsync(string connectionId)
     {

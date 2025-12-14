@@ -4,9 +4,9 @@ using Microsoft.EntityFrameworkCore;
 
 namespace Tests.Infrastructure;
 
-public class TestAppDbContext : AppDbContext
+public class UserRepositoryTestContext : AppDbContext
 {
-    public TestAppDbContext(DbContextOptions<AppDbContext> options) : base(options)
+    public UserRepositoryTestContext(DbContextOptions<AppDbContext> options) : base(options)
     {
     }
 

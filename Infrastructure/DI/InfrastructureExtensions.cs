@@ -15,6 +15,8 @@ public static class InfrastructureExtensions
     {
         services.AddDbContext<AppDbContext>(options =>
             options.UseNpgsql(configuration.GetConnectionString("DefaultConnection")));
+        
+        services.AddScoped<IDataContext>(sp => sp.GetRequiredService<AppDbContext>());
 
         services.AddScoped<IPlayerRepository, PlayerRepository>();
         services.AddScoped<IUserRepository, UserRepository>();

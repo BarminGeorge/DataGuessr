@@ -8,10 +8,10 @@ namespace Infrastructure.PostgreSQL.Repositories;
 
 public class RoomRepository : IRoomRepository
 {
-    private readonly AppDbContext db;
+    private readonly IDataContext db;
     private readonly TimeSpan retryDelay = TimeSpan.FromMilliseconds(100);
 
-    public RoomRepository(AppDbContext db)
+    public RoomRepository(IDataContext db)
     {
         this.db = db ?? throw new ArgumentNullException(nameof(db));
     }
@@ -24,9 +24,31 @@ public class RoomRepository : IRoomRepository
                 return OperationResult<Room>.Error.Validation("Id не может быть пустым GUID");
 
             var room = await db.Rooms
-                .AsNoTracking()
+            .Include(r => r.Players)
+            .Include(r => r.Games)     
+            .AsNoTracking()              
+            .FirstOrDefaultAsync(r => r.Id == id, ct);
+
+            if (room == null)
+                return OperationResult<Room>.Error.NotFound($"Комната с ID '{id}' не найдена");
+
+            return OperationResult<Room>.Ok(room);
+        });
+
+        return await operation.WithRetry(maxRetries: 3, delay: retryDelay);
+    }
+
+
+    public async Task<OperationResult<Room>> GetByIdAsyncForTesting(Guid id, CancellationToken ct)
+    {
+        var operation = new Func<Task<OperationResult<Room>>>(async () =>
+        {
+            if (id == Guid.Empty)
+                return OperationResult<Room>.Error.Validation("Id не может быть пустым GUID");
+
+            var room = await db.Rooms
                 .Include(r => r.Players)
-                .Include(r => r.Games)
+                .AsNoTracking()
                 .FirstOrDefaultAsync(r => r.Id == id, ct);
 
             if (room == null)
@@ -95,27 +117,6 @@ public class RoomRepository : IRoomRepository
         return await operation.WithRetry(maxRetries: 3, delay: retryDelay);
     }
 
-    public async Task<OperationResult> RemoveAsync(Guid roomId, CancellationToken ct)
-    {
-        var operation = new Func<Task<OperationResult>>(async () =>
-        {
-            if (roomId == Guid.Empty)
-                return OperationResult.Error.Validation("RoomId не может быть пустым GUID");
-
-            var room = await db.Rooms
-                .FirstOrDefaultAsync(r => r.Id == roomId, ct);
-
-            if (room == null)
-                return OperationResult.Error.NotFound($"Комната с ID '{roomId}' не найдена");
-
-            db.Rooms.Remove(room);
-            await db.SaveChangesAsync(ct);
-
-            return OperationResult.Ok();
-        });
-
-        return await operation.WithRetry(maxRetries: 3, delay: retryDelay);
-    }
 
     public async Task<OperationResult<Game>> GetCurrentGameAsync(Guid roomId, CancellationToken ct)
     {
