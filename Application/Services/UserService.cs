@@ -8,14 +8,14 @@ namespace Application.Services;
 public class UserService(
     IJwtProvider provider, 
     IUserRepository userRepository, 
-    IAvatarRepository avatarRepository,
+    IImageRepository imageRepository,
     IPasswordHasher passwordHasher)
     : IUserService
 {
     public async Task<OperationResult<User>> Register(string login, string password, string playerName, IFormFile image, CancellationToken ct)
     {
         var hashedPassword = passwordHasher.Generate(password);
-        var operation = () => avatarRepository.SaveUserAvatarAsync(image, ct);
+        var operation = () => imageRepository.SaveUserAvatarAsync(image, ct);
         var result = await operation.WithRetry(3, TimeSpan.FromSeconds(0.15));
         if (!result.Success || result.ResultObj == null)
             return result.ConvertToOperationResult<User>();
@@ -45,7 +45,7 @@ public class UserService(
     
     public async Task<OperationResult> UpdateUser(Guid userId, string playerName, IFormFile avatar,  CancellationToken ct)
     {
-        var operation = () => avatarRepository.SaveUserAvatarAsync(avatar, ct);
+        var operation = () => imageRepository.SaveUserAvatarAsync(avatar, ct);
         var avatarResult = await operation.WithRetry(3, TimeSpan.FromSeconds(0.2));
         if (!avatarResult.Success || avatarResult.ResultObj == null)
             return avatarResult;
@@ -56,7 +56,7 @@ public class UserService(
 
     public async Task<OperationResult<User>> CreateGuest(string playerName, IFormFile image, CancellationToken ct)
     {
-        var operation = () => avatarRepository.SaveUserAvatarAsync(image, ct);
+        var operation = () => imageRepository.SaveUserAvatarAsync(image, ct);
         var saveAvatarResult = await operation.WithRetry(3, TimeSpan.FromSeconds(0.2));
         if (!saveAvatarResult.Success || saveAvatarResult.ResultObj == null)
             return saveAvatarResult.ConvertToOperationResult<User>();

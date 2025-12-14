@@ -36,4 +36,11 @@ public static class ResultExtensions
             ? Results.Ok() 
             : CreateErrorResult(result.ErrorMessage, result.ErrorType);
     }
+
+    public static IResult ToResult(this OperationResult<FileStream> result)
+    {
+        return result is { Success: true, ResultObj: not null }
+            ? Results.File(result.ResultObj)
+            : CreateErrorResult(result.ErrorMessage, result.ErrorType);
+    }
 }

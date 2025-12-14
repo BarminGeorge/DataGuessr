@@ -16,11 +16,33 @@ public class UserRepository : IUserRepository
     }
 
 
-    // TODO
-    public Task<OperationResult<IEnumerable<User>>> GetUsersByIds(IEnumerable<Guid> usersId, CancellationToken ct)
+    public async Task<OperationResult<IEnumerable<User>>> GetUsersByIds(IEnumerable<Guid> usersId, CancellationToken ct)
     {
-        throw new NotImplementedException();
+        var operation = new Func<Task<OperationResult<IEnumerable<User>>>>(async () =>
+        {
+            if (usersId == null)
+                return OperationResult<IEnumerable<User>>.Error.Validation("Список ID пользователей не может быть null");
+
+            var userIdsList = usersId.ToList();
+
+            if (userIdsList.Count == 0)
+                return OperationResult<IEnumerable<User>>.Error.Validation("Список ID пользователей не может быть пустым");
+
+            var users = await db.Users
+                .AsNoTracking()
+                .Include(u => u.Avatar)
+                .Where(u => userIdsList.Contains(u.Id))
+                .ToListAsync(ct);
+
+            if (users.Count == 0)
+                return OperationResult<IEnumerable<User>>.Error.NotFound("Пользователи с указанными ID не найдены");
+
+            return OperationResult<IEnumerable<User>>.Ok(users);
+        });
+
+        return await operation.WithRetry(maxRetries: 3, delay: retryDelay);
     }
+
 
     public async Task<OperationResult> AddAsync(User user, CancellationToken ct)
     {
@@ -70,10 +92,10 @@ public class UserRepository : IUserRepository
     }
 
     public async Task<OperationResult> UpdateUserAsync(
-        Guid userId,
-        Avatar avatar,
-        string playerName,
-        CancellationToken ct)
+    Guid userId,
+    Avatar avatar,
+    string playerName,
+    CancellationToken ct)
     {
         var operation = new Func<Task<OperationResult>>(async () =>
         {
@@ -93,14 +115,10 @@ public class UserRepository : IUserRepository
             if (user == null)
                 return OperationResult.Error.NotFound($"Пользователь с ID '{userId}' не найден");
 
-            var oldAvatar = user.Avatar;
+            await db.Avatars.AddAsync(avatar, ct);
 
             user.UpdateProfile(playerName, avatar);
 
-            if (oldAvatar != null)
-                db.Avatars.Remove(oldAvatar);
-
-            db.Users.Update(user);
             await db.SaveChangesAsync(ct);
 
             return OperationResult.Ok();
@@ -108,6 +126,9 @@ public class UserRepository : IUserRepository
 
         return await operation.WithRetry(maxRetries: 3, delay: retryDelay);
     }
+
+
+
 
     public async Task<OperationResult<string>> GetPlayerNameByIdAsync(Guid playerId, CancellationToken ct)
     {

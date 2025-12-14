@@ -39,7 +39,7 @@ public static class AddApplicationExtensions
         services.AddScoped<IValidator<UpdateUserRequest>, UpdateUserRequestValidator>();
         services.AddScoped<IValidator<KickPlayerRequest>, KickPlayerRequestValidator>();
         services.AddScoped<IValidator<FinishGameRequest>, FinishGameRequsetValidator>();
-
+        
         services.AddFluentValidationAutoValidation();
         
         return services;
@@ -56,6 +56,7 @@ public static class AddApplicationExtensions
         services.AddScoped<IQuestionService, QuestionService>();
         services.AddScoped<IGuestCleanupService, GuestCleanupService>();
         services.AddScoped<INotificationService, SignalRNotificationService>();
+        services.AddScoped<IImageService, ImageService>();
         
         return services;
     }

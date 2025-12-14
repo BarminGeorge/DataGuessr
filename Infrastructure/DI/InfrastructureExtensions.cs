@@ -2,6 +2,7 @@
 using Infrastructure.PostgreSQL;
 using Infrastructure.PostgreSQL.Repositories;
 using Infrastructure.Providers;
+using Infrastructure.ROMRepositories;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
@@ -19,7 +20,7 @@ public static class InfrastructureExtensions
         services.AddScoped<IUserRepository, UserRepository>();
         services.AddScoped<IRoomRepository, RoomRepository>();
         services.AddScoped<IQuestionRepository, QuestionRepository>();
-        services.AddScoped<IAvatarRepository, AvatarRepository>();
+        services.AddScoped<IImageRepository, ImageRepository>();
         services.AddScoped<IGameRepository, GameRepository>();
         services.AddScoped<IPlayerAnswerRepository, PlayerAnswerRepository>();
         

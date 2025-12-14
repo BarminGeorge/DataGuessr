@@ -1,4 +1,5 @@
 using Application.Interfaces;
+using Application.Mappers;
 using Application.Notifications;
 using Domain.Common;
 using Domain.Entities;
@@ -59,8 +60,7 @@ public class GameManager(
         GameMode mode, 
         int countQuestions, 
         TimeSpan questionDuration,
-        CancellationToken ct,
-        IEnumerable<Question>? questions = null)
+        CancellationToken ct)
     {
         var getRoomResult = await roomRepository.GetByIdAsync(roomId, ct);
         if (!getRoomResult.Success || getRoomResult.ResultObj == null)
@@ -71,8 +71,6 @@ public class GameManager(
             return OperationResult<Game>.Error.InvalidOperation("Can't create new game, you are not the owner");
             
         var game = new Game(roomId, mode, questionDuration, countQuestions);
-        if (questions != null)
-            game.AddQuestions(questions);
         
         var addGameResult = await gameRepository.AddGameAsync(game, ct);
         if (!addGameResult.Success)
@@ -83,7 +81,7 @@ public class GameManager(
         if (!resultUpdate.Success)
             return resultUpdate.ConvertToOperationResult<Game>();
         
-        var notification = new NewGameNotification(game);
+        var notification = new NewGameNotification(game.ToDto());
         var operation = () => notificationService.NotifyGameRoomAsync(roomId, notification);
         var notifyResult = await operation.WithRetry(delay: TimeSpan.FromSeconds(0.15));
         

@@ -11,7 +11,7 @@ namespace Tests.Application.Implementations;
 [TestFixture]
 public class UserServiceTests
 {
-    protected IAvatarRepository AvatarRepository;
+    protected IImageRepository ImageRepository;
     protected IUserRepository UserRepository;
     protected UserService UserService;
     protected IFormFile FormFile;
@@ -23,12 +23,12 @@ public class UserServiceTests
     [SetUp]
     public void SetUp()
     {
-        AvatarRepository = A.Fake<IAvatarRepository>();
+        ImageRepository = A.Fake<IImageRepository>();
         UserRepository = A.Fake<IUserRepository>();
         jwtProvider = A.Fake<IJwtProvider>();
         FormFile = A.Fake<IFormFile>();
         PasswordHasher = A.Fake<IPasswordHasher>();
-        UserService = new UserService(jwtProvider, UserRepository, AvatarRepository, PasswordHasher);
+        UserService = new UserService(jwtProvider, UserRepository, ImageRepository, PasswordHasher);
     }
 }
 
@@ -39,7 +39,7 @@ public class RegisterTests : UserServiceTests
     {
         var avatar = new Avatar("filename", "mimetype");
         
-        A.CallTo(() => AvatarRepository.SaveUserAvatarAsync(A<IFormFile>._, Ct))
+        A.CallTo(() => ImageRepository.SaveUserAvatarAsync(A<IFormFile>._, Ct))
             .Returns(OperationResult<Avatar>.Ok(avatar));
 
         A.CallTo(() => UserRepository.AddAsync(A<User>._, Ct))
@@ -53,7 +53,7 @@ public class RegisterTests : UserServiceTests
     [Test]
     public async Task Register_WhenCanNotSaveAvatar()
     {
-        A.CallTo(() => AvatarRepository.SaveUserAvatarAsync(A<IFormFile>._, Ct))
+        A.CallTo(() => ImageRepository.SaveUserAvatarAsync(A<IFormFile>._, Ct))
             .Returns(OperationResult<Avatar>.Error.ExternalServiceError());
 
         var result = await UserService.Register("BarminG", "veryStrongPassword228", "gb", FormFile, Ct);
@@ -71,7 +71,7 @@ public class RegisterTests : UserServiceTests
     {
         var avatar = new Avatar("filename", "mimetype");
 
-        A.CallTo(() => AvatarRepository.SaveUserAvatarAsync(A<IFormFile>._, Ct))
+        A.CallTo(() => ImageRepository.SaveUserAvatarAsync(A<IFormFile>._, Ct))
             .ReturnsNextFromSequence(
                 OperationResult<Avatar>.Error.InternalError(),
                 OperationResult<Avatar>.Error.ExternalServiceError(),
@@ -90,7 +90,7 @@ public class RegisterTests : UserServiceTests
     {
         var avatar = new Avatar("filename", "mimetype");
         
-        A.CallTo(() => AvatarRepository.SaveUserAvatarAsync(A<IFormFile>._, Ct))
+        A.CallTo(() => ImageRepository.SaveUserAvatarAsync(A<IFormFile>._, Ct))
             .Returns(OperationResult<Avatar>.Ok(avatar));
 
         A.CallTo(() => UserRepository.AddAsync(A<User>._, Ct))
@@ -111,7 +111,7 @@ public class RegisterTests : UserServiceTests
     {
         var avatar = new Avatar("filename", "mimetype");
         
-        A.CallTo(() => AvatarRepository.SaveUserAvatarAsync(A<IFormFile>._, Ct))
+        A.CallTo(() => ImageRepository.SaveUserAvatarAsync(A<IFormFile>._, Ct))
             .Returns(OperationResult<Avatar>.Ok(avatar));
 
         A.CallTo(() => UserRepository.AddAsync(A<User>._, Ct))
@@ -222,7 +222,7 @@ public class UpdateUserTests : UserServiceTests
         var avatar = new Avatar("filename", "mimetype");
         var user = new User("BarminG", "veryStrongPassword228", avatar, "password");
 
-        A.CallTo(() => AvatarRepository.SaveUserAvatarAsync(A<IFormFile>._, Ct))
+        A.CallTo(() => ImageRepository.SaveUserAvatarAsync(A<IFormFile>._, Ct))
             .Returns(OperationResult<Avatar>.Ok(avatar));
         
         A.CallTo(() => UserRepository.UpdateUserAsync(user.Id, avatar, "newName", Ct))
@@ -239,7 +239,7 @@ public class UpdateUserTests : UserServiceTests
         var avatar = new Avatar("filename", "mimetype");
         var user = new User("BarminG", "veryStrongPassword228", avatar, "password");
 
-        A.CallTo(() => AvatarRepository.SaveUserAvatarAsync(A<IFormFile>._, Ct))
+        A.CallTo(() => ImageRepository.SaveUserAvatarAsync(A<IFormFile>._, Ct))
             .ReturnsNextFromSequence(
                 OperationResult<Avatar>.Error.InternalError(),
                 OperationResult<Avatar>.Error.ExternalServiceError(),
@@ -259,7 +259,7 @@ public class UpdateUserTests : UserServiceTests
         var avatar = new Avatar("filename", "mimetype");
         var user = new User("BarminG", "veryStrongPassword228", avatar, "password");
 
-        A.CallTo(() => AvatarRepository.SaveUserAvatarAsync(A<IFormFile>._, Ct))
+        A.CallTo(() => ImageRepository.SaveUserAvatarAsync(A<IFormFile>._, Ct))
             .ReturnsNextFromSequence(
                 OperationResult<Avatar>.Error.InternalError(),
                 OperationResult<Avatar>.Error.InternalError(),
@@ -280,7 +280,7 @@ public class UpdateUserTests : UserServiceTests
         var avatar = new Avatar("filename", "mimetype");
         var user = new User("BarminG", "veryStrongPassword228", avatar, "password");
 
-        A.CallTo(() => AvatarRepository.SaveUserAvatarAsync(A<IFormFile>._, Ct))
+        A.CallTo(() => ImageRepository.SaveUserAvatarAsync(A<IFormFile>._, Ct))
             .Returns(OperationResult<Avatar>.Ok(avatar));
         
         A.CallTo(() => UserRepository.UpdateUserAsync(user.Id, avatar, "newName", Ct))
@@ -300,7 +300,7 @@ public class UpdateUserTests : UserServiceTests
         var avatar = new Avatar("filename", "mimetype");
         var user = new User("BarminG", "veryStrongPassword228", avatar, "password");
 
-        A.CallTo(() => AvatarRepository.SaveUserAvatarAsync(A<IFormFile>._, Ct))
+        A.CallTo(() => ImageRepository.SaveUserAvatarAsync(A<IFormFile>._, Ct))
             .Returns(OperationResult<Avatar>.Ok(avatar));
         
         A.CallTo(() => UserRepository.UpdateUserAsync(user.Id, avatar, "newName", Ct))
@@ -323,7 +323,7 @@ public class CreateGuestTests : UserServiceTests
     {
         var avatar = new Avatar("filename", "mimetype");
         
-        A.CallTo(() => AvatarRepository.SaveUserAvatarAsync(A<IFormFile>._, Ct))
+        A.CallTo(() => ImageRepository.SaveUserAvatarAsync(A<IFormFile>._, Ct))
             .ReturnsNextFromSequence(
                 OperationResult<Avatar>.Error.InternalError(),
                 OperationResult<Avatar>.Error.InternalError(),
@@ -344,7 +344,7 @@ public class CreateGuestTests : UserServiceTests
     [Test]
     public async Task SuccessCreateUserTest_WhenCreateUserReturnError_3_Times()
     {
-        A.CallTo(() => AvatarRepository.SaveUserAvatarAsync(A<IFormFile>._, Ct))
+        A.CallTo(() => ImageRepository.SaveUserAvatarAsync(A<IFormFile>._, Ct))
             .ReturnsNextFromSequence(
                 OperationResult<Avatar>.Error.InternalError(),
                 OperationResult<Avatar>.Error.InternalError(),
@@ -364,7 +364,7 @@ public class CreateGuestTests : UserServiceTests
     {
         var avatar = new Avatar("filename", "mimetype");
         
-        A.CallTo(() => AvatarRepository.SaveUserAvatarAsync(A<IFormFile>._, Ct))
+        A.CallTo(() => ImageRepository.SaveUserAvatarAsync(A<IFormFile>._, Ct))
             .Returns(OperationResult<Avatar>.Ok(avatar));
 
         A.CallTo(() => UserRepository.AddAsync(A<User>._, Ct))
@@ -387,7 +387,7 @@ public class CreateGuestTests : UserServiceTests
     {
         var avatar = new Avatar("filename", "mimetype");
         
-        A.CallTo(() => AvatarRepository.SaveUserAvatarAsync(A<IFormFile>._, Ct))
+        A.CallTo(() => ImageRepository.SaveUserAvatarAsync(A<IFormFile>._, Ct))
             .Returns(OperationResult<Avatar>.Ok(avatar));
 
         A.CallTo(() => UserRepository.AddAsync(A<User>._, Ct))

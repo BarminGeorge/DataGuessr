@@ -1,4 +1,5 @@
 using Application.Interfaces;
+using Application.Mappers;
 using Application.Notifications;
 using Domain.Common;
 using Domain.Entities;
@@ -49,11 +50,8 @@ public class GameCoreService(
 
     private async Task NotifyRoomAboutNewQuestion(Question question, Game game, Guid roomId)
     {
-        var newQuestionNotification = new NewQuestionNotification(question.Id,
-                                                                  question.Formulation,
-                                                                  question.ImageUrl,
-                                                            DateTime.Now + game.QuestionDuration,
-                                                                  game.QuestionDuration.Seconds);
+        var newQuestionNotification = new NewQuestionNotification(question
+            .ToDto(DateTime.Now + game.QuestionDuration, game.QuestionDuration.Seconds));
         
         var operation = () => notificationService.NotifyGameRoomAsync(roomId, newQuestionNotification);
         await operation.WithRetry(delay: TimeSpan.FromSeconds(0.2));
@@ -61,7 +59,7 @@ public class GameCoreService(
 
     private async Task NotifyRoomAboutCloseQuestion(Question question, Guid roomId)
     {
-        var closedQuestionNotification = new QuestionClosedNotification(question.Id, question.RightAnswer);
+        var closedQuestionNotification = new QuestionClosedNotification(question.RightAnswer);
         var operation = () => notificationService.NotifyGameRoomAsync(roomId,closedQuestionNotification);
         await operation.WithRetry(delay: TimeSpan.FromSeconds(0.2));
     }
