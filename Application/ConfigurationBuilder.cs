@@ -86,10 +86,10 @@ public static class ConfigurationBuilder
         services.AddCors(options =>
         {
             options.AddPolicy("ProductionPolicy", policy =>
-                policy.WithOrigins(allowedOrigins ?? []).AllowAnyHeader().AllowAnyMethod());
+                policy.WithOrigins(allowedOrigins ?? []).AllowAnyHeader().AllowAnyMethod().AllowCredentials());
             
             options.AddPolicy("AllowAll", policy => 
-                policy.AllowAnyOrigin().AllowAnyHeader().AllowAnyMethod());
+                policy.WithOrigins(allowedOrigins ?? []).AllowAnyHeader().AllowAnyMethod().AllowCredentials());
         });
     }
     
