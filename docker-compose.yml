@@ -22,6 +22,7 @@ services:
     environment:
       ASPNETCORE_ENVIRONMENT: Development
       ASPNETCORE_URLS: http://+:8080
+      JwtOptions__SecretKey: ${JWT_SECRET_KEY:-}
       ConnectionStrings__DefaultConnection: Host=postgres;Port=5432;Database=DataGuessrDB;Username=dataguessr_user;Password=YourStrongPassword123;Include Error Detail=true
     ports:
       - "5000:8080"
