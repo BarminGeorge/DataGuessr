@@ -8,10 +8,10 @@ namespace Infrastructure.PostgreSQL.Repositories;
 
 public class GameRepository : IGameRepository
 {
-    private readonly AppDbContext db;
+    private readonly IDataContext db;
     private readonly TimeSpan retryDelay = TimeSpan.FromMilliseconds(100);
 
-    public GameRepository(AppDbContext db)
+    public GameRepository(IDataContext db)
     {
         this.db = db ?? throw new ArgumentNullException(nameof(db));
     }
@@ -27,7 +27,6 @@ public class GameRepository : IGameRepository
                 return OperationResult.Error.Validation("Статистика не может быть null");
 
             var game = await db.Games
-                .Include(g => g.CurrentStatistic)
                 .FirstOrDefaultAsync(g => g.Id == gameId, cancellationToken: ct);
 
             if (game == null)

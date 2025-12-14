@@ -8,10 +8,10 @@ namespace Infrastructure.PostgreSQL.Repositories;
 
 public class PlayerAnswerRepository : IPlayerAnswerRepository
 {
-    private readonly AppDbContext db;
+    private readonly IDataContext db;
     private readonly TimeSpan retryDelay = TimeSpan.FromMilliseconds(100);
 
-    public PlayerAnswerRepository(AppDbContext db)
+    public PlayerAnswerRepository(IDataContext db)
     {
         this.db = db ?? throw new ArgumentNullException(nameof(db));
     }

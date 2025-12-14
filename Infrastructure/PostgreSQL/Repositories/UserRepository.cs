@@ -7,10 +7,10 @@ namespace Infrastructure.PostgreSQL.Repositories;
 
 public class UserRepository : IUserRepository
 {
-    private readonly AppDbContext db;
+    private readonly IDataContext db;
     private readonly TimeSpan retryDelay = TimeSpan.FromMilliseconds(100);
 
-    public UserRepository(AppDbContext db)
+    public UserRepository(IDataContext db)
     {
         this.db = db ?? throw new ArgumentNullException(nameof(db));
     }
@@ -51,15 +51,15 @@ public class UserRepository : IUserRepository
             if (user == null)
                 return OperationResult.Error.Validation("Пользователь не может быть null");
 
-            if (string.IsNullOrEmpty(user.Login))
-                return OperationResult.Error.Validation("Логин не может быть пустым");
+            if (!user.IsGuest)
+            {
+                var existingUser = await db.Users
+                    .AsNoTracking()
+                    .FirstOrDefaultAsync(u => u.Login == user.Login, ct);
 
-            var existingUser = await db.Users
-                .AsNoTracking()
-                .FirstOrDefaultAsync(u => u.Login == user.Login, ct);
-
-            if (existingUser != null)
-                return OperationResult.Error.AlreadyExists($"Пользователь с логином '{user.Login}' уже существует");
+                if (existingUser != null)
+                    return OperationResult.Error.AlreadyExists($"Пользователь с логином '{user.Login}' уже существует");
+            }
 
             await db.Users.AddAsync(user, ct);
             await db.SaveChangesAsync(ct);
@@ -69,6 +69,7 @@ public class UserRepository : IUserRepository
 
         return await operation.WithRetry(maxRetries: 3, delay: retryDelay);
     }
+
 
     public async Task<OperationResult<User>> GetByLoginAsync(string login, CancellationToken ct)
     {

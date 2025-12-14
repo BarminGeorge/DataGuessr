@@ -1,9 +1,10 @@
 ﻿using Domain.Entities;
+using Infrastructure.Interfaces;
 using Microsoft.EntityFrameworkCore;
 
 namespace Infrastructure.PostgreSQL;
 
-public class AppDbContext : DbContext
+public class AppDbContext : DbContext, IDataContext
 {
     public DbSet<User> Users { get; set; }
     public DbSet<Player> Players { get; set; }
@@ -137,7 +138,7 @@ public class AppDbContext : DbContext
 
             entity.Property(q => q.Mode)
                 .IsRequired()
-                .HasConversion<int>();  // Enum сохраняется как int
+                .HasConversion<int>();
 
             entity.HasIndex(q => q.Mode);
 
@@ -206,8 +207,6 @@ public class AppDbContext : DbContext
                     }
                 );
 
-            // PlayerAnswers связь (конфигурация для каскадного удаления)
-            // Навигационное свойство убрано из Game, работаем через репозиторий
             entity.HasMany<PlayerAnswer>()
                 .WithOne()
                 .HasForeignKey(pa => pa.GameId)

@@ -56,6 +56,6 @@ public static class ConfigurationApp
         app.MapRoomEndpoints();
         app.MapImageEndpoints();
         
-        app.MapHub<AppHub>("/appHub");
+        app.MapHub<AppHub>("api/appHub");
     }
 }
