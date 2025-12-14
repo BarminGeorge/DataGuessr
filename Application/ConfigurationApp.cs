@@ -13,12 +13,12 @@ public static class ConfigurationApp
         {
             app.UseSwagger();
             app.UseSwaggerUI();
-            app.UseCors("ProductionPolicy");
+            app.UseCors("AllowAll");
         }
         else
         {
             app.UseHsts();
-            app.UseCors("AllowAll");
+            app.UseCors("ProductionPolicy");
         }
 
         app.UseHttpsRedirection();
