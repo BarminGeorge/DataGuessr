@@ -6,9 +6,9 @@ export default function PlayerCard(props: any) {
             return (
             <ScoreCard username={props.username} score={props.score} />
             );
-        case "preview":
+        case "lobby-common":
             return (
-            <LobbyCard/>
+            <LobbyCard username={props.username}/>
             );
         default:
             return null;
@@ -23,7 +23,13 @@ function LobbyCard(props: any) {
           alt="avatar"
           className="w-10 h-10 rounded-full border border-gray-300"
         />
-          {props.username}          
+          {props.username}  
+           <img
+          src="src/assets/defaultavatar.jpg"
+          alt="avatar"
+          className="w-10 h-10 rounded-full border border-gray-300"
+        />
+                
         </div>
   );
 }

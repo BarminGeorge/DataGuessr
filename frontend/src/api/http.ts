@@ -1,7 +1,7 @@
 import axios, { type AxiosInstance, type  AxiosRequestConfig, type InternalAxiosRequestConfig, type AxiosResponse } from "axios";
 
 export const api: AxiosInstance = axios.create({
-baseURL: "https://fiitguesser.ru/api", // поменяй на свой URL API
+baseURL: "https://fiitguesser.ru", // поменяй на свой URL API
 timeout: 10000,
 });
 

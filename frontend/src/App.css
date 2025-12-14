@@ -75,9 +75,8 @@
   color: #6366F1;
   margin-left: auto;
   margin-right: 33%;
-  font-family: "Dm Sans", sans-serif;
+  font-family: "Dm Sans", sans-serif; 
 }
-
 
 .button-primary {
   background-color: #423FE5;
@@ -107,6 +106,18 @@
     align-items: center;
 }
 
+.settings-container {
+    display: flex;
+    flex-wrap: wrap;
+    flex-direction: row;
+    justify-content: center;
+}
+
+.settings-element {
+    padding: 2rem;
+    
+}
+
 .centered-vertical-aligment {
     display: flex;
     flex-direction: column;
@@ -124,11 +135,11 @@
     justify-content: left;
     align-items: center;
     gap: 1rem;
-    
 }
 
 .right-aligment {
     display: flex;
+    flex-wrap: wrap;
     flex-direction: row;
     justify-content: right;
     align-items: center;
@@ -234,12 +245,12 @@
 
 .modal-global-container {
     padding: 2rem 1rem;
-    margin: auto; 
+    margin: auto;
     background-color: #CBCAF0;
     gap: 1rem;
 
-   
-    display: flex; 
+    display: flex;
+    flex-wrap: wrap;
     flex-direction: row;
     justify-content: center;
     align-items: center;
@@ -248,7 +259,6 @@
     border-color: white;
     border-style: solid;
     border-width: 0.1rem;
-
     border-radius: 1rem;
 }
 
@@ -259,8 +269,9 @@
     
     height: 25vh;
     width: 25vw;
+    min-width: max-content;
     flex-direction: column;
-    padding: 2rem 2rem; 
+    padding: 2rem 2rem;
     border-radius: 1rem;
     background-color: #EEEEEE;
     gap: 1rem;

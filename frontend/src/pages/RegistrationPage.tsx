@@ -5,98 +5,89 @@ import { api, http } from "../api/http";
 import { useState } from "react";
 import { usePage } from "../PageContext";
 import { validateLogin, validatePassword, validateUsername } from "../utils/validations";
+import { apiService } from "../apiUtils/endPointsServices";
 
 async function handleRegistration(
-  login: string, 
-  password: string, 
-  playerName: string,
-  avatar: any,
-  setPage: (page:any) => void) {
-  
-  try {
+    login: string,
+    password: string,
+    playerName: string,
+    avatar: any,
+    setLoggingStatus: (status: any) => void,
+    setPage: (page: any) => void) {
 
-    const formData = new FormData();
-    
-    formData.append("login", login);
-    formData.append("password", password);
-    formData.append("playerName", playerName);
-    formData.append("avatar", avatar);
+    const data = { login, password, playerName, avatar };
+    const result = await apiService.register(data);
 
-    const res: any = await api.post(
-      "/register", 
-      formData)
-
-    setPage("home");
-    console.log(123);
-
-
-    } catch (e) {
-      alert(e);
+    if (!result.success) {
+        console.error(result.message);
+        return;
     }
+    setLoggingStatus(1);
+    setPage("home");
 }
 
-export default function RegistrationPage() {
-  const { setPage } = usePage();
-  const [login, setLogin] = useState("");
-  const [password, setPassword] = useState("");
-  const [playerName, setPlayerName] = useState("");
-  const [avatar, setAvatar] = useState<File | null>(null);
-  
+export default function RegistrationPage(props: any) {
+    const { setPage } = usePage();
+    const [login, setLogin] = useState("");
+    const [password, setPassword] = useState("");
+    const [playerName, setPlayerName] = useState("");
+    const [avatar, setAvatar] = useState<File | null>(null);
 
-  return (
-    <div className="global-container">
-      <Header />
-      <div className="main-container">  
-        <div className="title-text">  
-        Регистрация
+    props = props.props;
+    return (
+        <div className="global-container">
+            <Header />
+            <div className="main-container">
+                <div className="title-text">
+                    Регистрация
+                </div>
+
+
+                <div className="secondary-container">
+                    <input
+                        type="text"
+                        className="text-input-primary"
+                        placeholder={"Придумайте логин"}
+                        onChange={(e) => setLogin(e.target.value)}
+                    />
+                    <span className="accent-text">
+                        {validateLogin(login)}
+                    </span>
+                </div>
+                <div className="secondary-container">
+                    <input
+                        type="text"
+                        className="text-input-primary"
+                        placeholder={"Придумайте пароль"}
+                        onChange={(e) => setPassword(e.target.value)} />
+                    <span className="accent-text">
+                        {validatePassword(password)}
+                    </span>
+                </div>
+                <div className="secondary-container">
+                    <input
+                        type="text"
+                        className="text-input-primary"
+                        placeholder={"Придумайте имя пользователя"}
+                        onChange={(e) => setPlayerName(e.target.value)} />
+                    <span className="accent-text">
+                        {validateUsername(playerName)}
+                    </span>
+                </div>
+
+                <input
+                    type="file"
+                    className="text-input-primary"
+                    placeholder={"Выберите аватар"}
+                    onChange={(e) => setAvatar(e.target.files && e.target.files[0] ? e.target.files[0] : null)} />
+
+
+                <button className="button-primary"
+                    onClick={() => handleRegistration(login, password, playerName, avatar, props.setLoggingStatus, setPage)}>Зарегистрироваться</button>
+
+            </div>
         </div>
-
-
-        <div className="secondary-container">
-        <input 
-          type="text"
-          className="text-input-primary"
-          placeholder={"Придумайте логин"}
-          onChange={(e) => setLogin(e.target.value)}
-          />
-          <span className="acсent-text">
-            {validateLogin(login)}
-          </span>
-        </div>
-        <div className="secondary-container">
-        <input 
-          type="text"
-          className="text-input-primary"
-          placeholder={"Придумайте пароль"}
-          onChange={(e) => setPassword(e.target.value)}/>
-        <span className="acсent-text">
-                    {validatePassword(password)}
-                  </span>
-        </div>
-        <div className="secondary-container">
-        <input 
-          type="text"
-          className="text-input-primary"
-          placeholder={"Придумайте имя пользователя"}
-          onChange={(e) => setPlayerName(e.target.value)}/>
-        <span className="acсent-text">
-          {validateUsername(playerName)}
-        </span>
-        </div>
-
-        <input 
-          type="file"
-          className="text-input-primary"
-          placeholder={"Выберите аватар"}
-          onChange={(e) => setAvatar(e.target.files && e.target.files[0] ? e.target.files[0] : null)}/>
-
-        
-        <button className="button-primary" 
-        onClick={() => handleRegistration(login, password, playerName, avatar, setPage)}>Зарегистрироваться</button>
-
-    </div>
-    </div>
-  );
+    );
 }
 
 

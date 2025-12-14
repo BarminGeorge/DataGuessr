@@ -9,22 +9,32 @@ import LobbyPage from "./pages/game/LobbyPage";
 import GameRoundPage from "./pages/game/GameRoundPage";
 import GameLeaderboard from "./pages/game/GameLeaderboard";
 import GameLeaderboardFinal from "./pages/game/GameLeaderboardFinal";
+import { useState } from "react";
 
+export enum LoggingStatus {
+    NotLogged,
+    Logged,
+    Guest
+}
 
 export default function App() {
-  const { page, setPage } = usePage();
+    const { page, setPage } = usePage();
+    const [loggingStatus, setLoggingStatus] = useState(LoggingStatus.NotLogged);
 
-  return (
-    <div>
-      {page === "home" && <Home />}
-      {page === "login" && <LoginPage />}
-      {page === "registration" && <RegistrationPage />}
-      {page === "profile" && <ProfilePage />}
-      {page === "room" && <LobbyPage />}
-      {page === "game_round" && <GameRoundPage />}
-      {page === "game_leaderboard" && <GameLeaderboard />}
-      {page === "game_leaderboard_final" && <GameLeaderboardFinal />}
-    </div>
-  );
+    const props = { loggingStatus, setLoggingStatus };
+    
+    
+    return (
+        <div>
+            {page === "home" && <Home props={props} />}
+            {page === "login" && <LoginPage props={props} />}
+            {page === "registration" && <RegistrationPage props={props} />}
+            {page === "profile" && <ProfilePage />}
+            {page === "room" && <LobbyPage />}
+            {page === "game_round" && <GameRoundPage />}
+            {page === "game_leaderboard" && <GameLeaderboard />}
+            {page === "game_leaderboard_final" && <GameLeaderboardFinal />}
+        </div>
+    );
 }
 

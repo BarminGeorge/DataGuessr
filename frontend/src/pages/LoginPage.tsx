@@ -6,88 +6,87 @@ import { usePage } from "../PageContext";
 import { http } from "../api/http";
 import { useState } from "react";
 import { validateLogin, validatePassword } from "../utils/validations";
+import { apiService } from "../apiUtils/endPointsServices";
+
 
 async function handleLogin(
-  login: string, 
-  password: string,
-  setPage: (page:any) => void) {
-  
-  try {
-    const res: any = await http.post(
-      "/login", 
-      {login, password},
-      {})
+    login: string,
+    password: string,
+    setLoggingStatus: (status: any) => void,
+    setPage: (page: any) => void) {
 
-    if (res.success === true) {
-      setPage("home");
-    } else {
-      alert("Упс, что-то пошло не так");
+    const data = { login, password };
+    const result = await apiService.login(data);
+
+    if (!result.success) {
+        console.error(result.message);
+        return;
     }
-    } catch (e) {
-      errorParser(e);
-    }
+    setLoggingStatus(1);
+    setPage("home");
 }
 
 
-function errorParser(e : any) {
-  console.log(e);
-  return
+function errorParser(e: any) {
+    console.log(e);
+    return
 }
 
 
-export default function LoginPage() {
-   const { setPage } = usePage();
-   const [login, setLogin] = useState("");
-   const [password, setPassword] = useState("");
+export default function LoginPage(props: any) {
+    const { setPage } = usePage();
+    const [login, setLogin] = useState("");
+    const [password, setPassword] = useState("");
 
-  return (
-    <div className="global-container">
-      <Header />
-      <div className="main-container">  
-        <div className="title-text">  
-        Вход
+    props = props.props;
+    return (
+        <div className="global-container">
+            <Header />
+            <div className="main-container">
+                <div className="title-text">
+                    Вход
+                </div>
+
+                <div className="secondary-container">
+                    <input
+                        type="text"
+                        className="text-input-primary"
+                        placeholder={"Введите логин"}
+                        onChange={(e) => setLogin(e.target.value)}
+                    />
+                    <span className="accent-text">
+                        {validateLogin(login)}
+                    </span>
+                </div>
+
+
+                <div className="secondary-container">
+                    <input
+                        type="text"
+                        className="text-input-primary"
+                        placeholder={"Введите пароль"}
+                        onChange={(e) => setPassword(e.target.value)} />
+                    <span className="accent-text">
+                        {validatePassword(password)}
+                    </span>
+
+                </div>
+                <div className="secondary-text">Нет аккаунта?
+
+                    <span
+                        className="link-text"
+                        onClick={() => setPage("registration")}>
+                        Зарегистрироваться
+                    </span>
+
+                </div>
+
+                <button className="button-primary"
+                    onClick={() => handleLogin(login, password, props.setLoggingStatus, setPage)}>
+                    Войти
+                </button>
+
+            </div>
         </div>
-
-        <div className="secondary-container">
-          <input 
-            type="text"
-            className="text-input-primary"
-            placeholder={"Введите логин"}
-            onChange={(e) => setLogin(e.target.value)}
-            />
-          <span className="acсent-text">
-            {validateLogin(login)}
-          </span>
-        </div>
-
-
-        <div className="secondary-container">
-          <input 
-            type="text"
-            className="text-input-primary"
-            placeholder={"Введите пароль"}
-            onChange={(e) => setPassword(e.target.value)}/>
-          <span className="acсent-text">
-            {validatePassword(password)}
-          </span>
-          
-        </div>
-        <div className="secondary-text">Нет аккаунта? 
-        
-        <span 
-          className="link-text"
-          onClick={() => setPage("registration")}>
-          Зарегистрироваться
-        </span>
-  
-        </div>
-       
-        <button className="button-primary" 
-          onClick={() => handleLogin(login, password, setPage)}>
-            Войти
-        </button>
-
-    </div>
-    </div>
-  );
+    );
 }
