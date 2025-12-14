@@ -1,23 +1,49 @@
-import React, { useState } from "react";
+import React, { useEffect, useState } from "react";
 import Header from "../components/Header";
-import TextInput from "../components/TextInputs";
 import http from "../api/http";
 import { usePage } from "../PageContext";
 import EnterModal from "../modals/EnterModal";
 import { LoggingStatus } from "../App";
+import { gameHubService } from "../apiUtils/HubServices";
 
-async function RandomRoom(
-    setPage: (page: any) => void) {
 
-    try {
-        const res: any = await http.get(
-            "/rooms");
+async function findRandomRoom(
+    userId: string,
+    setPage: (page: any ) => void
+) {
+    const result = await gameHubService.findQuickRoom({
+        userId
+    });
 
-        setPage("room");
-    } catch (e) {
-        alert(e);
-        setPage("room");
+    if (!result.success || !result.resultObj) {
+        alert(result.message ?? "Не удалось найти комнату");
+        return;
     }
+
+    setPage("room");
+}
+
+async function joinRoomByCode(
+    userId: string,
+    roomId: string,
+    setPage: (page: any) => void
+) {
+    if (!roomId) {
+        alert("Введите код комнаты");
+        return;
+    }
+
+    const result = await gameHubService.joinRoom({
+        userId,
+        roomId
+    });
+
+    if (!result.success || !result.resultObj) {
+        alert(result.message ?? "Не удалось войти в комнату");
+        return;
+    }
+
+    setPage("room");
 }
 
 function checkLogging(loggingStatus: any) {
@@ -30,10 +56,14 @@ function checkLogging(loggingStatus: any) {
     return false;
 }
 
+
 export default function HomePage(props: any) {
     const { setPage } = usePage();
-    props = props.props;
+    const [roomCode, setRoomCode] = useState("");
+
     
+    props = props.props;
+
     return (
         <div className="global-container">
 
@@ -65,13 +95,32 @@ export default function HomePage(props: any) {
                     {/* join game buttons */}
                     <div className="secondary-container">
                         <div className="right-aligment">
-                            <TextInput Text="Введите код приглашения" />
+                            <input
+                                type="text"
+                                className="text-input-primary"
+                                placeholder="Введите код приглашения"
+                                value={roomCode}
+                                onChange={e => setRoomCode(e.target.value)}
+                            />
 
-                            <button className="button-primary">Присоединиться</button>
+
+                            <button
+                                className="button-primary"
+                                onClick={() => joinRoomByCode(props.user_id, roomCode, setPage)}
+                            >
+                                Присоединиться
+                            </button>
+
 
                             <span className="mx-1 text-gray-600">или</span>
 
-                            <button className="button-primary" onClick={() => RandomRoom(setPage)}>Случайная игра</button>;
+                            <button
+                                className="button-primary"
+                                onClick={() => findRandomRoom(props.user_id, setPage)}
+                            >
+                                Случайная игра
+                            </button>
+
                         </div>
                     </div>
                 </div>

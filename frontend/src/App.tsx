@@ -9,7 +9,8 @@ import LobbyPage from "./pages/game/LobbyPage";
 import GameRoundPage from "./pages/game/GameRoundPage";
 import GameLeaderboard from "./pages/game/GameLeaderboard";
 import GameLeaderboardFinal from "./pages/game/GameLeaderboardFinal";
-import { useState } from "react";
+import { useEffect, useState } from "react";
+import { gameHubService } from "./apiUtils/HubServices";
 
 export enum LoggingStatus {
     NotLogged,
@@ -21,7 +22,16 @@ export default function App() {
     const { page, setPage } = usePage();
     const [loggingStatus, setLoggingStatus] = useState(LoggingStatus.NotLogged);
 
-    const props = { loggingStatus, setLoggingStatus };
+
+    useEffect(() => {
+        gameHubService.connect().catch(err => {
+            console.error("SignalR error", err);
+            alert("Не удалось подключиться к серверу");
+        });
+    }, []);
+
+    const user_id = localStorage.getItem("user_id");
+    const props = { loggingStatus, setLoggingStatus, user_id };
     
     
     return (

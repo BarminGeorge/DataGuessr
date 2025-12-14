@@ -25,7 +25,7 @@ class GameHubService {
 
         try {
             this.connection = new HubConnectionBuilder()
-                .withUrl('/appHub', {
+                .withUrl('https://fiitguesser.ru/appHub', {
                     accessTokenFactory: () => token || '',
                     withCredentials: true
                 })

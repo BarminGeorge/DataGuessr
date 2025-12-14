@@ -4,6 +4,7 @@ import { http } from "../api/http";
 import { useState } from "react";
 import defaultImage from './../assets/defaultavatar.jpg';
 import { apiService } from "../apiUtils/endPointsServices";
+import { LoggingStatus } from "../App";
 
 
 async function handleGuest(
@@ -19,7 +20,9 @@ async function handleGuest(
         console.error(result.message);
         return;
     }
-    setLoggingStatus(2);
+    setLoggingStatus(LoggingStatus.Guest);
+    if (result.resultObj)
+        localStorage.setItem("user_id", result.resultObj?.id);
 }
 
 async function urlToFile(url: string, filename: string): Promise<File> {

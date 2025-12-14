@@ -1,12 +1,12 @@
 import React from "react";
 import Header from "../components/Header";
-import TextInput from "../components/TextInputs";
 
 import { usePage } from "../PageContext";
 import { http } from "../api/http";
 import { useState } from "react";
 import { validateLogin, validatePassword } from "../utils/validations";
 import { apiService } from "../apiUtils/endPointsServices";
+import { LoggingStatus } from "../App";
 
 
 async function handleLogin(
@@ -22,15 +22,13 @@ async function handleLogin(
         console.error(result.message);
         return;
     }
-    setLoggingStatus(1);
+    setLoggingStatus(LoggingStatus.Logged);
+    if (result.resultObj)
+        localStorage.setItem("user_id", result.resultObj?.user.id);
     setPage("home");
 }
 
 
-function errorParser(e: any) {
-    console.log(e);
-    return
-}
 
 
 export default function LoginPage(props: any) {
