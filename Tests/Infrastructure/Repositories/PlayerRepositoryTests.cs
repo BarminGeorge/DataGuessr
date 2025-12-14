@@ -1,44 +1,36 @@
-﻿using NUnit.Framework;
-using static NUnit.Framework.Assert;
+﻿using Domain.Common;
 using Domain.Entities;
 using Domain.Enums;
-using Domain.Interfaces;
-using Infrastructure.PostgreSQL;
 using Infrastructure.PostgreSQL.Repositories;
 using Microsoft.EntityFrameworkCore;
-
+using NUnit.Framework;
+using static NUnit.Framework.Assert;
 
 namespace Tests.Infrastructure.Repositories;
 
 [TestFixture]
 public class PlayerRepositoryTests
 {
-    private AppDbContext dbContext;
+    private PlayerRepositoryTestContext context;
     private PlayerRepository playerRepository;
     private CancellationToken ct;
 
     [SetUp]
     public void Setup()
     {
-        var options = new DbContextOptionsBuilder<AppDbContext>()
-            .UseInMemoryDatabase($"TestDb_{Guid.NewGuid()}")
+        var options = new DbContextOptionsBuilder<PlayerRepositoryTestContext>()
+            .UseInMemoryDatabase(databaseName: Guid.NewGuid().ToString())
             .Options;
 
-        dbContext = new PlayerRepositoryTestContext(options);
-        dbContext.Database.EnsureCreated();
-
-        playerRepository = new PlayerRepository(dbContext);
+        context = new PlayerRepositoryTestContext(options);
+        playerRepository = new PlayerRepository(context);
         ct = CancellationToken.None;
     }
 
     [TearDown]
     public void TearDown()
     {
-        if (dbContext != null)
-        {
-            dbContext.Database.EnsureDeleted();
-            dbContext.Dispose();
-        }
+        context?.Dispose();
     }
 
     private User CreateTestUser(string login = "testuser", string playerName = "TestPlayer")
@@ -61,15 +53,15 @@ public class PlayerRepositoryTests
     public async Task GetPlayerByIdAsync_HappyPath_ReturnsPlayer()
     {
         var user = CreateTestUser();
-        await dbContext.Users.AddAsync(user);
+        await context.Users.AddAsync(user);
 
         var room = CreateTestRoom(user.Id);
-        await dbContext.Rooms.AddAsync(room);
-        await dbContext.SaveChangesAsync();
+        await context.Rooms.AddAsync(room);
+        await context.SaveChangesAsync();
 
         var player = CreateTestPlayer(user.Id, room.Id, "conn001");
-        await dbContext.Players.AddAsync(player);
-        await dbContext.SaveChangesAsync();
+        await context.Players.AddAsync(player);
+        await context.SaveChangesAsync();
 
         var result = await playerRepository.GetPlayerByIdAsync(player.Id, ct);
 
@@ -114,15 +106,15 @@ public class PlayerRepositoryTests
     public async Task GetPlayerByConnectionIdAsync_HappyPath_ReturnsPlayerIdAndRoomId()
     {
         var user = CreateTestUser();
-        await dbContext.Users.AddAsync(user);
+        await context.Users.AddAsync(user);
 
         var room = CreateTestRoom(user.Id);
-        await dbContext.Rooms.AddAsync(room);
-        await dbContext.SaveChangesAsync();
+        await context.Rooms.AddAsync(room);
+        await context.SaveChangesAsync();
 
         var player = CreateTestPlayer(user.Id, room.Id, "conn_special_123");
-        await dbContext.Players.AddAsync(player);
-        await dbContext.SaveChangesAsync();
+        await context.Players.AddAsync(player);
+        await context.SaveChangesAsync();
 
         var result = await playerRepository.GetPlayerByConnectionIdAsync("conn_special_123");
 
@@ -162,15 +154,15 @@ public class PlayerRepositoryTests
     public async Task CreatePlayerAsync_HappyPath_CreatesPlayerSuccessfully()
     {
         var user = CreateTestUser();
-        await dbContext.Users.AddAsync(user);
+        await context.Users.AddAsync(user);
 
         var room = CreateTestRoom(user.Id);
-        await dbContext.Rooms.AddAsync(room);
-        await dbContext.SaveChangesAsync();
+        await context.Rooms.AddAsync(room);
+        await context.SaveChangesAsync();
 
         var result = await playerRepository.CreatePlayerAsync("new_conn_123", user.Id, room.Id, ct);
 
-        var createdPlayer = dbContext.Players.FirstOrDefault(p => p.ConnectionId == "new_conn_123");
+        var createdPlayer = context.Players.FirstOrDefault(p => p.ConnectionId == "new_conn_123");
 
         Multiple(() =>
         {
@@ -186,8 +178,8 @@ public class PlayerRepositoryTests
     public async Task CreatePlayerAsync_RoomNotFound_ReturnsNotFound()
     {
         var user = CreateTestUser();
-        await dbContext.Users.AddAsync(user);
-        await dbContext.SaveChangesAsync();
+        await context.Users.AddAsync(user);
+        await context.SaveChangesAsync();
 
         var result = await playerRepository.CreatePlayerAsync("conn_123", user.Id, Guid.NewGuid(), ct);
 
@@ -202,11 +194,11 @@ public class PlayerRepositoryTests
     public async Task CreatePlayerAsync_UserNotFound_ReturnsNotFound()
     {
         var user = CreateTestUser();
-        await dbContext.Users.AddAsync(user);
+        await context.Users.AddAsync(user);
 
         var room = CreateTestRoom(user.Id);
-        await dbContext.Rooms.AddAsync(room);
-        await dbContext.SaveChangesAsync();
+        await context.Rooms.AddAsync(room);
+        await context.SaveChangesAsync();
 
         var result = await playerRepository.CreatePlayerAsync("conn_123", Guid.NewGuid(), room.Id, ct);
 
@@ -224,16 +216,16 @@ public class PlayerRepositoryTests
         var user2 = CreateTestUser("user2", "Player2");
         var user3 = CreateTestUser("user3", "Player3");
 
-        await dbContext.Users.AddRangeAsync(user1, user2, user3);
+        await context.Users.AddRangeAsync(user1, user2, user3);
 
         var room = CreateTestRoom(user1.Id, maxPlayers: 2);
-        await dbContext.Rooms.AddAsync(room);
-        await dbContext.SaveChangesAsync();
+        await context.Rooms.AddAsync(room);
+        await context.SaveChangesAsync();
 
         var player1 = CreateTestPlayer(user1.Id, room.Id, "conn1");
         var player2 = CreateTestPlayer(user2.Id, room.Id, "conn2");
-        await dbContext.Players.AddRangeAsync(player1, player2);
-        await dbContext.SaveChangesAsync();
+        await context.Players.AddRangeAsync(player1, player2);
+        await context.SaveChangesAsync();
 
         var result = await playerRepository.CreatePlayerAsync("conn3", user3.Id, room.Id, ct);
 
@@ -248,15 +240,15 @@ public class PlayerRepositoryTests
     public async Task CreatePlayerAsync_UserAlreadyInRoom_ReturnsAlreadyExists()
     {
         var user = CreateTestUser();
-        await dbContext.Users.AddAsync(user);
+        await context.Users.AddAsync(user);
 
         var room = CreateTestRoom(user.Id);
-        await dbContext.Rooms.AddAsync(room);
-        await dbContext.SaveChangesAsync();
+        await context.Rooms.AddAsync(room);
+        await context.SaveChangesAsync();
 
         var player = CreateTestPlayer(user.Id, room.Id, "conn_first");
-        await dbContext.Players.AddAsync(player);
-        await dbContext.SaveChangesAsync();
+        await context.Players.AddAsync(player);
+        await context.SaveChangesAsync();
 
         var result = await playerRepository.CreatePlayerAsync("conn_second", user.Id, room.Id, ct);
 
@@ -272,15 +264,15 @@ public class PlayerRepositoryTests
     {
         var user1 = CreateTestUser("user1", "Player1");
         var user2 = CreateTestUser("user2", "Player2");
-        await dbContext.Users.AddRangeAsync(user1, user2);
+        await context.Users.AddRangeAsync(user1, user2);
 
         var room = CreateTestRoom(user1.Id);
-        await dbContext.Rooms.AddAsync(room);
-        await dbContext.SaveChangesAsync();
+        await context.Rooms.AddAsync(room);
+        await context.SaveChangesAsync();
 
         var player1 = CreateTestPlayer(user1.Id, room.Id, "same_conn_id");
-        await dbContext.Players.AddAsync(player1);
-        await dbContext.SaveChangesAsync();
+        await context.Players.AddAsync(player1);
+        await context.SaveChangesAsync();
 
         var result = await playerRepository.CreatePlayerAsync("same_conn_id", user2.Id, room.Id, ct);
 
@@ -295,11 +287,11 @@ public class PlayerRepositoryTests
     public async Task CreatePlayerAsync_EmptyConnectionId_ReturnsValidationError()
     {
         var user = CreateTestUser();
-        await dbContext.Users.AddAsync(user);
+        await context.Users.AddAsync(user);
 
         var room = CreateTestRoom(user.Id);
-        await dbContext.Rooms.AddAsync(room);
-        await dbContext.SaveChangesAsync();
+        await context.Rooms.AddAsync(room);
+        await context.SaveChangesAsync();
 
         var result = await playerRepository.CreatePlayerAsync("", user.Id, room.Id, ct);
 
@@ -314,11 +306,11 @@ public class PlayerRepositoryTests
     public async Task CreatePlayerAsync_EmptyUserId_ReturnsValidationError()
     {
         var user = CreateTestUser();
-        await dbContext.Users.AddAsync(user);
+        await context.Users.AddAsync(user);
 
         var room = CreateTestRoom(user.Id);
-        await dbContext.Rooms.AddAsync(room);
-        await dbContext.SaveChangesAsync();
+        await context.Rooms.AddAsync(room);
+        await context.SaveChangesAsync();
 
         var result = await playerRepository.CreatePlayerAsync("conn_123", Guid.Empty, room.Id, ct);
 
@@ -333,8 +325,8 @@ public class PlayerRepositoryTests
     public async Task CreatePlayerAsync_EmptyRoomId_ReturnsValidationError()
     {
         var user = CreateTestUser();
-        await dbContext.Users.AddAsync(user);
-        await dbContext.SaveChangesAsync();
+        await context.Users.AddAsync(user);
+        await context.SaveChangesAsync();
 
         var result = await playerRepository.CreatePlayerAsync("conn_123", user.Id, Guid.Empty, ct);
 
@@ -349,19 +341,19 @@ public class PlayerRepositoryTests
     public async Task RemovePlayerByConnectionAsync_HappyPath_RemovesPlayerSuccessfully()
     {
         var user = CreateTestUser();
-        await dbContext.Users.AddAsync(user);
+        await context.Users.AddAsync(user);
 
         var room = CreateTestRoom(user.Id);
-        await dbContext.Rooms.AddAsync(room);
-        await dbContext.SaveChangesAsync();
+        await context.Rooms.AddAsync(room);
+        await context.SaveChangesAsync();
 
         var player = CreateTestPlayer(user.Id, room.Id, "conn_to_remove");
-        await dbContext.Players.AddAsync(player);
-        await dbContext.SaveChangesAsync();
+        await context.Players.AddAsync(player);
+        await context.SaveChangesAsync();
 
         var result = await playerRepository.RemovePlayerByConnectionAsync("conn_to_remove");
 
-        var removedPlayer = dbContext.Players.FirstOrDefault(p => p.ConnectionId == "conn_to_remove");
+        var removedPlayer = context.Players.FirstOrDefault(p => p.ConnectionId == "conn_to_remove");
 
         Multiple(() =>
         {
@@ -398,15 +390,15 @@ public class PlayerRepositoryTests
     public async Task GetConnectionByPlayerAsync_HappyPath_ReturnsConnectionId()
     {
         var user = CreateTestUser();
-        await dbContext.Users.AddAsync(user);
+        await context.Users.AddAsync(user);
 
         var room = CreateTestRoom(user.Id);
-        await dbContext.Rooms.AddAsync(room);
-        await dbContext.SaveChangesAsync();
+        await context.Rooms.AddAsync(room);
+        await context.SaveChangesAsync();
 
         var player = CreateTestPlayer(user.Id, room.Id, "special_conn_456");
-        await dbContext.Players.AddAsync(player);
-        await dbContext.SaveChangesAsync();
+        await context.Players.AddAsync(player);
+        await context.SaveChangesAsync();
 
         var result = await playerRepository.GetConnectionByPlayerAsync(player.Id, ct);
 

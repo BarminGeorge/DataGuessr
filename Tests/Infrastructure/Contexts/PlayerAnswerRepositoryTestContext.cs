@@ -1,10 +1,12 @@
 ﻿using Domain.Entities;
+using Infrastructure.PostgreSQL;
 using Infrastructure.Interfaces;
 using Microsoft.EntityFrameworkCore;
+using Domain.ValueTypes;
 
 namespace Tests.Infrastructure;
 
-public class RoomRepositoryTestContext : DbContext, IDataContext
+public class PlayerAnswerRepositoryTestContext : DbContext, IDataContext
 {
     public DbSet<User> Users { get; set; }
     public DbSet<Room> Rooms { get; set; }
@@ -14,16 +16,14 @@ public class RoomRepositoryTestContext : DbContext, IDataContext
     public DbSet<PlayerAnswer> PlayerAnswers { get; set; }
     public DbSet<Avatar> Avatars { get; set; }
 
-    public RoomRepositoryTestContext(DbContextOptions<RoomRepositoryTestContext> options)
+    public PlayerAnswerRepositoryTestContext(DbContextOptions<PlayerAnswerRepositoryTestContext> options)
         : base(options) { }
 
     protected override void OnModelCreating(ModelBuilder modelBuilder)
     {
-        modelBuilder.Ignore<Game>();
         modelBuilder.Ignore<Question>();
-        modelBuilder.Ignore<PlayerAnswer>();
+        modelBuilder.Ignore<Game>();
 
-        // ============ USER ============
         modelBuilder.Entity<User>(entity =>
         {
             entity.ToTable("users");
@@ -35,7 +35,6 @@ public class RoomRepositoryTestContext : DbContext, IDataContext
             entity.HasIndex(u => u.PlayerName);
         });
 
-        // ============ AVATAR ============
         modelBuilder.Entity<Avatar>(entity =>
         {
             entity.ToTable("avatars");
@@ -51,7 +50,6 @@ public class RoomRepositoryTestContext : DbContext, IDataContext
             entity.HasIndex(a => a.UserId).IsUnique();
         });
 
-        // ============ PLAYER ============
         modelBuilder.Entity<Player>(entity =>
         {
             entity.ToTable("players");
@@ -72,7 +70,6 @@ public class RoomRepositoryTestContext : DbContext, IDataContext
             entity.HasIndex(p => p.RoomId);
         });
 
-        // ============ ROOM ============
         modelBuilder.Entity<Room>(entity =>
         {
             entity.ToTable("rooms");
@@ -90,5 +87,27 @@ public class RoomRepositoryTestContext : DbContext, IDataContext
             entity.HasIndex(r => r.Status);
             entity.HasIndex(r => r.ClosedAt);
         });
+
+        modelBuilder.Entity<PlayerAnswer>(entity =>
+        {
+            entity.ToTable("player_answers");
+            entity.HasKey(pa => pa.Id);
+            entity.Property(pa => pa.GameId).IsRequired();
+            entity.Property(pa => pa.PlayerId).IsRequired();
+            entity.Property(pa => pa.QuestionId).IsRequired();
+
+            entity.Property(pa => pa.Answer)
+                .HasConversion(
+                    v => System.Text.Json.JsonSerializer.Serialize(v, (System.Text.Json.JsonSerializerOptions)null),
+                    v => System.Text.Json.JsonSerializer.Deserialize<Answer>(v, (System.Text.Json.JsonSerializerOptions)null)
+                )
+                .IsRequired();
+
+            entity.HasIndex(pa => new { pa.GameId, pa.QuestionId, pa.PlayerId }).IsUnique();
+            entity.HasIndex(pa => pa.GameId);
+            entity.HasIndex(pa => pa.QuestionId);
+            entity.HasIndex(pa => pa.PlayerId);
+        });
+
     }
 }

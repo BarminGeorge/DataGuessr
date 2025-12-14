@@ -12,19 +12,18 @@ namespace Tests.Infrastructure.Repositories;
 [TestFixture]
 public class RoomRepositoryTests
 {
-    private IDataContext dbContext;
+    private RoomRepositoryTestContext dbContext;
     private RoomRepository roomRepository;
     private CancellationToken ct;
 
     [SetUp]
     public void Setup()
     {
-        var options = new DbContextOptionsBuilder()
+        var options = new DbContextOptionsBuilder<RoomRepositoryTestContext>()
             .UseInMemoryDatabase(databaseName: Guid.NewGuid().ToString())
             .Options;
 
         dbContext = new RoomRepositoryTestContext(options);
-        dbContext.Database.EnsureCreated();
 
         roomRepository = new RoomRepository(dbContext);
         ct = CancellationToken.None;
@@ -37,7 +36,6 @@ public class RoomRepositoryTests
     {
         if (dbContext != null)
         {
-            dbContext.Database.EnsureDeleted();
             dbContext.Dispose();
         }
     }

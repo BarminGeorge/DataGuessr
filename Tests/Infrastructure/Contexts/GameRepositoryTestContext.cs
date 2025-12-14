@@ -1,10 +1,12 @@
 ﻿using Domain.Entities;
+using Domain.ValueTypes;
 using Infrastructure.Interfaces;
+using Infrastructure.PostgreSQL;
 using Microsoft.EntityFrameworkCore;
 
 namespace Tests.Infrastructure;
 
-public class RoomRepositoryTestContext : DbContext, IDataContext
+public class GameRepositoryTestContext : DbContext, IDataContext
 {
     public DbSet<User> Users { get; set; }
     public DbSet<Room> Rooms { get; set; }
@@ -14,12 +16,11 @@ public class RoomRepositoryTestContext : DbContext, IDataContext
     public DbSet<PlayerAnswer> PlayerAnswers { get; set; }
     public DbSet<Avatar> Avatars { get; set; }
 
-    public RoomRepositoryTestContext(DbContextOptions<RoomRepositoryTestContext> options)
+    public GameRepositoryTestContext(DbContextOptions<GameRepositoryTestContext> options)
         : base(options) { }
 
     protected override void OnModelCreating(ModelBuilder modelBuilder)
     {
-        modelBuilder.Ignore<Game>();
         modelBuilder.Ignore<Question>();
         modelBuilder.Ignore<PlayerAnswer>();
 
@@ -87,8 +88,36 @@ public class RoomRepositoryTestContext : DbContext, IDataContext
                 .WithOne()
                 .HasForeignKey(p => p.RoomId)
                 .OnDelete(DeleteBehavior.Cascade);
+            entity.HasMany(r => r.Games)
+                .WithOne()
+                .HasForeignKey(g => g.RoomId)
+                .OnDelete(DeleteBehavior.Cascade);
             entity.HasIndex(r => r.Status);
             entity.HasIndex(r => r.ClosedAt);
+        });
+
+        // ============ GAME ============
+        modelBuilder.Entity<Game>(entity =>
+        {
+            entity.ToTable("games");
+            entity.HasKey(g => g.Id);
+            entity.Property(g => g.RoomId).IsRequired();
+            entity.Property(g => g.Mode).IsRequired();
+            entity.Property(g => g.Status).IsRequired();
+            entity.Property(g => g.QuestionsCount).IsRequired();
+            entity.Property(g => g.QuestionDuration).IsRequired();
+            entity.Property(g => g.CurrentStatistic)
+                .HasConversion(
+                    v => v == null ? null : System.Text.Json.JsonSerializer.Serialize(v, (System.Text.Json.JsonSerializerOptions)null),
+                    v => v == null ? null : System.Text.Json.JsonSerializer.Deserialize<Statistic>(v, (System.Text.Json.JsonSerializerOptions)null)
+                )
+                .IsRequired(false);
+            entity.HasOne<Room>()
+                .WithMany(r => r.Games)
+                .HasForeignKey(g => g.RoomId)
+                .OnDelete(DeleteBehavior.Cascade);
+            entity.HasIndex(g => g.Status);
+            entity.HasIndex(g => g.RoomId);
         });
     }
 }

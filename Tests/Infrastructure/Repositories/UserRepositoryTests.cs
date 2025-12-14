@@ -1,6 +1,5 @@
 ﻿using Domain.Common;
 using Domain.Entities;
-using Infrastructure.PostgreSQL;
 using Infrastructure.PostgreSQL.Repositories;
 using Microsoft.EntityFrameworkCore;
 using NUnit.Framework;
@@ -11,32 +10,26 @@ namespace Tests.Infrastructure;
 [TestFixture]
 public class UserRepositoryTests
 {
-    private AppDbContext dbContext;
+    private UserRepositoryTestContext context;
     private UserRepository userRepository;
     private CancellationToken ct;
 
     [SetUp]
     public void Setup()
     {
-        var options = new DbContextOptionsBuilder<AppDbContext>()
-            .UseInMemoryDatabase($"TestDb_{Guid.NewGuid()}")
+        var options = new DbContextOptionsBuilder<UserRepositoryTestContext>()
+            .UseInMemoryDatabase(databaseName: Guid.NewGuid().ToString())
             .Options;
 
-        dbContext = new UserRepositoryTestContext(options);
-        dbContext.Database.EnsureCreated();
-
-        userRepository = new UserRepository(dbContext);
+        context = new UserRepositoryTestContext(options);
+        userRepository = new UserRepository(context);
         ct = CancellationToken.None;
     }
 
     [TearDown]
     public void TearDown()
     {
-        if (dbContext != null)
-        {
-            dbContext.Database.EnsureDeleted();
-            dbContext.Dispose();
-        }
+        context?.Dispose();
     }
 
     private User CreateTestUser(string login = "testuser", string playerName = "TestPlayer")
@@ -56,9 +49,9 @@ public class UserRepositoryTests
         var user1 = CreateTestUser("user1", "Player1");
         var user2 = CreateTestUser("user2", "Player2");
 
-        await dbContext.Users.AddAsync(user1);
-        await dbContext.Users.AddAsync(user2);
-        await dbContext.SaveChangesAsync();
+        await context.Users.AddAsync(user1);
+        await context.Users.AddAsync(user2);
+        await context.SaveChangesAsync();
 
         var userIds = new[] { user1.Id, user2.Id };
 
@@ -116,8 +109,8 @@ public class UserRepositoryTests
     public async Task GetUsersByIds_WhenPartialMatch_ReturnsOnlyFoundUsers()
     {
         var user1 = CreateTestUser("user1");
-        await dbContext.Users.AddAsync(user1);
-        await dbContext.SaveChangesAsync();
+        await context.Users.AddAsync(user1);
+        await context.SaveChangesAsync();
 
         var userIds = new[] { user1.Id, Guid.NewGuid() };
 
@@ -141,7 +134,7 @@ public class UserRepositoryTests
         Multiple(() =>
         {
             That(result.Success, Is.True);
-            That(dbContext.Users.Count(), Is.EqualTo(1));
+            That(context.Users.Count(), Is.EqualTo(1));
         });
     }
 
@@ -194,8 +187,8 @@ public class UserRepositoryTests
     {
         var user = CreateTestUser("testlogin");
 
-        await dbContext.Users.AddAsync(user);
-        await dbContext.SaveChangesAsync();
+        await context.Users.AddAsync(user);
+        await context.SaveChangesAsync();
 
         var result = await userRepository.GetByLoginAsync("testlogin", ct);
 
@@ -235,14 +228,14 @@ public class UserRepositoryTests
     public async Task UpdateUserAsync_HappyPath_UpdatesUserSuccessfully()
     {
         var user = CreateTestUser();
-        await dbContext.Users.AddAsync(user);
-        await dbContext.SaveChangesAsync();
+        await context.Users.AddAsync(user);
+        await context.SaveChangesAsync();
 
         var newAvatar = CreateTestAvatar();
 
         var result = await userRepository.UpdateUserAsync(user.Id, newAvatar, "NewPlayerName", ct);
 
-        var updatedUser = dbContext.Users.FirstOrDefault(u => u.Id == user.Id);
+        var updatedUser = context.Users.FirstOrDefault(u => u.Id == user.Id);
 
         Multiple(() =>
         {
@@ -251,7 +244,6 @@ public class UserRepositoryTests
             That(updatedUser.Avatar, Is.Not.Null);
         });
     }
-
 
     [Test]
     public async Task UpdateUserAsync_WhenUserIdEmpty_ReturnsValidationError()
@@ -315,8 +307,8 @@ public class UserRepositoryTests
     public async Task GetPlayerNameByIdAsync_HappyPath_ReturnsPlayerName()
     {
         var user = CreateTestUser("login", "TestPlayerName");
-        await dbContext.Users.AddAsync(user);
-        await dbContext.SaveChangesAsync();
+        await context.Users.AddAsync(user);
+        await context.SaveChangesAsync();
 
         var result = await userRepository.GetPlayerNameByIdAsync(user.Id, ct);
 

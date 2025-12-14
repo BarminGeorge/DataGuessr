@@ -27,7 +27,6 @@ public class GameRepository : IGameRepository
                 return OperationResult.Error.Validation("Статистика не может быть null");
 
             var game = await db.Games
-                .Include(g => g.CurrentStatistic)
                 .FirstOrDefaultAsync(g => g.Id == gameId, cancellationToken: ct);
 
             if (game == null)
