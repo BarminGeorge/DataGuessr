@@ -74,7 +74,7 @@ public class RoomManager(
         
         room.RemovePlayer(player);
         
-        var notification = new PlayerLeavedNotification(userId, room.Owner);
+        var notification = new PlayerLeavedNotification(player.Id, room.Owner);
         var operation = () => notificationService.NotifyGameRoomAsync(roomId, notification);
         var notifyResult = await operation.WithRetry(delay: TimeSpan.FromSeconds(0.15));
         if (!notifyResult.Success)

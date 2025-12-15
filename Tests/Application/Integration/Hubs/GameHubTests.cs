@@ -48,7 +48,7 @@ public class GameHubTests: HubTests
         Assert.Multiple(() =>
         {
             Assert.That(result.ResultObj.QuestionsCount, Is.EqualTo(questionsCount));
-            Assert.That(result.ResultObj.QuestionDuration, Is.EqualTo(questionDuraction));
+            Assert.That(result.ResultObj.QuestionDuration, Is.EqualTo(questionDuraction.Seconds));
             Assert.That(result.ResultObj.Mode, Is.EqualTo(gameMode));
             Assert.That(result.ResultObj.Status, Is.EqualTo(GameStatus.NotStarted));
         });
