@@ -22,7 +22,7 @@ public static class ModelToUiMapper
             game.Mode,
             game.Status,
             game.QuestionsCount,
-            game.QuestionDuration);
+            game.QuestionDuration.Seconds);
     }
 
     public static UserDto ToDto(this User user)
