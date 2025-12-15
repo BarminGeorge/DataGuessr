@@ -3,7 +3,7 @@ import Header from "../components/Header";
 import http from "../api/http";
 import { usePage } from "../PageContext";
 import EnterModal from "../modals/EnterModal";
-import { LoggingStatus } from "../App";
+import { LoggingStatus, type CurrentAppState } from "../App";
 import { gameHubService } from "../apiUtils/HubServices";
 import { RoomPrivacy } from "../apiUtils/dto";
 
@@ -50,23 +50,28 @@ async function joinRoomByCode(
 }
 
 async function createRoom(
-    userId: string,
-    setPage: (page: any) => void) {
+    userId: string| null,
+    setPage: (page: any) => void,
+    setRoom: (x: any) => void) {
+
+    if (userId == null)
+        return;
 
     const result = await gameHubService.createRoom({
         userId: userId,
         privacy: RoomPrivacy.Public,
         maxPlayers: 8
     });
-    console.log(result.message);
+    console.log(result);
 
     if (!result.success || !result.resultObj) {    
         alert("Не удалось создать комнату");
         return;
     }
-
+    setRoom(result.resultObj);
     setPage("room");
 }
+
 function checkLogging(loggingStatus: any) {
     if (loggingStatus == LoggingStatus.Guest) {
         return true;
@@ -78,12 +83,10 @@ function checkLogging(loggingStatus: any) {
 }
 
 
-export default function HomePage(props: any) {
+export default function HomePage(props: CurrentAppState) {
     const { setPage } = usePage();
     const [roomCode, setRoomCode] = useState("");
-
     
-    props = props.props;
 
     return (
         <div className="global-container">
@@ -95,13 +98,13 @@ export default function HomePage(props: any) {
             <div className={checkLogging(props.loggingStatus) ? "" : "blur"}>
 
 
-                <Header variant={checkLogging(props.loggingStatus) ?
+                <Header variant={props.loggingStatus == LoggingStatus.Logged ?
                     "logo-and-avatar-and-interactive"
                     : "logo-and-login-button"}
-                    interact_action={() => createRoom(props.user_id, setPage)}
+                    interact_action={() => createRoom(props.user_id, setPage, props.setRoom)}
                     interact_label= {"Create lobby"}
-
                 />
+
                 <div className="main-container">
                     <div className="secondary-container">
                         <div className="left-aligment title-variant-1">Время</div>

@@ -6,6 +6,7 @@ import { useState } from "react";
 import { usePage } from "../PageContext";
 import { validateLogin, validatePassword, validateUsername } from "../utils/validations";
 import { apiService } from "../apiUtils/endPointsServices";
+import type { CurrentAppState } from "../App";
 
 async function handleRegistration(
     login: string,
@@ -31,14 +32,13 @@ async function handleRegistration(
     setPage("home");
 }
 
-export default function RegistrationPage(props: any) {
+export default function RegistrationPage(props: CurrentAppState) {
     const { setPage } = usePage();
     const [login, setLogin] = useState("");
     const [password, setPassword] = useState("");
     const [playerName, setPlayerName] = useState("");
     const [avatar, setAvatar] = useState<File | null>(null);
 
-    props = props.props;
     return (
         <div className="global-container">
             <Header />

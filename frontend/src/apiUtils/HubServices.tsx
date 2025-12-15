@@ -142,7 +142,7 @@ class GameHubService {
 
         try {
             const result = await this.connection.invoke<T>(methodName, ...args);
-            return { success: true, resultObj: result };
+            return result;
         } catch (error: any) {
             return {
                 success: false,
@@ -178,7 +178,7 @@ class GameHubService {
         }
 
         this.notificationCallbacks.get(eventName)!.add(callback);
-
+        console.log(eventName);
         // Возвращаем функцию для отписки
         return () => {
             const callbacks = this.notificationCallbacks.get(eventName);

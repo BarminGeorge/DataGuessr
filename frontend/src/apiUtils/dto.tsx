@@ -45,8 +45,8 @@ export interface CreateGuestRequest {
 }
 
 export enum RoomPrivacy {
-    Public = "public",
-    Private = "private"
+    Public = 0,
+    Private = 1
 }
 
 export interface PlayerDto {
@@ -69,15 +69,22 @@ export interface RoomPrivacyResponse {
 }
 
 export enum GameMode {
-    Default = "Default",
-    BoolMode = "BoolMode",
+    Default = 0,
+    BoolMode = 1,
 }
 
 export interface GameDto {
     id: string;
     mode: GameMode;
-    questions: QuestionDto[];
+    questionDuration: number;
     questionsCount: number;
+    status: GameStatus;
+}
+
+enum GameStatus {
+    NotStarted = 0,
+    InProgress = 1,
+    Finished = 2
 }
 
 export interface QuestionDto {

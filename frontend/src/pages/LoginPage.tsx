@@ -6,7 +6,7 @@ import { http } from "../api/http";
 import { useState } from "react";
 import { validateLogin, validatePassword } from "../utils/validations";
 import { apiService } from "../apiUtils/endPointsServices";
-import { LoggingStatus } from "../App";
+import { LoggingStatus, type CurrentAppState } from "../App";
 
 
 async function handleLogin(
@@ -24,6 +24,7 @@ async function handleLogin(
     }
     setLoggingStatus(LoggingStatus.Logged);
     console.log(result);
+
     if (result.resultObj) {
         localStorage.setItem("user_id", result.resultObj?.id);
         localStorage.setItem("player_name", result.resultObj?.playerName);
@@ -35,12 +36,11 @@ async function handleLogin(
 
 
 
-export default function LoginPage(props: any) {
+export default function LoginPage(props: CurrentAppState) {
     const { setPage } = usePage();
     const [login, setLogin] = useState("");
     const [password, setPassword] = useState("");
 
-    props = props.props;
     return (
         <div className="global-container">
             <Header />

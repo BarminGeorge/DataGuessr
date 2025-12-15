@@ -11,6 +11,7 @@ import GameLeaderboard from "./pages/game/GameLeaderboard";
 import GameLeaderboardFinal from "./pages/game/GameLeaderboardFinal";
 import { useEffect, useState } from "react";
 import { gameHubService } from "./apiUtils/HubServices";
+import type { RoomDto } from "./apiUtils/dto";
 
 export enum LoggingStatus {
     NotLogged,
@@ -18,9 +19,20 @@ export enum LoggingStatus {
     Guest
 }
 
+export interface CurrentAppState {
+    loggingStatus: LoggingStatus,
+    setLoggingStatus: (x: any) => void,
+
+    user_id: string| null,
+    room: RoomDto | null,
+    setRoom: (x: any) => void | null
+
+};
+
 export default function App() {
     const { page, setPage } = usePage();
     const [loggingStatus, setLoggingStatus] = useState(LoggingStatus.NotLogged);
+    const [room, setRoom] = useState(null);
 
 
     useEffect(() => {
@@ -31,17 +43,17 @@ export default function App() {
     }, []);
 
     const user_id = localStorage.getItem("user_id");
-    const props = { loggingStatus, setLoggingStatus, user_id };
+    const props: CurrentAppState = { loggingStatus, setLoggingStatus, user_id, room, setRoom };
     console.log(props);
 
 
     return (
         <div>
-            {page === "home" && <Home props={props} />}
-            {page === "login" && <LoginPage props={props} />}
-            {page === "registration" && <RegistrationPage props={props} />}
+            {page === "home" && <Home {...props} />}
+            {page === "login" && <LoginPage {...props} />}
+            {page === "registration" && <RegistrationPage {...props} />}
             {page === "profile" && <ProfilePage />}
-            {page === "room" && <LobbyPage />}
+            {page === "room" && <LobbyPage {...props} />}
             {page === "game_round" && <GameRoundPage />}
             {page === "game_leaderboard" && <GameLeaderboard />}
             {page === "game_leaderboard_final" && <GameLeaderboardFinal />}

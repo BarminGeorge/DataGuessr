@@ -39,7 +39,7 @@ function HeaderWithLogoAndLoginButton() {
     const { setPage } = usePage();
     return (
         <div className="header-container">
-            <div className="title-text" onClick={() => setPage("home")}>FIITguesser</div>
+            <div className="title-text">FIITguesser</div>
 
             <div className="flex items-center gap-3">
                 <button className="button-primary" onClick={() => setPage("login")}>Login</button>
@@ -75,7 +75,7 @@ function HeaderWithLogoAndAvatarAndInteractive(props: any) {
 
     return (
         <div className="header-container">
-            <div className="title-text" onClick={() => setPage("home")}>FIITguesser</div>
+            <div className="title-text">FIITguesser</div>
             <div className="left-aligment">
 
                 <div className="accent-title-text"
@@ -99,7 +99,7 @@ function HeaderWithLogoAndAvatarAndRemoveRoomButton() {
     const { setPage } = usePage();
     return (
         <div className="header-container">
-            <div className="title-text" onClick={() => setPage("home")}>FIITguesser</div>
+            <div className="title-text">FIITguesser</div>
             <div className="left-aligment">
                 <div className="accent-title-text" onClick={() => alert("remove lobby")}>Remove lobby</div>
                 <div className="flex items-center gap-3">
@@ -118,7 +118,7 @@ function HeaderWithLogoAndAvatarAndTimer() {
     const { setPage } = usePage();
     return (
         <div className="header-container">
-            <div className="title-text" onClick={() => setPage("home")}>FIITguesser</div>
+            <div className="title-text">FIITguesser</div>
             <div className="flex items-center gap-3">
                 <CircularProgress
                     variant="determinate"

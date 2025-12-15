@@ -34,7 +34,6 @@ export interface CreateGameRequest {
     mode: GameMode;
     countQuestions: number;
     questionDuration: number;
-    questions?: QuestionDto[]; // Уточнить тип
 }
 
 export interface StartGameRequest {

@@ -73,6 +73,8 @@ class ApiService {
         }
     }
 
+    
+
     async createGuest(data: CreateGuestRequest): Promise<OperationResult<UserDto>> {
         const formData = new FormData();
         formData.append('playerName', data.playerName);
