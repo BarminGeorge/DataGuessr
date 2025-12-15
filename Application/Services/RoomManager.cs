@@ -18,11 +18,9 @@ public class RoomManager(
         string? password = null, int maxPlayers = 15)
     {
         var room = new Room(userId, privacy, maxPlayers, password);
-        Console.WriteLine($"20 {room.Players.Count}");
         var addRoomResult = await roomRepository.AddAsync(room, ct);
         if (!addRoomResult.Success)
             return addRoomResult.ConvertToOperationResult<Room>();
-        Console.WriteLine($"24 {room.Players.Count}");
         return OperationResult<Room>.Ok(room);
     }
 
@@ -31,7 +29,7 @@ public class RoomManager(
         var getRoomResult = await roomRepository.GetByIdAsync(roomId, ct);
         if (!getRoomResult.Success || getRoomResult.ResultObj == null)
             return getRoomResult;
-        Console.WriteLine($"33 {getRoomResult.ResultObj.Players.Count}");
+
         var room = getRoomResult.ResultObj;
         if (room.Privacy == RoomPrivacy.Private && password != room.Password)
             return OperationResult<Room>.Error.Unauthorized();
@@ -41,23 +39,22 @@ public class RoomManager(
             return getPlayerResult.ConvertToOperationResult<Room>();
         
         var player = getPlayerResult.ResultObj;
-        Console.WriteLine($"46 {room.Players.Count}");
         var getUsersResult = await usersRepository.GetUsersByIds([userId], ct);
         if (!getUsersResult.Success || getUsersResult.ResultObj == null)
             return getUsersResult.ConvertToOperationResult<Room>();
         player.SetUserInfo(getUsersResult.ResultObj.First());
-        Console.WriteLine($"50 {room.Players.Count}");
+
         var notification = new NewPlayerNotification(player.ToDto());
         var operation = () => notificationService.NotifyGameRoomAsync(roomId, notification);
         var notifyResult = await operation.WithRetry(delay: TimeSpan.FromSeconds(0.15));
         if (!notifyResult.Success)
             return notifyResult.ConvertToOperationResult<Room>();
-        Console.WriteLine($"57 {room.Players.Count}");
+
         var usersResult = await usersRepository.GetUsersByIds(room.Players.Select(x => x.UserId), ct);
         if (!usersResult.Success || usersResult.ResultObj == null)
             return usersResult.ConvertToOperationResult<Room>();
         room.FillPlayersWithUserInfo(usersResult.ResultObj);
-        Console.WriteLine($"65 {room.Players.Count}");
+
         return OperationResult<Room>.Ok(room);
     }
 

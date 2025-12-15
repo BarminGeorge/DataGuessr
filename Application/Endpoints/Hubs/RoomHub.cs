@@ -18,16 +18,14 @@ public partial class AppHub
         
         if (result is { Success: true, ResultObj: not null })
         {
-            Console.WriteLine($"18hub {result.ResultObj.Players.Count}");
             var connectionServiceResult = await connectionService.AddConnection(Context.ConnectionId, request.UserId, result.ResultObj.Id, ct);
             if (!connectionServiceResult.Success)
                 return connectionServiceResult.ConvertToOperationResult<RoomDto>();
-            Console.WriteLine($"24hub {result.ResultObj.Players.Count}");
+
             await Groups.AddToGroupAsync(Context.ConnectionId, $"room-{result.ResultObj.Id}", ct);
+            
             var joinOperation = () => roomManager.JoinRoomAsync(result.ResultObj.Id, request.UserId, ct, request.Password);
-            
             var joinResult = await joinOperation.WithRetry(delay: TimeSpan.FromSeconds(0.15));
-            
             if (!joinResult.Success || joinResult.ResultObj is null)
                 return joinResult.ConvertToOperationResult<RoomDto>();
             
