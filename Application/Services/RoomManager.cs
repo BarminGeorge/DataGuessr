@@ -22,7 +22,7 @@ public class RoomManager(
         var addRoomResult = await roomRepository.AddAsync(room, ct);
         if (!addRoomResult.Success)
             return addRoomResult.ConvertToOperationResult<Room>();
-        
+        Console.WriteLine($"24 {room.Players.Count}");
         return OperationResult<Room>.Ok(room);
     }
 
