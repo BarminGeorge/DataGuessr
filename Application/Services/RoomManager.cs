@@ -36,7 +36,7 @@ public class RoomManager(
         if (room.Privacy == RoomPrivacy.Private && password != room.Password)
             return OperationResult<Room>.Error.Unauthorized();
             
-        var getPlayerResult = await playerRepository.GetPlayerByIdAsync(userId, ct);
+        var getPlayerResult = await playerRepository.GetPlayerByUserIdAsync(userId, ct);
         if (!getPlayerResult.Success || getPlayerResult.ResultObj == null)
             return getPlayerResult.ConvertToOperationResult<Room>();
         
@@ -74,7 +74,7 @@ public class RoomManager(
         
         var room = getRoomResult.ResultObj;
         
-        var getPlayerResult = await playerRepository.GetPlayerByIdAsync(userId, ct);
+        var getPlayerResult = await playerRepository.GetPlayerByUserIdAsync(userId, ct);
         if (!getPlayerResult.Success  || getPlayerResult.ResultObj == null)
             return getPlayerResult;
         

@@ -15,19 +15,19 @@ public class PlayerRepository : IPlayerRepository
         this.db = db ?? throw new ArgumentNullException(nameof(db));
     }
 
-    public async Task<OperationResult<Player>> GetPlayerByIdAsync(Guid playerId, CancellationToken ct)
+    public async Task<OperationResult<Player>> GetPlayerByUserIdAsync(Guid userId, CancellationToken ct)
     {
         var operation = new Func<Task<OperationResult<Player>>>(async () =>
         {
-            if (playerId == Guid.Empty)
-                return OperationResult<Player>.Error.Validation("PlayerId не может быть пустым GUID");
-
+            if (userId == Guid.Empty)
+                return OperationResult<Player>.Error.Validation("UserId не может быть пустым GUID");
+            Console.WriteLine($"Поиск player для {userId}");
             var player = await db.Players
                 .AsNoTracking()
-                .FirstOrDefaultAsync(p => p.Id == playerId, ct);
+                .FirstOrDefaultAsync(p => p.UserId == userId, ct);
 
             if (player == null)
-                return OperationResult<Player>.Error.NotFound($"Игрок с ID '{playerId}' не найден");
+                return OperationResult<Player>.Error.NotFound($"Игрок с UserId '{userId}' не найден");
 
             return OperationResult<Player>.Ok(player);
         });
@@ -98,9 +98,10 @@ public class PlayerRepository : IPlayerRepository
                 return OperationResult.Error.AlreadyExists($"ConnectionId '{connectionId}' уже занят");
 
             var player = new Player(userId, roomId, connectionId);
+            Console.WriteLine("Начало создания пользователя");
             await db.Players.AddAsync(player, ct);
             await db.SaveChangesAsync(ct);
-
+            Console.WriteLine($"Для пользователя {userId} создан игрок {player.Id}");
             return OperationResult.Ok();
         });
 

@@ -63,7 +63,7 @@ public class PlayerRepositoryTests
         await context.Players.AddAsync(player);
         await context.SaveChangesAsync();
 
-        var result = await playerRepository.GetPlayerByIdAsync(player.Id, ct);
+        var result = await playerRepository.GetPlayerByUserIdAsync(player.Id, ct);
 
         Multiple(() =>
         {
@@ -81,7 +81,7 @@ public class PlayerRepositoryTests
     {
         var nonExistentId = Guid.NewGuid();
 
-        var result = await playerRepository.GetPlayerByIdAsync(nonExistentId, ct);
+        var result = await playerRepository.GetPlayerByUserIdAsync(nonExistentId, ct);
 
         Multiple(() =>
         {
@@ -93,7 +93,7 @@ public class PlayerRepositoryTests
     [Test]
     public async Task GetPlayerByIdAsync_EmptyId_ReturnsValidationError()
     {
-        var result = await playerRepository.GetPlayerByIdAsync(Guid.Empty, ct);
+        var result = await playerRepository.GetPlayerByUserIdAsync(Guid.Empty, ct);
 
         Multiple(() =>
         {
