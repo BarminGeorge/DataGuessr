@@ -42,27 +42,27 @@ public class RoomManager(
         
         var player = getPlayerResult.ResultObj;
         room.AddPlayer(player);
-
+        Console.WriteLine($"44 {room} : {room.Players.Count}");
         var getUsersResult = await usersRepository.GetUsersByIds([userId], ct);
         if (!getUsersResult.Success || getUsersResult.ResultObj == null)
             return getUsersResult.ConvertToOperationResult<Room>();
         player.SetUserInfo(getUsersResult.ResultObj.First());
-            
+        Console.WriteLine($"49 {room} : {room.Players.Count}");
         var notification = new NewPlayerNotification(player.ToDto());
         var operation = () => notificationService.NotifyGameRoomAsync(roomId, notification);
         var notifyResult = await operation.WithRetry(delay: TimeSpan.FromSeconds(0.15));
         if (!notifyResult.Success)
             return notifyResult.ConvertToOperationResult<Room>();
-        
+        Console.WriteLine($"55 {room} : {room.Players.Count}");
         var updateResult = await roomRepository.UpdateAsync(room, ct);
         if (!updateResult.Success)
             return updateResult.ConvertToOperationResult<Room>();
-        
+        Console.WriteLine($"59 {room} : {room.Players.Count}");
         var usersResult = await usersRepository.GetUsersByIds(room.Players.Select(x => x.UserId), ct);
         if (!usersResult.Success || usersResult.ResultObj == null)
             return usersResult.ConvertToOperationResult<Room>();
         room.FillPlayersWithUserInfo(usersResult.ResultObj);
-        
+        Console.WriteLine($"65 {room} : {room.Players.Count}");
         return OperationResult<Room>.Ok(room);
     }
 
