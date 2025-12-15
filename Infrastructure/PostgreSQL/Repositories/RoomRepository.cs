@@ -68,7 +68,8 @@ public class RoomRepository : IRoomRepository
                 .AsNoTracking()
                 .Where(r => r.Privacy == RoomPrivacy.Public
                     && r.Status == RoomStatus.Available
-                    && r.ClosedAt > DateTime.UtcNow)
+                    && r.ClosedAt > DateTime.UtcNow
+                    && r.Players.Count != r.MaxPlayers)
                 .Include(r => r.Players)
                 .ToListAsync(ct);
             

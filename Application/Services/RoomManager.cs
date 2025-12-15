@@ -86,26 +86,9 @@ public class RoomManager(
     public async Task<OperationResult<Room>> FindOrCreateQuickRoomAsync(Guid userId, CancellationToken ct)
     {
         var availableRoomResult = await roomRepository.GetWaitingPublicRoomsAsync(ct);
-        if (!availableRoomResult.Success || availableRoomResult.ResultObj == null)
+        if (!availableRoomResult.Success || availableRoomResult.ResultObj == null || !availableRoomResult.ResultObj.Any())
             return await CreateRoomAsync(userId, RoomPrivacy.Public, ct);
-        
-        Console.WriteLine($"92 roomManager {availableRoomResult.ResultObj}");
-        var rooms =  availableRoomResult.ResultObj;
-        foreach (var room in rooms)
-        {   
-            Console.WriteLine($"93 roomManager {room.Owner}");
-            var joinRoomResult = await JoinRoomAsync(room.Id, userId, ct);
-            if (!joinRoomResult.Success)
-            {
-                Console.WriteLine($"100 roomManager {joinRoomResult.ErrorMessage}, {joinRoomResult.ErrorType}");
-                continue;
-            }
-                
-            
-            return OperationResult<Room>.Ok(room);
-        }
-
-        return OperationResult<Room>.Error.InternalError("Cannot create or find a room");
+        return OperationResult<Room>.Ok(availableRoomResult.ResultObj.First());
     }
 
     public async Task<OperationResult<IEnumerable<Room>>> GetAvailablePublicRoomsAsync(CancellationToken ct)

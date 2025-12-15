@@ -81,9 +81,18 @@ public partial class AppHub
 
         if (result is { Success: true, ResultObj: not null })
         {
-            await connectionService.AddConnection(Context.ConnectionId, request.UserId, result.ResultObj.Id, ct);
+            var connectionServiceResult = await connectionService.AddConnection(Context.ConnectionId, request.UserId, result.ResultObj.Id, ct);
+            if (!connectionServiceResult.Success)
+                return connectionServiceResult.ConvertToOperationResult<RoomDto>();
+
             await Groups.AddToGroupAsync(Context.ConnectionId, $"room-{result.ResultObj.Id}", ct);
-            return OperationResult<RoomDto>.Ok(result.ResultObj.ToDto());
+            
+            var joinOperation = () => roomManager.JoinRoomAsync(result.ResultObj.Id, request.UserId, ct);
+            var joinResult = await joinOperation.WithRetry(delay: TimeSpan.FromSeconds(0.15));
+            if (!joinResult.Success || joinResult.ResultObj is null)
+                return joinResult.ConvertToOperationResult<RoomDto>();
+            
+            return OperationResult<RoomDto>.Ok(joinResult.ResultObj.ToDto());
         }
 
         return result.ConvertToOperationResult<RoomDto>();
