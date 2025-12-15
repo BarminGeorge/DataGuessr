@@ -92,10 +92,15 @@ public class RoomManager(
         Console.WriteLine($"92 roomManager {availableRoomResult.ResultObj}");
         var rooms =  availableRoomResult.ResultObj;
         foreach (var room in rooms)
-        {
+        {   
+            Console.WriteLine($"93 roomManager {room.Owner}");
             var joinRoomResult = await JoinRoomAsync(room.Id, userId, ct);
             if (!joinRoomResult.Success)
+            {
+                Console.WriteLine($"100 roomManager {joinRoomResult.ErrorMessage}, {joinRoomResult.ErrorType}");
                 continue;
+            }
+                
             
             return OperationResult<Room>.Ok(room);
         }
