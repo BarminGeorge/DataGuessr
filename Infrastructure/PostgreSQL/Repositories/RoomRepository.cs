@@ -69,7 +69,8 @@ public class RoomRepository : IRoomRepository
                 .Where(r => r.Privacy == RoomPrivacy.Public
                     && r.Status == RoomStatus.Available
                     && r.ClosedAt > DateTime.UtcNow
-                    && r.Players.Count != r.MaxPlayers)
+                    && r.Players.Count < r.MaxPlayers)
+                .OrderByDescending(r => r.Players.Count)
                 .Include(r => r.Players)
                 .ToListAsync(ct);
             
