@@ -15,19 +15,19 @@ public class PlayerRepository : IPlayerRepository
         this.db = db ?? throw new ArgumentNullException(nameof(db));
     }
 
-    public async Task<OperationResult<Player>> GetPlayerByIdAsync(Guid playerId, CancellationToken ct)
+    public async Task<OperationResult<Player>> GetPlayerByUserIdAsync(Guid userId, CancellationToken ct)
     {
         var operation = new Func<Task<OperationResult<Player>>>(async () =>
         {
-            if (playerId == Guid.Empty)
-                return OperationResult<Player>.Error.Validation("PlayerId не может быть пустым GUID");
+            if (userId == Guid.Empty)
+                return OperationResult<Player>.Error.Validation("UserId не может быть пустым GUID");
 
             var player = await db.Players
                 .AsNoTracking()
-                .FirstOrDefaultAsync(p => p.Id == playerId, ct);
+                .FirstOrDefaultAsync(p => p.UserId == userId, ct);
 
             if (player == null)
-                return OperationResult<Player>.Error.NotFound($"Игрок с ID '{playerId}' не найден");
+                return OperationResult<Player>.Error.NotFound($"Игрок с UserId '{userId}' не найден");
 
             return OperationResult<Player>.Ok(player);
         });

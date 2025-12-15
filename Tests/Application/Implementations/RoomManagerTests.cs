@@ -61,7 +61,7 @@ public class CreateRoomTests : RoomManagerTests
             .Returns(OperationResult<Room>.Ok(room));
 
         var player = new Player(Guid.NewGuid(), userId, "");
-        A.CallTo(() => PlayerRepository.GetPlayerByIdAsync(A<Guid>._, A<CancellationToken>._))
+        A.CallTo(() => PlayerRepository.GetPlayerByUserIdAsync(A<Guid>._, A<CancellationToken>._))
             .Returns(OperationResult<Player>.Ok(player));
 
         var user = new User("login", "name", new Avatar("file", "mimetype"), "password");
@@ -140,7 +140,7 @@ public class JoinRoomTests : RoomManagerTests
         A.CallTo(() => RoomRepository.GetByIdAsync(roomId, cancellationToken))
             .Returns(OperationResult<Room>.Ok(room));
         
-        A.CallTo(() => PlayerRepository.GetPlayerByIdAsync(userId, cancellationToken))
+        A.CallTo(() => PlayerRepository.GetPlayerByUserIdAsync(userId, cancellationToken))
             .Returns(OperationResult<Player>.Ok(player));
 
         A.CallTo(() => UsersRepository.GetUsersByIds(A<IEnumerable<Guid>>._, cancellationToken))
@@ -192,7 +192,7 @@ public class JoinRoomTests : RoomManagerTests
         A.CallTo(() => RoomRepository.GetByIdAsync(roomId, cancellationToken))
             .Returns(OperationResult<Room>.Ok(room));
         
-        A.CallTo(() => PlayerRepository.GetPlayerByIdAsync(userId, cancellationToken))
+        A.CallTo(() => PlayerRepository.GetPlayerByUserIdAsync(userId, cancellationToken))
             .Returns(OperationResult<Player>.Error.NotFound("Player not found"));
 
         var result = await RoomManager.JoinRoomAsync(roomId, userId, cancellationToken);
@@ -210,7 +210,7 @@ public class JoinRoomTests : RoomManagerTests
         A.CallTo(() => RoomRepository.GetByIdAsync(roomId, cancellationToken))
             .Returns(OperationResult<Room>.Ok(room));
         
-        A.CallTo(() => PlayerRepository.GetPlayerByIdAsync(userId, cancellationToken))
+        A.CallTo(() => PlayerRepository.GetPlayerByUserIdAsync(userId, cancellationToken))
             .Returns(OperationResult<Player>.Ok(player));
         
         A.CallTo(() => NotificationService.NotifyGameRoomAsync(roomId, A<NewPlayerNotification>._))
@@ -237,7 +237,7 @@ public class JoinRoomTests : RoomManagerTests
         A.CallTo(() => RoomRepository.GetByIdAsync(roomId, cancellationToken))
             .Returns(OperationResult<Room>.Ok(privateRoom));
         
-        A.CallTo(() => PlayerRepository.GetPlayerByIdAsync(userId, cancellationToken))
+        A.CallTo(() => PlayerRepository.GetPlayerByUserIdAsync(userId, cancellationToken))
             .Returns(OperationResult<Player>.Ok(player));
         
         A.CallTo(() => UsersRepository.GetPlayerNameByIdAsync(userId, cancellationToken))
@@ -320,7 +320,7 @@ public class LeaveRoomTests : RoomManagerTests
 
         A.CallTo(() => RoomRepository.GetByIdAsync(roomId, cancellationToken))
             .MustHaveHappenedOnceExactly();
-        A.CallTo(() => PlayerRepository.GetPlayerByIdAsync(A<Guid>._, A<CancellationToken>._))
+        A.CallTo(() => PlayerRepository.GetPlayerByUserIdAsync(A<Guid>._, A<CancellationToken>._))
             .MustNotHaveHappened();
         A.CallTo(() => NotificationService.NotifyGameRoomAsync(A<Guid>._, A<PlayerLeavedNotification>._))
             .MustNotHaveHappened();
@@ -335,7 +335,7 @@ public class LeaveRoomTests : RoomManagerTests
 
         A.CallTo(() => RoomRepository.GetByIdAsync(roomId, cancellationToken))
             .Returns(OperationResult<Room>.Ok(room));
-        A.CallTo(() => PlayerRepository.GetPlayerByIdAsync(userId, cancellationToken))
+        A.CallTo(() => PlayerRepository.GetPlayerByUserIdAsync(userId, cancellationToken))
             .Returns(OperationResult<Player>.Error.NotFound(errorMessage));
         
         var result = await RoomManager.LeaveRoomAsync(roomId, userId, cancellationToken);
@@ -348,7 +348,7 @@ public class LeaveRoomTests : RoomManagerTests
         
         A.CallTo(() => RoomRepository.GetByIdAsync(roomId, cancellationToken))
             .MustHaveHappenedOnceExactly();
-        A.CallTo(() => PlayerRepository.GetPlayerByIdAsync(userId, cancellationToken))
+        A.CallTo(() => PlayerRepository.GetPlayerByUserIdAsync(userId, cancellationToken))
             .MustHaveHappenedOnceExactly();
         A.CallTo(() => NotificationService.NotifyGameRoomAsync(A<Guid>._, A<PlayerLeavedNotification>._))
             .MustNotHaveHappened();
@@ -363,7 +363,7 @@ public class LeaveRoomTests : RoomManagerTests
 
         A.CallTo(() => RoomRepository.GetByIdAsync(roomId, cancellationToken))
             .Returns(OperationResult<Room>.Ok(room));
-        A.CallTo(() => PlayerRepository.GetPlayerByIdAsync(userId, cancellationToken))
+        A.CallTo(() => PlayerRepository.GetPlayerByUserIdAsync(userId, cancellationToken))
             .Returns(OperationResult<Player>.Ok(player));
         A.CallTo(() => NotificationService.NotifyGameRoomAsync(roomId, A<PlayerLeavedNotification>._))
             .Returns(OperationResult.Error.InternalError(notificationError));
@@ -377,7 +377,7 @@ public class LeaveRoomTests : RoomManagerTests
         });
         
         A.CallTo(() => RoomRepository.GetByIdAsync(roomId, cancellationToken)).MustHaveHappenedOnceExactly();
-        A.CallTo(() => PlayerRepository.GetPlayerByIdAsync(userId, cancellationToken)).MustHaveHappenedOnceExactly();
+        A.CallTo(() => PlayerRepository.GetPlayerByUserIdAsync(userId, cancellationToken)).MustHaveHappenedOnceExactly();
         A.CallTo(() => NotificationService.NotifyGameRoomAsync(roomId, A<PlayerLeavedNotification>._)).MustHaveHappened();
         A.CallTo(() => RoomRepository.UpdateAsync(A<Room>._, A<CancellationToken>._)).MustNotHaveHappened();
     }
@@ -389,7 +389,7 @@ public class LeaveRoomTests : RoomManagerTests
 
         A.CallTo(() => RoomRepository.GetByIdAsync(roomId, cancellationToken))
             .Returns(OperationResult<Room>.Ok(room));
-        A.CallTo(() => PlayerRepository.GetPlayerByIdAsync(userId, cancellationToken))
+        A.CallTo(() => PlayerRepository.GetPlayerByUserIdAsync(userId, cancellationToken))
             .Returns(OperationResult<Player>.Ok(player));
         A.CallTo(() => NotificationService.NotifyGameRoomAsync(roomId, A<PlayerLeavedNotification>._))
             .Returns(OperationResult.Ok());
@@ -405,7 +405,7 @@ public class LeaveRoomTests : RoomManagerTests
         });
         
         A.CallTo(() => RoomRepository.GetByIdAsync(roomId, cancellationToken)).MustHaveHappenedOnceExactly();
-        A.CallTo(() => PlayerRepository.GetPlayerByIdAsync(userId, cancellationToken)).MustHaveHappenedOnceExactly();
+        A.CallTo(() => PlayerRepository.GetPlayerByUserIdAsync(userId, cancellationToken)).MustHaveHappenedOnceExactly();
         
         A.CallTo(() => NotificationService.NotifyGameRoomAsync(
             roomId, 
@@ -424,7 +424,7 @@ public class LeaveRoomTests : RoomManagerTests
 
         A.CallTo(() => RoomRepository.GetByIdAsync(roomId, cancellationToken))
             .Returns(OperationResult<Room>.Ok(room));
-        A.CallTo(() => PlayerRepository.GetPlayerByIdAsync(userId, cancellationToken))
+        A.CallTo(() => PlayerRepository.GetPlayerByUserIdAsync(userId, cancellationToken))
             .Returns(OperationResult<Player>.Ok(player));
         A.CallTo(() => NotificationService.NotifyGameRoomAsync(roomId, A<PlayerLeavedNotification>._))
             .Returns(OperationResult.Ok());
@@ -441,7 +441,7 @@ public class LeaveRoomTests : RoomManagerTests
         
         A.CallTo(() => RoomRepository.GetByIdAsync(roomId, cancellationToken))
             .MustHaveHappenedOnceExactly();
-        A.CallTo(() => PlayerRepository.GetPlayerByIdAsync(userId, cancellationToken))
+        A.CallTo(() => PlayerRepository.GetPlayerByUserIdAsync(userId, cancellationToken))
             .MustHaveHappenedOnceExactly();
         A.CallTo(() => NotificationService.NotifyGameRoomAsync(roomId, A<PlayerLeavedNotification>._))
             .MustHaveHappenedOnceExactly();
@@ -454,7 +454,7 @@ public class LeaveRoomTests : RoomManagerTests
     {
         A.CallTo(() => RoomRepository.GetByIdAsync(roomId, cancellationToken))
             .Returns(OperationResult<Room>.Ok(room));
-        A.CallTo(() => PlayerRepository.GetPlayerByIdAsync(userId, cancellationToken))
+        A.CallTo(() => PlayerRepository.GetPlayerByUserIdAsync(userId, cancellationToken))
             .Returns(OperationResult<Player>.Ok(player));
         
         A.CallTo(() => NotificationService.NotifyGameRoomAsync(roomId, A<PlayerLeavedNotification>._))
