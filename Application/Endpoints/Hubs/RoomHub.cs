@@ -15,9 +15,10 @@ public partial class AppHub
             return OperationResult<RoomDto>.Error.Validation(error);
         
         var result = await roomManager.CreateRoomAsync(request.UserId, request.Privacy, ct, request.Password, request.MaxPlayers);
-        Console.WriteLine(result);
+        
         if (result is { Success: true, ResultObj: not null })
         {
+            Console.WriteLine($"18hub {result.ResultObj.Players.Count}");
             var connectionServiceResult = await connectionService.AddConnection(Context.ConnectionId, request.UserId, result.ResultObj.Id, ct);
             if (!connectionServiceResult.Success)
                 return connectionServiceResult.ConvertToOperationResult<RoomDto>();
