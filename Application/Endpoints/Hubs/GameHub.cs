@@ -19,7 +19,7 @@ public partial class AppHub
             request.UserId,
             request.Mode,
             request.CountQuestions,
-            request.QuestionDuration,
+            TimeSpan.FromSeconds(request.QuestionDuration),
             ct);
 
         return result is { Success: true, ResultObj: not null }

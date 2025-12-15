@@ -37,7 +37,7 @@ public class GameHubTests: HubTests
         
         await HubConnection.StartAsync();
         var result = await HubConnection.InvokeAsync<OperationResult<GameDto>>("CreateGame", 
-                new CreateGameRequest(userId, roomId, gameMode, questionsCount, questionDuraction),
+                new CreateGameRequest(userId, roomId, gameMode, questionsCount, questionDuraction.Seconds),
             CancellationToken.None);
         
         Assert.Multiple(() =>
@@ -72,7 +72,7 @@ public class GameHubTests: HubTests
         
         await HubConnection.StartAsync();
         var result = await HubConnection.InvokeAsync<OperationResult<GameDto>>("CreateGame", 
-            new CreateGameRequest(userId, roomId, gameMode, invalidQuestionsCount, questionDuraction),
+            new CreateGameRequest(userId, roomId, gameMode, invalidQuestionsCount, questionDuraction.Seconds),
             CancellationToken.None);
 
         Assert.Multiple(() =>

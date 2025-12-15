@@ -18,7 +18,7 @@ public record CreateGameRequest(
     Guid RoomId, 
     GameMode Mode, 
     int CountQuestions, 
-    TimeSpan QuestionDuration);
+    int QuestionDuration);
 
 public record StartGameRequest(Guid UserId, Guid RoomId);
 public record FinishGameRequest(Guid UserId, Guid RoomId);
