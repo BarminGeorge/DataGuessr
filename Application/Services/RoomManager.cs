@@ -41,8 +41,6 @@ public class RoomManager(
             return getPlayerResult.ConvertToOperationResult<Room>();
         
         var player = getPlayerResult.ResultObj;
-        Console.WriteLine($"43 {room.Players.Count}");
-        room.AddPlayer(player);
         Console.WriteLine($"46 {room.Players.Count}");
         var getUsersResult = await usersRepository.GetUsersByIds([userId], ct);
         if (!getUsersResult.Success || getUsersResult.ResultObj == null)
@@ -55,10 +53,6 @@ public class RoomManager(
         if (!notifyResult.Success)
             return notifyResult.ConvertToOperationResult<Room>();
         Console.WriteLine($"57 {room.Players.Count}");
-        var updateResult = await roomRepository.UpdateAsync(room, ct);
-        if (!updateResult.Success)
-            return updateResult.ConvertToOperationResult<Room>();
-        Console.WriteLine($"60 {room.Players.Count}");
         var usersResult = await usersRepository.GetUsersByIds(room.Players.Select(x => x.UserId), ct);
         if (!usersResult.Success || usersResult.ResultObj == null)
             return usersResult.ConvertToOperationResult<Room>();
