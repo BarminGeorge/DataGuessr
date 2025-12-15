@@ -23,7 +23,7 @@ public class RoomManager(
         if (!addRoomResult.Success)
             return addRoomResult.ConvertToOperationResult<Room>();
         
-        return await JoinRoomAsync(room.Id, userId, ct, password);
+        return OperationResult<Room>.Ok(room);
     }
 
     public async Task<OperationResult<Room>> JoinRoomAsync(Guid roomId, Guid userId, CancellationToken ct, string? password = null)
