@@ -59,7 +59,10 @@ public static class UserEndpoints
     private static async Task<IResult> CreateGuest([FromForm] CreateGuestRequest request, 
         [FromServices] IUserService userService, CancellationToken ct)
     {
-        return (await userService.CreateGuest(request.PlayerName, request.Avatar, ct))
-            .ToResult();
+        var result = await userService.CreateGuest(request.PlayerName, request.Avatar, ct);
+        
+        return result is { Success: true, ResultObj: not null }
+            ? Results.Ok(result.ResultObj.ToDto()) 
+            : result.ToResult();
     }
 }
