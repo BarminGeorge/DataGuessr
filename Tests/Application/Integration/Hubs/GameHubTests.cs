@@ -159,7 +159,7 @@ public class GameHubTests: HubTests
         Assert.Multiple(() =>
         {
             Assert.That(result.ResultObj.Id, Is.EqualTo(room.Id));
-            Assert.That(result.ResultObj.Host, Is.EqualTo(userId));
+            Assert.That(result.ResultObj.OwnerId, Is.EqualTo(userId));
         });
     }
     

@@ -59,7 +59,7 @@ public partial class AppHub
         if (await this.ValidateRequestAsync(request, ct) is { } error)
             return OperationResult.Error.Validation(error);
         
-        var result = await roomManager.LeaveRoomAsync(request.UserId, request.RoomId, ct);
+        var result = await roomManager.LeaveRoomAsync(request.RoomId, request.UserId, ct);
         
         if (result.Success)
         {
