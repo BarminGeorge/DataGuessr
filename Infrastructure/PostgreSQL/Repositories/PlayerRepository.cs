@@ -98,7 +98,7 @@ public class PlayerRepository : IPlayerRepository
                 return OperationResult.Error.AlreadyExists($"ConnectionId '{connectionId}' уже занят");
 
             var player = new Player(userId, roomId, connectionId);
-            
+            Console.WriteLine("Начало создания пользователя");
             await db.Players.AddAsync(player, ct);
             await db.SaveChangesAsync(ct);
             Console.WriteLine($"Для пользователя {userId} создан игрок {player.Id}");
