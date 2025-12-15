@@ -89,6 +89,7 @@ public class RoomManager(
         if (!availableRoomResult.Success || availableRoomResult.ResultObj == null)
             return await CreateRoomAsync(userId, RoomPrivacy.Public, ct);
         
+        Console.WriteLine($"92 roomManager {availableRoomResult.ResultObj}");
         var rooms =  availableRoomResult.ResultObj;
         foreach (var room in rooms)
         {

@@ -71,7 +71,8 @@ public class RoomRepository : IRoomRepository
                     && r.ClosedAt > DateTime.UtcNow)
                 .Include(r => r.Players)
                 .ToListAsync(ct);
-
+            
+            Console.WriteLine($"74 roomRep {rooms.Count}");
             return OperationResult<IEnumerable<Room>>.Ok(rooms);
         });
 
