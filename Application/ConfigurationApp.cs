@@ -1,7 +1,9 @@
 using Application.Endpoints;
 using Application.EndPoints;
 using Application.Endpoints.Hubs;
+using Infrastructure.PostgreSQL;
 using Microsoft.AspNetCore.CookiePolicy;
+using Microsoft.EntityFrameworkCore;
 
 namespace Application;
 
@@ -35,6 +37,12 @@ public static class ConfigurationApp
         app.UseAntiforgery();
 
 //app.UseHangfireDashboard("/hangfire");
+
+        using (var scope = app.Services.CreateScope())
+        {
+            var dbContext = scope.ServiceProvider.GetRequiredService<AppDbContext>();
+            dbContext.Database.Migrate();
+        }
 
         app.AddMappedEndPoints();
         app.MapControllers();
