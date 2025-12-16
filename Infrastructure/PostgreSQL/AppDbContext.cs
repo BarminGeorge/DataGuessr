@@ -107,6 +107,9 @@ public class AppDbContext : DbContext, IDataContext
             entity.Property(r => r.MaxPlayers).IsRequired();
             entity.Property(r => r.Password).HasMaxLength(128);
             entity.Property(r => r.ClosedAt).IsRequired();
+            entity.Property(r => r.InviteCode)
+                .IsRequired()
+                .HasMaxLength(50);
 
             entity.HasMany(r => r.Players)
                 .WithOne()
@@ -118,6 +121,7 @@ public class AppDbContext : DbContext, IDataContext
                 .HasForeignKey(g => g.RoomId)
                 .OnDelete(DeleteBehavior.Cascade);
 
+            entity.HasIndex(r => r.InviteCode).IsUnique();
             entity.HasIndex(r => r.Status);
             entity.HasIndex(r => r.ClosedAt);
         });
@@ -176,7 +180,6 @@ public class AppDbContext : DbContext, IDataContext
             entity.Property(g => g.QuestionsCount).IsRequired();
             entity.Property(g => g.QuestionDuration).IsRequired();
 
-            // CurrentStatistic как JSON (EF сам сериализует/десериализует)
             entity.Property(g => g.CurrentStatistic)
                 .HasColumnType("jsonb")
                 .IsRequired(false);
@@ -230,7 +233,6 @@ public class AppDbContext : DbContext, IDataContext
                 .HasColumnType("jsonb")
                 .IsRequired();
 
-            // Один ответ на вопрос от одного игрока в игре
             entity.HasIndex(pa => new { pa.GameId, pa.QuestionId, pa.PlayerId }).IsUnique();
 
             entity.HasIndex(pa => pa.GameId);

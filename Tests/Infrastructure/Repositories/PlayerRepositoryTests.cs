@@ -39,9 +39,9 @@ public class PlayerRepositoryTests
         return new User(login, playerName, avatar, "hashedPassword123");
     }
 
-    private Room CreateTestRoom(Guid ownerId, RoomPrivacy privacy = RoomPrivacy.Public, int maxPlayers = 4)
+    private Room CreateTestRoom(Guid ownerId, RoomPrivacy privacy = RoomPrivacy.Public, int maxPlayers = 4, string inviteCode = "aaa")
     {
-        return new Room(ownerId, privacy, maxPlayers);
+        return new Room(ownerId, privacy, maxPlayers, inviteCode);
     }
 
     private Player CreateTestPlayer(Guid userId, Guid roomId, string connectionId = "conn123")

@@ -60,6 +60,33 @@ public class RoomRepository : IRoomRepository
         return await operation.WithRetry(maxRetries: 3, delay: retryDelay);
     }
 
+
+    public async Task<OperationResult<Room>> GetByInviteCodeAsync(string inviteCode, CancellationToken ct)
+    {
+        var operation = new Func<Task<OperationResult<Room>>>(async () =>
+        {
+            if (string.IsNullOrWhiteSpace(inviteCode))
+                return OperationResult<Room>.Error.Validation("Код приглашения не может быть пустым");
+
+            var room = await db.Rooms
+                .Include(r => r.Players)
+                .Include(r => r.Games)
+                .AsNoTracking()
+                .FirstOrDefaultAsync(r => r.InviteCode == inviteCode, ct);
+
+            if (room == null)
+                return OperationResult<Room>.Error.NotFound($"Комната с кодом приглашения '{inviteCode}' не найдена");
+
+            if (room.IsExpired)
+                return OperationResult<Room>.Error.NotFound("Комната истекла и больше недоступна");
+
+            return OperationResult<Room>.Ok(room);
+        });
+
+        return await operation.WithRetry(maxRetries: 3, delay: retryDelay);
+    }
+
+
     public async Task<OperationResult<IEnumerable<Room>>> GetWaitingPublicRoomsAsync(CancellationToken ct)
     {
         var operation = new Func<Task<OperationResult<IEnumerable<Room>>>>(async () =>

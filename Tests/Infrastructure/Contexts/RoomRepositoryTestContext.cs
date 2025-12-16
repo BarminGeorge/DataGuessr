@@ -83,10 +83,14 @@ public class RoomRepositoryTestContext : DbContext, IDataContext
             entity.Property(r => r.MaxPlayers).IsRequired();
             entity.Property(r => r.Password).HasMaxLength(128);
             entity.Property(r => r.ClosedAt).IsRequired();
+            entity.Property(r => r.InviteCode)
+                .IsRequired()
+                .HasMaxLength(50);
             entity.HasMany(r => r.Players)
                 .WithOne()
                 .HasForeignKey(p => p.RoomId)
                 .OnDelete(DeleteBehavior.Cascade);
+            entity.HasIndex(r => r.InviteCode).IsUnique();
             entity.HasIndex(r => r.Status);
             entity.HasIndex(r => r.ClosedAt);
         });
