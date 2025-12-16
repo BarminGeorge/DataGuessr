@@ -20,7 +20,7 @@ public class CreateGameRequestValidator : AbstractValidator<CreateGameRequest>
             .InclusiveBetween(1, 100).WithMessage("Number of questions must be between 1 and 100");
 
         RuleFor(x => x.QuestionDuration)
-            .GreaterThan(TimeSpan.Zero).WithMessage("Question duration must be positive")
-            .LessThanOrEqualTo(TimeSpan.FromMinutes(5)).WithMessage("Question duration cannot exceed 5 minutes");
+            .GreaterThan(0).WithMessage("Question duration must be positive")
+            .LessThanOrEqualTo(300).WithMessage("Question duration cannot exceed 5 minutes");
     }
 }

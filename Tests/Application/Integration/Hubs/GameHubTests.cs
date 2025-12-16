@@ -37,7 +37,7 @@ public class GameHubTests: HubTests
         
         await HubConnection.StartAsync();
         var result = await HubConnection.InvokeAsync<OperationResult<GameDto>>("CreateGame", 
-                new CreateGameRequest(userId, roomId, gameMode, questionsCount, questionDuraction),
+                new CreateGameRequest(userId, roomId, gameMode, questionsCount, questionDuraction.Seconds),
             CancellationToken.None);
         
         Assert.Multiple(() =>
@@ -48,7 +48,7 @@ public class GameHubTests: HubTests
         Assert.Multiple(() =>
         {
             Assert.That(result.ResultObj.QuestionsCount, Is.EqualTo(questionsCount));
-            Assert.That(result.ResultObj.QuestionDuration, Is.EqualTo(questionDuraction));
+            Assert.That(result.ResultObj.QuestionDuration, Is.EqualTo(questionDuraction.Seconds));
             Assert.That(result.ResultObj.Mode, Is.EqualTo(gameMode));
             Assert.That(result.ResultObj.Status, Is.EqualTo(GameStatus.NotStarted));
         });
@@ -72,7 +72,7 @@ public class GameHubTests: HubTests
         
         await HubConnection.StartAsync();
         var result = await HubConnection.InvokeAsync<OperationResult<GameDto>>("CreateGame", 
-            new CreateGameRequest(userId, roomId, gameMode, invalidQuestionsCount, questionDuraction),
+            new CreateGameRequest(userId, roomId, gameMode, invalidQuestionsCount, questionDuraction.Seconds),
             CancellationToken.None);
 
         Assert.Multiple(() =>
@@ -159,7 +159,7 @@ public class GameHubTests: HubTests
         Assert.Multiple(() =>
         {
             Assert.That(result.ResultObj.Id, Is.EqualTo(room.Id));
-            Assert.That(result.ResultObj.Host, Is.EqualTo(userId));
+            Assert.That(result.ResultObj.OwnerId, Is.EqualTo(userId));
         });
     }
     

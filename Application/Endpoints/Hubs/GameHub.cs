@@ -19,7 +19,7 @@ public partial class AppHub
             request.UserId,
             request.Mode,
             request.CountQuestions,
-            request.QuestionDuration,
+            TimeSpan.FromSeconds(request.QuestionDuration),
             ct);
 
         return result is { Success: true, ResultObj: not null }
@@ -42,8 +42,7 @@ public partial class AppHub
         if (await this.ValidateRequestAsync(request, ct) is { } error)
             return OperationResult.Error.Validation(error);
 
-        return await gameManager.SubmitAnswerAsync(request.GameId, request.QuestionId, request.PlayerId, request.Answer,
-            ct);
+        return await gameManager.SubmitAnswerAsync(request.GameId, request.QuestionId, request.PlayerId, request.Answer, ct);
     }
 
     public async Task<OperationResult<RoomDto>> FinishGame(FinishGameRequest request)

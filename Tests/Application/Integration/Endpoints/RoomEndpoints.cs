@@ -41,15 +41,15 @@ public class RoomEndpointsIntegrationTests
     [Test]
     public async Task GetRoomPrivacy_WhenRoomExists_ReturnsPrivacyInfo()
     {
-        var roomId = Guid.NewGuid();
+        var inviteCode = "abc";
         const RoomPrivacy expectedPrivacy = RoomPrivacy.Public;
         
-        A.CallTo(() => roomManagerFake.GetRoomPrivacyAsync(roomId, A<CancellationToken>._))
+        A.CallTo(() => roomManagerFake.GetRoomPrivacyAsync(inviteCode, A<CancellationToken>._))
             .Returns(OperationResult<RoomPrivacy>.Ok(expectedPrivacy));
 
         using var client = factory.CreateClient();
 
-        var response = await client.GetAsync($"/api/rooms/{roomId}");
+        var response = await client.GetAsync($"/api/rooms/{inviteCode}");
         var content = await response.Content.ReadAsStringAsync();
 
         Assert.Multiple(() =>
@@ -58,21 +58,21 @@ public class RoomEndpointsIntegrationTests
             Assert.That(content.ToLower(), Does.Contain("public"));
         });
 
-        A.CallTo(() => roomManagerFake.GetRoomPrivacyAsync(roomId, A<CancellationToken>._))
+        A.CallTo(() => roomManagerFake.GetRoomPrivacyAsync(inviteCode, A<CancellationToken>._))
             .MustHaveHappenedOnceExactly();
     }
 
     [Test]
     public async Task GetRoomPrivacy_WhenRoomDoesNotExist_ReturnsNotFound()
     {
-        var roomId = Guid.NewGuid();
+        const string inviteCode = "abc";
         
-        A.CallTo(() => roomManagerFake.GetRoomPrivacyAsync(roomId, A<CancellationToken>._))
+        A.CallTo(() => roomManagerFake.GetRoomPrivacyAsync(inviteCode, A<CancellationToken>._))
             .Returns(OperationResult<RoomPrivacy>.Error.NotFound("не нашел"));
 
         using var client = factory.CreateClient();
 
-        var response = await client.GetAsync($"/api/rooms/{roomId}");
+        var response = await client.GetAsync($"/api/rooms/{inviteCode}");
         var content = await response.Content.ReadAsStringAsync();
 
         Assert.Multiple(() =>
@@ -81,7 +81,7 @@ public class RoomEndpointsIntegrationTests
             Assert.That(content.ToLower(), Does.Contain("не нашел"));
         });
 
-        A.CallTo(() => roomManagerFake.GetRoomPrivacyAsync(roomId, A<CancellationToken>._))
+        A.CallTo(() => roomManagerFake.GetRoomPrivacyAsync(inviteCode, A<CancellationToken>._))
             .MustHaveHappenedOnceExactly();
     }
 }

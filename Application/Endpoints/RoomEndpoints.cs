@@ -1,5 +1,6 @@
 using Application.Extensions;
 using Application.Interfaces;
+using Application.Requests;
 using Microsoft.AspNetCore.Mvc;
 using SharpGrip.FluentValidation.AutoValidation.Endpoints.Extensions;
 
@@ -13,15 +14,15 @@ public static class RoomEndpoints
             
         group.AddFluentValidationAutoValidation();
         
-        group.MapGet("{roomId:guid}", GetRoomPrivacy);
+        group.MapGet("privacy", GetRoomPrivacy);
         
         return app;
     }
 
-    private static async Task<IResult> GetRoomPrivacy([FromRoute] Guid roomId, 
+    private static async Task<IResult> GetRoomPrivacy(GetRoomPrivacyRequest request,
         [FromServices] IRoomManager roomManager, HttpContext context, CancellationToken ct)
     {
-        return (await roomManager.GetRoomPrivacyAsync(roomId, ct))
+        return (await roomManager.GetRoomPrivacyAsync(request.InviteCode, ct))
             .ToResult();
     }
 }

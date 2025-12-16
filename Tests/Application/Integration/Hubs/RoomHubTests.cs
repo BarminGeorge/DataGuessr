@@ -33,7 +33,7 @@ public class RoomHubTests: HubTests
             Assert.That(result.ResultObj, Is.Not.Null);
         });
         
-        Assert.That(result.ResultObj.Host, Is.EqualTo(userId));
+        Assert.That(result.ResultObj.OwnerId, Is.EqualTo(userId));
         
         A.CallTo(() =>
             RoomManagerFake.CreateRoomAsync(userId, room.Privacy, A<CancellationToken>._, room.Password,

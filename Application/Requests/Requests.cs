@@ -18,9 +18,10 @@ public record CreateGameRequest(
     Guid RoomId, 
     GameMode Mode, 
     int CountQuestions, 
-    TimeSpan QuestionDuration);
+    int QuestionDuration);
 
 public record StartGameRequest(Guid UserId, Guid RoomId);
 public record FinishGameRequest(Guid UserId, Guid RoomId);
 public record SubmitAnswerRequest(Guid GameId, Guid QuestionId, Guid PlayerId, Answer Answer);
 public record KickPlayerRequest(Guid UserId, Guid RoomId, Guid RemovedPlayerId);
+public record GetRoomPrivacyRequest(string InviteCode);
