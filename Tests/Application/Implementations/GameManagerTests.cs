@@ -53,7 +53,7 @@ public class StartNewGameTests : GameManagerTests
         ct = CancellationToken.None;
         
         existingGame = new Game(roomId, GameMode.DefaultMode, TimeSpan.FromMilliseconds(100), 5);
-        validRoom = new Room(userId, RoomPrivacy.Public, 10);
+        validRoom = new Room(userId, RoomPrivacy.Public, 10, "aaa");
     }
     
     [Test]
@@ -76,7 +76,7 @@ public class StartNewGameTests : GameManagerTests
     [Test]
     public async Task StartNewGameAsync_WhenUserIsNotOwner_ReturnsErrorAndDoesNotStartGame()
     {
-        var notOwnerRoom = new Room(Guid.NewGuid(), RoomPrivacy.Public, 10);
+        var notOwnerRoom = new Room(Guid.NewGuid(), RoomPrivacy.Public, 10, "aaa");
         
         A.CallTo(() => RoomRepository.GetByIdAsync(roomId, ct))
             .Returns(OperationResult<Room>.Ok(notOwnerRoom));
@@ -100,7 +100,7 @@ public class StartNewGameTests : GameManagerTests
     [Test]
     public async Task StartNewGameAsync_WhenNotEnoughPlayers_ReturnsError()
     {
-        var singlePlayerRoom = new Room(Guid.NewGuid(), RoomPrivacy.Public, 10);
+        var singlePlayerRoom = new Room(Guid.NewGuid(), RoomPrivacy.Public, 10, "aaa");
         
         A.CallTo(() => RoomRepository.GetByIdAsync(roomId, ct))
             .Returns(OperationResult<Room>.Ok(singlePlayerRoom));
@@ -272,7 +272,7 @@ public class CreateNewGameTests : GameManagerTests
 
         testQuestions = new List<Question>();
 
-        validRoom = new Room(userId, RoomPrivacy.Public, 10);
+        validRoom = new Room(userId, RoomPrivacy.Public, 10, "aaa");
     }
     
     [Test]
@@ -338,7 +338,7 @@ public class CreateNewGameTests : GameManagerTests
     [Test]
     public async Task CreateNewGameAsync_WhenUserIsNotOwner_ReturnsError()
     {
-        var notOwnerRoom = new Room(Guid.NewGuid(), RoomPrivacy.Public, 10);
+        var notOwnerRoom = new Room(Guid.NewGuid(), RoomPrivacy.Public, 10, "aaa");
         A.CallTo(() => RoomRepository.GetByIdAsync(roomId, ct))
             .Returns(OperationResult<Room>.Ok(notOwnerRoom));
         
@@ -477,7 +477,7 @@ public class FinishGameTests : GameManagerTests
         userId = Guid.NewGuid();
         ct = CancellationToken.None;
 
-        validRoom = new Room(userId, RoomPrivacy.Public, 10);
+        validRoom = new Room(userId, RoomPrivacy.Public, 10, "aaa");
     }
 
     [Test]
@@ -526,7 +526,7 @@ public class FinishGameTests : GameManagerTests
     public async Task FinishGameAsync_WhenUserIsNotOwner_ReturnsError()
     {
         var notOwnerUserId = Guid.NewGuid();
-        var roomWithDifferentOwner = new Room(Guid.NewGuid(), RoomPrivacy.Public, 10);
+        var roomWithDifferentOwner = new Room(Guid.NewGuid(), RoomPrivacy.Public, 10, "aaa");
 
         A.CallTo(() => RoomRepository.GetByIdAsync(roomId, ct))
             .Returns(OperationResult<Room>.Ok(roomWithDifferentOwner));
@@ -619,7 +619,7 @@ public class FinishGameTests : GameManagerTests
     {
         var ownerId = Guid.NewGuid();
         var nonOwnerId = Guid.NewGuid();
-        var room = new Room(ownerId, RoomPrivacy.Public, 10);
+        var room = new Room(ownerId, RoomPrivacy.Public, 10, "aaa");
 
         A.CallTo(() => RoomRepository.GetByIdAsync(roomId, ct))
             .Returns(OperationResult<Room>.Ok(room));

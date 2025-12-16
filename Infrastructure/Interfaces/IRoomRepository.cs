@@ -10,4 +10,5 @@ public interface IRoomRepository
     Task<OperationResult> AddAsync(Room room, CancellationToken ct);
     Task<OperationResult> UpdateAsync(Room room, CancellationToken ct);
     Task<OperationResult<Game>> GetCurrentGameAsync(Guid roomId, CancellationToken ct);
+    Task<OperationResult<Room>> GetByInviteCodeAsync(string inviteCode, CancellationToken ct);
 }

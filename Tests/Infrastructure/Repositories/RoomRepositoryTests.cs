@@ -180,7 +180,7 @@ public class RoomRepositoryTests
         await dbContext.SaveChangesAsync();
 
         var validRoom = CreateTestRoom(user.Id, RoomPrivacy.Public);
-        var expiredRoom = new Room(user.Id, RoomPrivacy.Public, 4, null, TimeSpan.FromHours(-1));
+        var expiredRoom = new Room(user.Id, RoomPrivacy.Public, 4, "aaa", null, TimeSpan.FromHours(-1));
 
         await dbContext.Rooms.AddRangeAsync(validRoom, expiredRoom);
         await dbContext.SaveChangesAsync();
@@ -298,7 +298,7 @@ public class RoomRepositoryTests
     [Test]
     public async Task UpdateAsync_EmptyId_ReturnsValidationError()
     {
-        var room = new Room(Guid.NewGuid(), RoomPrivacy.Public, 4);
+        var room = new Room(Guid.NewGuid(), RoomPrivacy.Public, 4, "aaa");
 
         typeof(Room).GetProperty("Id")?.SetValue(room, Guid.Empty);
 

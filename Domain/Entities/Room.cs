@@ -13,6 +13,7 @@ public class Room : IEntity<Guid>
     public Guid Owner { get; private set; }
     public RoomPrivacy Privacy { get; private set; }
     public string? Password { get; private set; }
+    public string InviteCode { get; private set; }
     public RoomStatus Status { get; private set; }
     public int MaxPlayers { get; private set; }
 
@@ -20,7 +21,7 @@ public class Room : IEntity<Guid>
 
     protected Room() { }
 
-    public Room(Guid ownerId, RoomPrivacy privacy, int maxPlayers, string? password = null, TimeSpan? ttl = null)
+    public Room(Guid ownerId, RoomPrivacy privacy, int maxPlayers, string inviteCode, string? password = null, TimeSpan? ttl = null)
     {
         Id = Guid.NewGuid();
         Owner = ownerId;
@@ -28,6 +29,7 @@ public class Room : IEntity<Guid>
         Status = RoomStatus.Available;
         Password = password;
         MaxPlayers = maxPlayers;
+        InviteCode = inviteCode;
 
         ClosedAt = DateTime.UtcNow + (ttl ?? TimeSpan.FromDays(1));
     }
