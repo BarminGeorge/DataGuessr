@@ -9,7 +9,7 @@ export interface CreateRoomRequest {
 
 export interface JoinRoomRequest {
     userId: string;
-    roomId: string;
+    inviteCode: string;
     password?: string;
 }
 

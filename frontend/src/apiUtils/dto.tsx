@@ -62,6 +62,7 @@ export interface RoomDto {
     players: PlayerDto[];
     ownerId: string;
     closedAt: string;
+    inviteCode: string;
 }
 
 export interface RoomPrivacyResponse {
