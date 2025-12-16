@@ -112,6 +112,27 @@ public class RoomRepository : IRoomRepository
             if (room == null)
                 return OperationResult.Error.Validation("Комната не может быть null");
 
+            if (string.IsNullOrWhiteSpace(room.InviteCode))
+                return OperationResult.Error.Validation("Код приглашения не может быть пустым");
+
+            if (room.MaxPlayers <= 0)
+                return OperationResult.Error.Validation("MaxPlayers должно быть больше 0");
+
+            var existingRoomId = await db.Rooms
+                .AsNoTracking()
+                .FirstOrDefaultAsync(r => r.Id == room.Id, ct);
+
+            if (existingRoomId != null)
+                return OperationResult.Error.AlreadyExists($"Комната с id '{room.Id}' уже существует");
+
+
+            var existingRoom = await db.Rooms
+                .AsNoTracking()
+                .FirstOrDefaultAsync(r => r.InviteCode == room.InviteCode, ct);
+
+            if (existingRoom != null)
+                return OperationResult.Error.AlreadyExists($"Комната с кодом приглашения '{room.InviteCode}' уже существует");
+
             await db.Rooms.AddAsync(room, ct);
             await db.SaveChangesAsync(ct);
 
@@ -120,6 +141,7 @@ public class RoomRepository : IRoomRepository
 
         return await operation.WithRetry(maxRetries: 3, delay: retryDelay);
     }
+
 
     public async Task<OperationResult> UpdateAsync(Room room, CancellationToken ct)
     {
