@@ -79,13 +79,13 @@ export default function RegistrationPage(props: CurrentAppState) {
                         {validateUsername(playerName)}
                     </span>
                 </div>
-
+                <div className="secondary-container">
                 <input
                     type="file"
                     className="text-input-primary"
                     placeholder={"Выберите аватар"}
                     onChange={(e) => setAvatar(e.target.files && e.target.files[0] ? e.target.files[0] : null)} />
-
+                </div>
 
                 <button className="button-primary"
                     onClick={() => handleRegistration(login, password, playerName, avatar, props.setLoggingStatus, setPage)}>Зарегистрироваться</button>

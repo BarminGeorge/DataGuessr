@@ -355,6 +355,8 @@
 }
 
 
+
+
 /* Property 1=Avatar_with_triangle */
 .Avatar-with-triangle {
 	position: absolute;
@@ -410,4 +412,10 @@
 	top: calc(50% - 80px/2);
 
 	background-color: red;
+}
+
+.content-wrapper {
+    /* Важно: transition должен висеть на элементе постоянно */
+    transition: filter 0.5s ease, opacity 0.5s ease;
+    will-change: filter; /* Оптимизация производительности */
 }

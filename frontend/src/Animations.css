@@ -1,0 +1,253 @@
+/* --- HYPE / TRENDY ANIMATIONS --- */
+:root {
+    --ease-hype: cubic-bezier(0.16, 1, 0.3, 1);
+    --ease-jelly: cubic-bezier(0.34, 1.56, 0.64, 1);
+}
+
+/* 1. Пружинистые кнопки (Jelly Effect) */
+.button-primary {
+    position: relative;
+    overflow: hidden;
+    /* Пружинная физика */
+    transition: transform 0.4s cubic-bezier(0.34, 1.56, 0.64, 1), background-color 0.2s ease, box-shadow 0.2s ease;
+}
+
+    .button-primary:hover {
+        background-color: #312ECB;
+        /* Увеличиваем и добавляем "дорогое" свечение */
+        transform: scale(1.05) translateY(-2px);
+        box-shadow: 0 10px 20px rgba(66, 63, 229, 0.4);
+    }
+
+.button-primary:active {
+    /* Эффект нажатия (сплющивание) */
+    transform: scale(0.95) translateY(0);
+}
+
+/* 2. Поля ввода с "Неоновым" фокусом */
+.text-input-primary {
+    transition: all 0.3s cubic-bezier(0.25, 0.8, 0.25, 1);
+    border: 2px solid transparent;
+}
+
+.text-input-primary:focus {
+    /* Глубокая тень вместо скучной рамки */
+    box-shadow: 0 4px 20px rgba(66, 63, 229, 0.15);
+    border-color: #423FE5;
+    transform: translateY(-1px);
+}
+
+/* 3. Модальные окна: Эффект появления "Snappy" (Резко и четко) */
+@keyframes hypeSlideUp {
+    0% {
+        opacity: 0;
+        transform: translateY(40px) scale(0.9);
+    }
+
+    70% {
+        transform: translateY(-5px) scale(1.01); /* Небольшой перелет вверх */
+    }
+
+    100% {
+        opacity: 1;
+        transform: translateY(0) scale(1);
+    }
+}
+
+.modal-global-container {
+    animation: hypeSlideUp 0.5s cubic-bezier(0.16, 1, 0.3, 1) forwards;
+    /* Сильная тень как в MacOS */
+    box-shadow: 0 25px 50px -12px rgba(0, 0, 0, 0.25);
+}
+
+/* 4. Карточки (Счет и Картинки) - Эффект парения */
+.score-card,
+.picture-xl-container {
+    transition: all 0.4s cubic-bezier(0.175, 0.885, 0.32, 1.275); /* Пружина */
+}
+
+    .score-card:hover,
+    .picture-xl-container:hover {
+        transform: translateY(-8px) scale(1.02);
+        box-shadow: 0 20px 30px rgba(0,0,0,0.08); /* Мягкая тень при поднятии */
+    }
+
+/* 5. Ссылки с подчеркиванием, которое "выезжает" */
+.link-text {
+    text-decoration: none; /* Убираем стандартное */
+    position: relative;
+    transition: color 0.3s ease;
+}
+
+.link-text::after {
+    content: '';
+    position: absolute;
+    width: 0%;
+    height: 2px;
+    bottom: -2px;
+    left: 0;
+    background-color: #423FE5;
+    transition: width 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+}
+
+.link-text:hover::after {
+    width: 100%;
+}
+
+/* 6. Аватарка - Вращение и Зум */
+.avatar-xl {
+    transition: transform 0.5s cubic-bezier(0.34, 1.56, 0.64, 1);
+    border: 4px solid white; /* Белая обводка добавляет контраста */
+}
+
+.avatar-xl:hover {
+    transform: scale(1.1) rotate(5deg);
+}
+
+/* 7. Обновленный БЛЮР (для нового класса content-wrapper) */
+/* Мы переопределяем старый класс .blur, чтобы он использовал filter, 
+   так как backdrop-filter часто глючит с transition на больших блоках */
+
+.blur {
+    /* Если blur применяется к обертке контента */
+    filter: blur(8px) grayscale(20%);
+    pointer-events: none;
+    user-select: none;
+    transform: scale(0.98); /* Чуть отдаляем задний фон */
+}
+
+@keyframes hypePageIn {
+    from {
+        opacity: 0;
+        transform: scale(0.97) translateY(20px);
+        filter: blur(6px);
+    }
+
+    to {
+        opacity: 1;
+        transform: scale(1) translateY(0);
+        filter: blur(0);
+    }
+}
+
+.global-container {
+    animation: hypePageIn 0.7s var(--ease-hype) both;
+}
+
+@keyframes hypeTitle {
+    0% {
+        opacity: 0;
+        transform: translateY(30px) scale(0.95);
+    }
+
+    70% {
+        transform: translateY(-4px) scale(1.01);
+    }
+
+    100% {
+        opacity: 1;
+        transform: translateY(0) scale(1);
+    }
+}
+
+.title-variant-1 {
+    animation: hypeTitle 0.6s var(--ease-hype) 0.1s both;
+}
+
+.title-variant-2 {
+    animation: hypeTitle 0.6s var(--ease-hype) 0.25s both;
+}
+
+.title-variant-3 {
+    animation: hypeTitle 0.6s var(--ease-hype) 0.35s both;
+}
+
+.secondary-text {
+    animation: hypeFadeText 0.6s ease-out 0.5s both;
+}
+
+@keyframes hypeFadeText {
+    from {
+        opacity: 0;
+        transform: translateY(12px);
+    }
+
+    to {
+        opacity: 1;
+        transform: translateY(0);
+    }
+}
+
+
+
+@keyframes hypeControlsIn {
+    from {
+        opacity: 0;
+        transform: translateY(20px) scale(0.98);
+    }
+
+    to {
+        opacity: 1;
+        transform: translateY(0) scale(1);
+    }
+}
+
+
+
+@keyframes hypeFloat {
+    0% {
+        transform: translateY(0);
+    }
+
+    50% {
+        transform: translateY(-6px);
+    }
+
+    100% {
+        transform: translateY(0);
+    }
+}
+
+.score-card,
+.picture-xl-container {
+    animation: hypeFloat 6s ease-in-out infinite;
+}
+
+.blur {
+    transition: filter 0.4s var(--ease-hype), transform 0.4s var(--ease-hype);
+}
+
+.modal {
+    animation: hypeSlideUp 0.5s var(--ease-hype) both;
+}
+
+@keyframes avatarIdleHype {
+    0% {
+        transform: scale(1) rotate(0deg);
+    }
+
+    50% {
+        transform: scale(1.03) rotate(-1deg);
+    }
+
+    100% {
+        transform: scale(1) rotate(0deg);
+    }
+}
+
+.avatar-xl {
+    animation: avatarIdleHype 5s ease-in-out infinite;
+}
+
+    .avatar-xl:hover {
+        animation: none;
+        transform: scale(1.12) rotate(6deg);
+    }
+
+
+html,
+body {
+    width: 100%;
+    height: 100%;
+    overflow-x: hidden;
+}

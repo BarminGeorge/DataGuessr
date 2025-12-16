@@ -50,7 +50,8 @@ export enum RoomPrivacy {
 }
 
 export interface PlayerDto {
-    id: string;
+    playerId: string;
+    userId: string;
     playerName: string;
     avatarUrl: string;
 }

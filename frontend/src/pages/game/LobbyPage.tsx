@@ -111,7 +111,7 @@ function LobbyPageCreatorView(props: CurrentAppState) {
 
                     <div className="down-picture row-column">
                         <div className="centered-aligment">
-                            <div className="title-text-2">Поделись кодом с другом: {props.room.id}</div>
+                            <div className="title-text-2">{props.room.inviteCode}</div>
                             <div className="settings-container">
                                 <div className="settings-element">
                                     <CustomizedRadiosGameMode />
@@ -162,7 +162,7 @@ function LobbyPageGuestView(props: CurrentAppState) {
 
                     <div className="down-picture row-column">
                         <div className="centered-aligment">
-                            <div className="title-text-2">Поделись кодом с другом: {props.room.id}</div>
+                            <div className="title-text-2">{props.room.inviteCode}</div>
                             <div className="settings-container">
                                 <div className="picture-xl-container">
                                     <img

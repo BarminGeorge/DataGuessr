@@ -31,7 +31,8 @@ export default function HomePage(props: CurrentAppState) {
             <div className={`modal centered-vertical-aligment ${checkLogging(props.loggingStatus) ? 'hide' : ''}`}>
                 <EnterModal setLoggingStatus={props.setLoggingStatus} />
             </div>
-            <div className={checkLogging(props.loggingStatus) ? "" : "blur"}>
+
+            <div className={`content-wrapper ${checkLogging(props.loggingStatus) ? "" : "blur"}`}>
 
 
                 <Header variant={props.loggingStatus == LoggingStatus.Logged ?
@@ -47,7 +48,7 @@ export default function HomePage(props: CurrentAppState) {
                         <div className="centered-aligment title-variant-2">
                             Угадывать
                         </div>
-                        <div className="right-aligment  title-variant-3">Время</div>
+                        <div className="right-aligment title-variant-3">Время</div>
                     </div>
 
                     <div className="right-aligment">

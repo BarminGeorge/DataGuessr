@@ -11,7 +11,7 @@ import GameLeaderboard from "./pages/game/GameLeaderboard";
 import GameLeaderboardFinal from "./pages/game/GameLeaderboardFinal";
 import { useEffect, useState } from "react";
 import { gameHubService } from "./apiUtils/HubServices";
-import type { GameDto, RoomDto } from "./apiUtils/dto";
+import type { GameDto, PlayerDto, RoomDto } from "./apiUtils/dto";
 import { in_room } from "./utils/RoomHubUtils";
 
 export enum LoggingStatus {
@@ -37,6 +37,10 @@ export interface CurrentAppState {
 
 };
 
+export function getPlayerId(props: CurrentAppState) {
+    return props.room?.players.find((x: PlayerDto) => x.userId == props.user_id)?.playerId;
+}
+
 export default function App() {
     const { page, setPage } = usePage();
     const [loggingStatus, setLoggingStatus] = useState(LoggingStatus.NotLogged);
@@ -51,13 +55,15 @@ export default function App() {
         });
     }, []);
 
+
+
    
     
     const user_id = localStorage.getItem("user_id");
     // Service Locator think how to kill him 
     const props: CurrentAppState = { loggingStatus, setLoggingStatus, user_id, room, setRoom, game, setGame, page, setPage };
     console.log(props);
-    
+
     useEffect(() => {
         if (!room) return;
 

@@ -1,10 +1,10 @@
 import React, { useEffect, useState } from "react";
 import Header from "../../components/Header";
 import Slider from '@mui/material/Slider';
-import type { CurrentAppState } from "../../App";
+import { getPlayerId, type CurrentAppState } from "../../App";
 import PacmanLoader from "react-spinners/PacmanLoader";
 import { gameHubService } from "../../apiUtils/HubServices";
-import type { QuestionDto } from "../../apiUtils/dto";
+import type { AnswerDto, QuestionDto } from "../../apiUtils/dto";
 import type { NewQuestionNotification } from "../../apiUtils/notifications";
 import fetchImageUrl from "../../components/ImageDownloader";
 
@@ -25,9 +25,37 @@ function LoadingScreen() {
 
 } 
 
-function QuestionScreen(question: NewQuestionNotification) {
+async function sendAnswer(
+    answer: AnswerDto,
+    gameId: string,
+    playerId: string,
+    questionId: string) {
+
+    if (playerId == null)
+        return;
+
+    const result = await gameHubService.submitAnswer({
+        answer,
+        gameId,
+        playerId,
+        questionId
+    });
+    console.log(result);
+
+    if (!result.success || !result.resultObj) {
+        alert("Не удалось ответить");
+        return;
+    }
+}
+
+function QuestionScreen(question: NewQuestionNotification, props: CurrentAppState) {
     const [year, setYear] = useState(1966);
     const [imageSrc, setimageSrc] = useState<string>("src/assets/defaultavatar.jpg");
+
+    if (props.game == null) {
+        return;
+    }
+    const playerId = getPlayerId(props);
 
     useEffect(() => {
         let cancelled = false;
@@ -42,8 +70,6 @@ function QuestionScreen(question: NewQuestionNotification) {
             cancelled = true;
         };
     }, [question.imageUrl]);
-
-
 
 
     return (
@@ -81,6 +107,12 @@ function QuestionScreen(question: NewQuestionNotification) {
                     />
 
                     <span className="accent-text">{year} год</span>
+                    <button className="primary-button"
+                        onClick={() => {
+                            const answer: AnswerDto = { value: year };
+                            sendAnswer(answer, props.game.id, playerId, question.questionId);
+                        }}>
+                    Ответить</button>
                 </div>
             </div>
         </div>
@@ -93,8 +125,9 @@ export default function GameRoundPage(props: CurrentAppState) {
 
     useEffect(() => {
         if (!props.game) return;
-
+        
         const offQuestion = gameHubService.onNewQuestion(data => {
+            console.log(data);
             setQuestion(data);
         });
 
@@ -108,7 +141,7 @@ export default function GameRoundPage(props: CurrentAppState) {
     return (
         <div className="global-container">
             <Header variant="logo-and-timer" />
-            <QuestionScreen {...question} />
+            <QuestionScreen {...question} {...props} />
         </div>
         );
     return (

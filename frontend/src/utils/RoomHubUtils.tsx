@@ -26,7 +26,7 @@ export function in_room(props: CurrentAppState) {
             return {
                 ...prevRoom,
                 ownerId: data.ownerId,
-                players: prevRoom.players.filter(p => p.id !== data.playerId),
+                players: prevRoom.players.filter(p => p.playerId !== data.playerId),
             };
         });
     };
@@ -85,19 +85,19 @@ export async function findRandomRoom(
 
 export async function joinRoomByCode(
     userId: string,
-    roomId: string,
+    inviteCode: string,
     setPage: (page: any) => void,
     room: RoomDto,
     setRoom: (x: any) => void
 ) {
-    if (!roomId) {
+    if (!inviteCode) {
         alert("Введите код комнаты");
         return;
     }
 
     const result = await gameHubService.joinRoom({
         userId,
-        roomId
+        inviteCode
     });
 
     if (!result.success || !result.resultObj) {
