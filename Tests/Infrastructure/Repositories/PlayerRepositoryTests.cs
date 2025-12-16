@@ -63,7 +63,7 @@ public class PlayerRepositoryTests
         await context.Players.AddAsync(player);
         await context.SaveChangesAsync();
 
-        var result = await playerRepository.GetPlayerByUserIdAsync(player.Id, ct);
+        var result = await playerRepository.GetPlayerByUserIdAsync(user.Id, ct);
 
         Multiple(() =>
         {
