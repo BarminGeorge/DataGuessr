@@ -71,13 +71,13 @@ public class Room : IEntity<Guid>
 
     public void SetNewOwner()
     {
-        if (Players.Count == 0)
-            throw new InvalidOperationException("Коллекция игроков пуста.");
-
-        var random = new Random();
-        var randomIndex = random.Next(Players.Count);
-        var player = new List<Player>(Players)[randomIndex];
+        if (Players.Count < 2)
+            throw new InvalidOperationException("В комнате нет других игроков");
         
-        Owner = player.Id;
+        Owner = Players
+            .Select(x => x.Id)
+            .First(x => x != Owner);
     }
+
+    public void SetArchivedStatus() => Status = RoomStatus.Archived;
 }

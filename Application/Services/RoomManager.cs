@@ -65,7 +65,10 @@ public class RoomManager(
             return getRoomResult;
         
         var room = getRoomResult.ResultObj;
-        if (userId == room.Owner)
+        
+        if (room.Players.Count == 1)
+            room.SetArchivedStatus();
+        else if (userId == room.Owner)
             room.SetNewOwner();
         
         var getPlayerResult = await playerRepository.GetPlayerByUserIdAsync(userId, ct);
