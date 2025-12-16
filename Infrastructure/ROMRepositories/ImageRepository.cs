@@ -12,10 +12,8 @@ public class ImageRepository : IImageRepository
     private static readonly string avatarsRoot = Path.Combine(Directory.GetCurrentDirectory(), "files", "avatars");
     private static readonly string questionsImagesRoot = Path.Combine(Directory.GetCurrentDirectory(), "files", "questions");
     
-    private readonly IDataContext db;
-    public ImageRepository(IDataContext db)
+    public ImageRepository()
     {
-        this.db = db ?? throw new ArgumentNullException(nameof(db));
         Directory.CreateDirectory(avatarsRoot);
         Directory.CreateDirectory(questionsImagesRoot);
     }
