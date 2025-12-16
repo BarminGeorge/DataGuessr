@@ -48,6 +48,7 @@ public static class ModelToUiMapper
     {
         return new PlayerDto(
             player.Id,
+            player.UserId,
             player.Name,
             player.Avatar.GetUrl());
     }
