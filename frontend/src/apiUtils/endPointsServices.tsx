@@ -95,22 +95,9 @@ class ApiService {
         }
     }
 
-    // === Комнаты ===
-    async getAvailableRooms(): Promise<OperationResult<RoomDto[]>> {
+    async getRoomPrivacy(inviteCode: string): Promise<OperationResult<RoomPrivacyResponse>> {
         try {
-            const response = await http.get<RoomDto[]>('/api/rooms');
-            return { success: true, resultObj: response };
-        } catch (error: any) {
-            return {
-                success: false,
-                message: error.response?.data?.message || 'Ошибка получения комнат'
-            };
-        }
-    }
-
-    async getRoomPrivacy(roomId: string): Promise<OperationResult<RoomPrivacyResponse>> {
-        try {
-            const response = await http.get<RoomPrivacyResponse>(`/api/rooms/${roomId}`);
+            const response = await http.get<RoomPrivacyResponse>(`/api/rooms/${inviteCode}/privacy`);
             return { success: true, resultObj: response };
         } catch (error: any) {
             return {
