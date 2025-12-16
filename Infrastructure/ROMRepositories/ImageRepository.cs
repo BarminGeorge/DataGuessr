@@ -12,8 +12,10 @@ public class ImageRepository : IImageRepository
     private static readonly string avatarsRoot = Path.Combine(Directory.GetCurrentDirectory(), "files", "avatars");
     private static readonly string questionsImagesRoot = Path.Combine(Directory.GetCurrentDirectory(), "files", "questions");
     
-    public ImageRepository()
+    private readonly IDataContext db;
+    public ImageRepository(IDataContext db)
     {
+        this.db = db ?? throw new ArgumentNullException(nameof(db));
         Directory.CreateDirectory(avatarsRoot);
         Directory.CreateDirectory(questionsImagesRoot);
     }
@@ -34,8 +36,8 @@ public class ImageRepository : IImageRepository
                 await avatarFile.CopyToAsync(stream, ct);
             }
 
-            // await db.Avatars.AddAsync(avatar, ct);
-            // await db.SaveChangesAsync(ct);
+            await db.Avatars.AddAsync(avatar, ct);
+            await db.SaveChangesAsync(ct);
 
             return avatar;
         });
