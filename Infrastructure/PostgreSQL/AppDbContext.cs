@@ -121,7 +121,8 @@ public class AppDbContext : DbContext, IDataContext
                 .HasForeignKey(g => g.RoomId)
                 .OnDelete(DeleteBehavior.Cascade);
 
-            entity.HasIndex(r => r.InviteCode).IsUnique();
+            entity.HasIndex(r => new { r.InviteCode, r.Id })
+                .IsUnique();
             entity.HasIndex(r => r.Status);
             entity.HasIndex(r => r.ClosedAt);
         });
