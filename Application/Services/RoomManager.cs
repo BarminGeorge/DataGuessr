@@ -117,4 +117,10 @@ public class RoomManager(
         
         return await LeaveRoomAsync(roomId, removedPlayer, ct);
     }
+
+    public async Task<OperationResult<Room>> GetRoomAsync(string inviteCode, CancellationToken ct)
+    {  
+        var getRoomOperation = () => roomRepository.GetByInviteCodeAsync(inviteCode, ct);
+        return await getRoomOperation.WithRetry(delay: TimeSpan.FromSeconds(0.15));
+    }
 }

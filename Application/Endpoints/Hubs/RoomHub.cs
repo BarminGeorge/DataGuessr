@@ -41,12 +41,18 @@ public partial class AppHub
         if (await this.ValidateRequestAsync(request, ct) is { } error)
             return OperationResult<RoomDto>.Error.Validation(error);
         
-        var result = await roomManager.JoinRoomAsync(request.UserId, request.RoomId, ct, request.Password);
+        var getRoomOperation = () =>  roomManager.GetRoomAsync(request.InviteCode, ct);
+        var roomResult = await getRoomOperation.WithRetry(delay: TimeSpan.FromSeconds(0.15));
+        if (!roomResult.Success || roomResult.ResultObj is null)
+            return roomResult.ConvertToOperationResult<RoomDto>();
+        
+        var roomId = roomResult.ResultObj.Id;
+        var result = await roomManager.JoinRoomAsync(request.UserId, roomId, ct, request.Password);
 
         if (result is { Success: true, ResultObj: not null})
         {
-            await connectionService.AddConnection(Context.ConnectionId, request.UserId, request.RoomId, ct);
-            await Groups.AddToGroupAsync(Context.ConnectionId, $"room-{request.RoomId}", ct);
+            await connectionService.AddConnection(Context.ConnectionId, request.UserId, roomId, ct);
+            await Groups.AddToGroupAsync(Context.ConnectionId, $"room-{roomId}", ct);
             return OperationResult<RoomDto>.Ok(result.ResultObj.ToDto());
         }
 

@@ -12,6 +12,7 @@ public class RoomHubTests: HubTests
 {
     private readonly Guid userId = Guid.NewGuid();
     private readonly int maxPlayers = 10;
+    private const string inviteCode = "ABC245";
 
     [Test]
     public async Task CreateRoom_WithPassword_ShouldReturnRoom()
@@ -96,13 +97,15 @@ public class RoomHubTests: HubTests
         [Test]
     public async Task JoinRoom_CorrectRequest_ShouldReturnRoomAndAddConnection()
     {
-        var password = "12345";
+        const string password = "12345";
         var room = new Room(Guid.NewGuid(), RoomPrivacy.Private, maxPlayers, password);
         
         A.CallTo(() => RoomManagerFake.JoinRoomAsync(userId, room.Id, A<CancellationToken>._, password))
             .Returns(OperationResult<Room>.Ok(room));
+        A.CallTo(() => RoomManagerFake.GetRoomAsync(A<string>._, A<CancellationToken>._))
+            .Returns(OperationResult<Room>.Ok(room));
 
-        var request = new JoinRoomRequest(userId, room.Id, password);
+        var request = new JoinRoomRequest(userId, inviteCode, password);
         
         await HubConnection.StartAsync();
         var result = await HubConnection.InvokeAsync<OperationResult<RoomDto>>("JoinRoom", request);

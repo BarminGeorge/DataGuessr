@@ -1,10 +1,11 @@
 using Domain.Enums;
 using Domain.ValueTypes;
+using Microsoft.AspNetCore.Mvc;
 
 namespace Application.Requests;
 
 public record CreateRoomRequest(Guid UserId, RoomPrivacy Privacy, string? Password, int MaxPlayers);
-public record JoinRoomRequest(Guid UserId, Guid RoomId, string? Password);
+public record JoinRoomRequest(Guid UserId, string InviteCode, string? Password);
 public record LeaveRoomRequest(Guid UserId, Guid RoomId);
 public record FindQuickRoomRequest(Guid UserId);
 
@@ -24,4 +25,4 @@ public record StartGameRequest(Guid UserId, Guid RoomId);
 public record FinishGameRequest(Guid UserId, Guid RoomId);
 public record SubmitAnswerRequest(Guid GameId, Guid QuestionId, Guid PlayerId, Answer Answer);
 public record KickPlayerRequest(Guid UserId, Guid RoomId, Guid RemovedPlayerId);
-public record GetRoomPrivacyRequest(string InviteCode);
+public record GetRoomPrivacyRequest([FromRoute] string InviteCode);
