@@ -65,16 +65,14 @@ public class RoomManager(
             return getRoomResult;
         
         var room = getRoomResult.ResultObj;
+        if (userId == room.Owner)
+            room.SetNewOwner();
         
         var getPlayerResult = await playerRepository.GetPlayerByUserIdAsync(userId, ct);
         if (!getPlayerResult.Success  || getPlayerResult.ResultObj == null)
             return getPlayerResult;
         
-        var player = getPlayerResult.ResultObj;
-        
-        room.RemovePlayer(player);
-        
-        var notification = new PlayerLeavedNotification(player.Id, room.Owner);
+        var notification = new PlayerLeavedNotification(getPlayerResult.ResultObj.Id, room.Owner);
         var operation = () => notificationService.NotifyGameRoomAsync(roomId, notification);
         var notifyResult = await operation.WithRetry(delay: TimeSpan.FromSeconds(0.15));
         if (!notifyResult.Success)

@@ -68,4 +68,16 @@ public class Room : IEntity<Guid>
             if (userDict.TryGetValue(player.UserId, out var user))
                 player.SetUserInfo(user);
     }
+
+    public void SetNewOwner()
+    {
+        if (Players.Count == 0)
+            throw new InvalidOperationException("Коллекция игроков пуста.");
+
+        var random = new Random();
+        var randomIndex = random.Next(Players.Count);
+        var player = new List<Player>(Players)[randomIndex];
+        
+        Owner = player.Id;
+    }
 }

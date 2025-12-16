@@ -12,8 +12,8 @@ public partial class AppHub(IGameManager gameManager, IRoomManager roomManager, 
         if (getPlayerResult.Success)
         {
             var (playerId, roomId) = getPlayerResult.ResultObj;
-            await connectionService.RemoveConnection(Context.ConnectionId);
             await roomManager.LeaveRoomAsync(roomId, playerId);
+            await connectionService.RemoveConnection(Context.ConnectionId);
             await Groups.RemoveFromGroupAsync(Context.ConnectionId, $"room-{roomId}");
         }
         
