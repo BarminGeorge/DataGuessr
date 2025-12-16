@@ -166,6 +166,7 @@ class GameHubService {
         ];
 
         handlers.forEach(({ method, key }) => {
+            this.connection!.off(method);
             this.connection?.on(method, (data: any) => {
                 this.notifySubscribers(key, data);
             });
@@ -178,7 +179,7 @@ class GameHubService {
         }
 
         this.notificationCallbacks.get(eventName)!.add(callback);
-        console.log(eventName);
+        
         // Возвращаем функцию для отписки
         return () => {
             const callbacks = this.notificationCallbacks.get(eventName);

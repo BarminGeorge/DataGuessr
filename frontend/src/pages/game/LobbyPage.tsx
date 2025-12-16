@@ -9,6 +9,7 @@ import { gameHubService } from '../../apiUtils/HubServices';
 import { RoomPrivacy, type PlayerDto, GameMode } from '../../apiUtils/dto';
 import { usePage } from '../../PageContext';
 import type { CurrentAppState } from '../../App';
+import { leaveRoom, createGame } from '../../utils/RoomHubUtils';
 
 function BpRadio(props: any) {
     return (
@@ -77,37 +78,6 @@ export default function LobbyPage(props: CurrentAppState) {
     }
 
 }
-
-
-async function createGame(
-    userId: string | null,
-    roomId: string | undefined,
-    setPage: (page: any) => void)
-    {
-
-
-    if (userId == null || !roomId) {
-        alert("Не удалось начать игру");
-        return;
-    }
-    const result = await gameHubService.createGame({
-        userId: userId,
-        roomId,
-        mode: GameMode.Default,
-        countQuestions: 5,
-        questionDuration: 30
-    });
-
-    console.log(result);
-
-    if (!result.success || !result.resultObj) {
-        alert("Не удалось начать игру");
-        return;
-    }
-    
-    setPage("game_round");
-}
-
 function LobbyPageCreatorView(props: CurrentAppState) {
     const { setPage } = usePage();
     if (props.room == null) {
@@ -118,7 +88,7 @@ function LobbyPageCreatorView(props: CurrentAppState) {
 
     const playerList = props.room.players.map(
         player =>
-            <PlayerCard variant="lobby-creator" username={player.playerName} action={() => alert("Игрок кикнут")}
+            <PlayerCard variant="lobby-creator" username={player.playerName} avatar={player.avatarUrl} action={() => alert("Игрок кикнут")}
             />);
 
 
@@ -141,7 +111,7 @@ function LobbyPageCreatorView(props: CurrentAppState) {
 
                     <div className="down-picture row-column">
                         <div className="centered-aligment">
-                            <div className="title-text-2">{props.room.id}</div>
+                            <div className="title-text-2">Поделись кодом с другом: {props.room.id}</div>
                             <div className="settings-container">
                                 <div className="settings-element">
                                     <CustomizedRadiosGameMode />
@@ -161,30 +131,7 @@ function LobbyPageCreatorView(props: CurrentAppState) {
     );
 }
 
-async function leaveRoom(
-    userId: string | null,
-    roomId: string | undefined,
-    setPage: (page: any) => void,
-    setRoom: (x: any) => void) {
 
-
-    if (userId == null || !roomId) {
-        alert("Не удалось покинуть комнату");
-        return;
-    }
-    const result = await gameHubService.leaveRoom({
-        userId: userId,
-        roomId,
-    });
-    console.log(result);
-
-    if (!result.success) {
-        alert("Не удалось покинуть комнату");
-        return;
-    }
-    setRoom(null);
-    setPage("home");
-}
 
 function LobbyPageGuestView(props: CurrentAppState) {
     const { setPage } = usePage();
@@ -194,7 +141,7 @@ function LobbyPageGuestView(props: CurrentAppState) {
         setPage("home");
         return;
     }
-    const playerList = props.room.players.map(player => <PlayerCard variant="lobby-common" username={player.playerName} />);
+    const playerList = props.room.players.map(player => <PlayerCard variant="lobby-common" username={player.playerName} avatar={player.avatarUrl} />);
 
     return (
         <div className="global-container">
@@ -215,7 +162,7 @@ function LobbyPageGuestView(props: CurrentAppState) {
 
                     <div className="down-picture row-column">
                         <div className="centered-aligment">
-                            <div className="title-text-2">#SOIFL44</div>
+                            <div className="title-text-2">Поделись кодом с другом: {props.room.id}</div>
                             <div className="settings-container">
                                 <div className="picture-xl-container">
                                     <img

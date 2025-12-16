@@ -5,72 +5,8 @@ import { usePage } from "../PageContext";
 import EnterModal from "../modals/EnterModal";
 import { LoggingStatus, type CurrentAppState } from "../App";
 import { gameHubService } from "../apiUtils/HubServices";
-import { RoomPrivacy } from "../apiUtils/dto";
-
-
-async function findRandomRoom(
-    userId: string,
-    setPage: (page: any ) => void
-) {
-    const result = await gameHubService.findQuickRoom({
-        userId
-    });
-
-    if (!result.success || !result.resultObj) {
-        console.log(result.message);
-        alert("Не удалось найти комнату");
-        return;
-    }
-
-    setPage("room");
-}
-
-async function joinRoomByCode(
-    userId: string,
-    roomId: string,
-    setPage: (page: any) => void
-) {
-    if (!roomId) {
-        alert("Введите код комнаты");
-        return;
-    }
-
-    const result = await gameHubService.joinRoom({
-        userId,
-        roomId
-    });
-
-    if (!result.success || !result.resultObj) {
-        console.log(result.message);
-        alert("Не удалось найти комнату");
-        return;
-    }
-
-    setPage("room");
-}
-
-async function createRoom(
-    userId: string| null,
-    setPage: (page: any) => void,
-    setRoom: (x: any) => void) {
-
-    if (userId == null)
-        return;
-
-    const result = await gameHubService.createRoom({
-        userId: userId,
-        privacy: RoomPrivacy.Public,
-        maxPlayers: 8
-    });
-    console.log(result);
-
-    if (!result.success || !result.resultObj) {    
-        alert("Не удалось создать комнату");
-        return;
-    }
-    setRoom(result.resultObj);
-    setPage("room");
-}
+import { RoomPrivacy, type RoomDto, type PlayerDto } from "../apiUtils/dto";
+import { createRoom, joinRoomByCode, findRandomRoom } from "../utils/RoomHubUtils";
 
 function checkLogging(loggingStatus: any) {
     if (loggingStatus == LoggingStatus.Guest) {
@@ -86,7 +22,7 @@ function checkLogging(loggingStatus: any) {
 export default function HomePage(props: CurrentAppState) {
     const { setPage } = usePage();
     const [roomCode, setRoomCode] = useState("");
-    
+
 
     return (
         <div className="global-container">
@@ -101,8 +37,8 @@ export default function HomePage(props: CurrentAppState) {
                 <Header variant={props.loggingStatus == LoggingStatus.Logged ?
                     "logo-and-avatar-and-interactive"
                     : "logo-and-login-button"}
-                    interact_action={() => createRoom(props.user_id, setPage, props.setRoom)}
-                    interact_label= {"Create lobby"}
+                    interact_action={() => createRoom(props.user_id, setPage, props.room, props.setRoom)}
+                    interact_label={"Create lobby"}
                 />
 
                 <div className="main-container">
@@ -136,7 +72,7 @@ export default function HomePage(props: CurrentAppState) {
 
                             <button
                                 className="button-primary"
-                                onClick={() => joinRoomByCode(props.user_id, roomCode, setPage)}
+                                onClick={() => joinRoomByCode(props.user_id, roomCode, setPage, props.room, props.setRoom)}
                             >
                                 Присоединиться
                             </button>
@@ -146,7 +82,7 @@ export default function HomePage(props: CurrentAppState) {
 
                             <button
                                 className="button-primary"
-                                onClick={() => findRandomRoom(props.user_id, setPage)}
+                                onClick={() => findRandomRoom(props.user_id, setPage, props.room, props.setRoom)}
                             >
                                 Случайная игра
                             </button>

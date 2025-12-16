@@ -1,4 +1,4 @@
-import type {AnswerDto, GameDto, RoomDto, StatisticDto } from "./dto";
+import type {AnswerDto, GameDto, PlayerDto, RoomDto, StatisticDto } from "./dto";
 
 export interface GameNotification {
     methodName: string;
@@ -6,8 +6,7 @@ export interface GameNotification {
 }
 
 export interface NewPlayerNotification {
-    playerId: string;
-    playerName: string;
+    player: PlayerDto;
 }
 
 export interface PlayerLeavedNotification {

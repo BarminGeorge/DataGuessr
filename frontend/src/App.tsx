@@ -11,7 +11,8 @@ import GameLeaderboard from "./pages/game/GameLeaderboard";
 import GameLeaderboardFinal from "./pages/game/GameLeaderboardFinal";
 import { useEffect, useState } from "react";
 import { gameHubService } from "./apiUtils/HubServices";
-import type { RoomDto } from "./apiUtils/dto";
+import type { GameDto, RoomDto } from "./apiUtils/dto";
+import { in_room } from "./utils/RoomHubUtils";
 
 export enum LoggingStatus {
     NotLogged,
@@ -23,9 +24,16 @@ export interface CurrentAppState {
     loggingStatus: LoggingStatus,
     setLoggingStatus: (x: any) => void,
 
-    user_id: string| null,
+    user_id: string | null,
+
     room: RoomDto | null,
-    setRoom: (x: any) => void | null
+    setRoom: (x: any) => void | null,
+
+    game: GameDto | null,
+    setGame: (x: any) => void | null,
+
+    page: any,
+    setPage: (x: any) => void | null
 
 };
 
@@ -33,19 +41,44 @@ export default function App() {
     const { page, setPage } = usePage();
     const [loggingStatus, setLoggingStatus] = useState(LoggingStatus.NotLogged);
     const [room, setRoom] = useState(null);
+    const [game, setGame] = useState(null);
 
 
-    useEffect(() => {
+    useEffect(()  => {
         gameHubService.connect().catch(err => {
             console.error("SignalR error", err);
-            alert("Íå óäàëîñü ïîäêëþ÷èòüñÿ ê ñåðâåðó");
+            alert("ÐÐµ ÑƒÐ´Ð°Ð»Ð¾ÑÑŒ Ð¿Ð¾Ð´ÐºÐ»ÑŽÑ‡Ð¸Ñ‚ÑŒÑÑ Ðº SignalR");
         });
     }, []);
 
+   
+    
     const user_id = localStorage.getItem("user_id");
-    const props: CurrentAppState = { loggingStatus, setLoggingStatus, user_id, room, setRoom };
+    // Service Locator think how to kill him 
+    const props: CurrentAppState = { loggingStatus, setLoggingStatus, user_id, room, setRoom, game, setGame, page, setPage };
     console.log(props);
+    
+    useEffect(() => {
+        if (!room) return;
 
+        const roomN = in_room(props);
+
+        return () => {
+            roomN();
+        };
+    }, [props.room]);
+
+    useEffect(() => {
+        if (!game) return;
+
+        const offQuestion = gameHubService.onNewQuestion(data => {
+            ;
+        });
+
+        return () => {
+            offQuestion();
+        };
+    }, [props.game]);
 
     return (
         <div>
@@ -54,7 +87,7 @@ export default function App() {
             {page === "registration" && <RegistrationPage {...props} />}
             {page === "profile" && <ProfilePage />}
             {page === "room" && <LobbyPage {...props} />}
-            {page === "game_round" && <GameRoundPage />}
+            {page === "game_round" && <GameRoundPage {...props} />}
             {page === "game_leaderboard" && <GameLeaderboard />}
             {page === "game_leaderboard_final" && <GameLeaderboardFinal />}
         </div>

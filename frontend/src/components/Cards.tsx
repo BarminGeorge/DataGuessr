@@ -1,4 +1,5 @@
-import React from "react";
+import React, { useEffect, useState } from "react";
+import fetchImageUrl from "./ImageDownloader";
 
 export default function PlayerCard(props: any) {
     switch (props.variant) {
@@ -8,11 +9,11 @@ export default function PlayerCard(props: any) {
             );
         case "lobby-common":
             return (
-                <LobbyViewerCard username={props.username} />
+                <LobbyViewerCard username={props.username} avatar={props.avatarUrl} />
             );
         case "lobby-creator":
             return (
-                <LobbyCreatorCard username={props.username} action={props.action} />
+                <LobbyCreatorCard username={props.username} avatar={props.avatarUrl} action={props.action} />
             );
         default:
             return null;
@@ -20,10 +21,26 @@ export default function PlayerCard(props: any) {
 }
 
 function LobbyCreatorCard(props: any) {
+    const [avatar, setAvatar] = useState<string>("src/assets/defaultavatar.jpg");
+
+    useEffect(() => {
+        let cancelled = false;
+
+        fetchImageUrl(props.avatarUrl).then((url) => {
+            if (!cancelled) {
+                setAvatar(url);
+            }
+        });
+
+        return () => {
+            cancelled = true;
+        };
+    }, [props.avatarUrl]);
+
     return (
         <div className="score-card">
             <img
-                src="src/assets/defaultavatar.jpg"
+                src={avatar}
                 alt="avatar"
                 className="w-10 h-10 rounded-full border border-gray-300"
             />
@@ -40,15 +57,31 @@ function LobbyCreatorCard(props: any) {
 }
 
 function LobbyViewerCard(props: any) {
+    const [avatar, setAvatar] = useState<string>("src/assets/defaultavatar.jpg");
+
+    useEffect(() => {
+        let cancelled = false;
+
+        fetchImageUrl(props.avatarUrl).then((url) => {
+            if (!cancelled) {
+                setAvatar(url);
+            }
+        });
+
+        return () => {
+            cancelled = true;
+        };
+    }, [props.avatarUrl]);
+
     return (
         <div className="score-card">
             <img
-                src="src/assets/defaultavatar.jpg"
+                src={avatar}
                 alt="avatar"
                 className="w-10 h-10 rounded-full border border-gray-300"
             />
             {props.username}
-
+            <div className="w-10 h-10 rounded-full"></div>
         </div>
     );
 }

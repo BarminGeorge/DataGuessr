@@ -306,6 +306,13 @@
 	margin-right: auto;
 }
 
+.centered-empty-element {
+    margin-top: 25vh;
+    margin-bottom: 25vh;
+    margin-left: auto;
+    margin-right: auto;
+    position: relative;
+}
 
 .centered-element {
 	margin-top: 15vh;
