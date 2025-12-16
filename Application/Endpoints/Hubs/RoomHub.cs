@@ -47,7 +47,7 @@ public partial class AppHub
             return roomResult.ConvertToOperationResult<RoomDto>();
         
         var roomId = roomResult.ResultObj.Id;
-        var result = await roomManager.JoinRoomAsync(request.UserId, roomId, ct, request.Password);
+        var result = await roomManager.JoinRoomAsync(roomId, request.UserId, ct, request.Password);
 
         if (result is { Success: true, ResultObj: not null})
         {
