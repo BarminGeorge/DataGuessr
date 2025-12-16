@@ -35,9 +35,9 @@ export function in_room(props: CurrentAppState) {
         console.log(data);
         props.setGame(data.game);
         props.setPage("game_round");
-       
+
     }
-    
+
     const offNewPlayer = gameHubService.onNewPlayer(onNewPlayer);
     const offPlayerLeaved = gameHubService.onPlayerLeaved(onPlayerLeaved);
     const offNewGame = gameHubService.onNewGame(onNewGame);

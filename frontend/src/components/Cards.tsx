@@ -9,11 +9,11 @@ export default function PlayerCard(props: any) {
             );
         case "lobby-common":
             return (
-                <LobbyViewerCard username={props.username} avatar={props.avatarUrl} />
+                <LobbyViewerCard username={props.username} avatar={props.avatar} />
             );
         case "lobby-creator":
             return (
-                <LobbyCreatorCard username={props.username} avatar={props.avatarUrl} action={props.action} />
+                <LobbyCreatorCard username={props.username} avatar={props.avatar} action={props.action} />
             );
         default:
             return null;
@@ -26,7 +26,7 @@ function LobbyCreatorCard(props: any) {
     useEffect(() => {
         let cancelled = false;
 
-        fetchImageUrl(props.avatarUrl).then((url) => {
+        fetchImageUrl(props.avatar).then((url) => {
             if (!cancelled) {
                 setAvatar(url);
             }
@@ -35,7 +35,7 @@ function LobbyCreatorCard(props: any) {
         return () => {
             cancelled = true;
         };
-    }, [props.avatarUrl]);
+    }, [props.avatar]);
 
     return (
         <div className="score-card">
@@ -62,7 +62,7 @@ function LobbyViewerCard(props: any) {
     useEffect(() => {
         let cancelled = false;
 
-        fetchImageUrl(props.avatarUrl).then((url) => {
+        fetchImageUrl(props.avatar).then((url) => {
             if (!cancelled) {
                 setAvatar(url);
             }
@@ -71,7 +71,7 @@ function LobbyViewerCard(props: any) {
         return () => {
             cancelled = true;
         };
-    }, [props.avatarUrl]);
+    }, [props.avatar]);
 
     return (
         <div className="score-card">

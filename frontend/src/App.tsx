@@ -68,18 +68,6 @@ export default function App() {
         };
     }, [props.room]);
 
-    useEffect(() => {
-        if (!game) return;
-
-        const offQuestion = gameHubService.onNewQuestion(data => {
-            ;
-        });
-
-        return () => {
-            offQuestion();
-        };
-    }, [props.game]);
-
     return (
         <div>
             {page === "home" && <Home {...props} />}

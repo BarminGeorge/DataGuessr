@@ -1,8 +1,12 @@
-import React, { useState } from "react";
+import React, { useEffect, useState } from "react";
 import Header from "../../components/Header";
 import Slider from '@mui/material/Slider';
 import type { CurrentAppState } from "../../App";
 import PacmanLoader from "react-spinners/PacmanLoader";
+import { gameHubService } from "../../apiUtils/HubServices";
+import type { QuestionDto } from "../../apiUtils/dto";
+import type { NewQuestionNotification } from "../../apiUtils/notifications";
+import fetchImageUrl from "../../components/ImageDownloader";
 
 function valuetext(value: number) {
     return `${value}`;
@@ -21,18 +25,36 @@ function LoadingScreen() {
 
 } 
 
-function QuestionScreen(props: any) {
+function QuestionScreen(question: NewQuestionNotification) {
     const [year, setYear] = useState(1966);
+    const [imageSrc, setimageSrc] = useState<string>("src/assets/defaultavatar.jpg");
+
+    useEffect(() => {
+        let cancelled = false;
+
+        fetchImageUrl(question.imageUrl).then((url) => {
+            if (!cancelled) {
+                setimageSrc(url);
+            }
+        });
+
+        return () => {
+            cancelled = true;
+        };
+    }, [question.imageUrl]);
+
+
+
 
     return (
         <div className="main-container">
             <div className="main-container">
                 <div className="secondary-container">
                     {/* question */}
-                    <p className="title-accent-text">В каком году сделана данная фотография?</p>
+                    <p className="title-accent-text">{question.formulation}</p>
                     <div className="picture-xl-container">
                         <img
-                            src="src/assets/defaultavatar.jpg"
+                            src={imageSrc }
                             className="default-picture"
                         />
 
@@ -66,18 +88,32 @@ function QuestionScreen(props: any) {
 }
 
 export default function GameRoundPage(props: CurrentAppState) {
-    const [question, setQuestion] = useState(null);
+    const [question, setQuestion] = useState<NewQuestionNotification>();
+
+
+    useEffect(() => {
+        if (!props.game) return;
+
+        const offQuestion = gameHubService.onNewQuestion(data => {
+            setQuestion(data);
+        });
+
+        return () => {
+            offQuestion();
+        };
+    }, [props.game]);
+
 
     if (question)
     return (
         <div className="global-container">
             <Header variant="logo-and-timer" />
-            <QuestionScreen />
+            <QuestionScreen {...question} />
         </div>
         );
     return (
         <div className="global-container">
-            <Header variant="logo-and-timer" />
+            <Header variant="logo" />
             <LoadingScreen />
         </div>
     );
