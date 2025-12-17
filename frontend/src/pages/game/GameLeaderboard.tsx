@@ -1,44 +1,69 @@
-import React from "react";
+import React, { useEffect } from "react";
 import Header from "../../components/Header";
 import PlayerCard from "../../components/Cards";
+import type { CurrentAppState } from "../../App";
+import { usePage } from "../../PageContext";
+import { gameHubService } from "../../apiUtils/HubServices";
 
-export default function GameLeaderboard() {
-  const playerList = [];
-  for (let i = 0; i < 10; i++) {
-    playerList.push(<PlayerCard variant="score" username="Имя пользователя" score={(100 - i*10) ** 2} />);
-  }
+export default function GameLeaderboard(props: CurrentAppState) {
+    const { setPage } = usePage();
+
+    if (props.room == null) {
+        alert("undefined error");
+        setPage("home");
+        return;
+    }
 
 
-  return (
-    <div className="global-container">
-      <Header variant="logo-and-timer"/>
-      <div className="main-container">  
+    useEffect(() => {
+        if (!props.game) return;
 
-      <div className="row-template">  
-      <div className="down-picture row-column">
-        <div className="down-element">
-          <img
-          src="src/assets/defaultavatar.jpg"
-          className="default-picture"
-        />
+        const offQuestion = gameHubService.onNewQuestion(data => {
+            console.warn(data);
+        });
+    });
+
+
+    const playerList = props.room.players.sort(p => p.score ?? 0).map(
+        player =>
+            <PlayerCard variant="score" username={player.playerName} avatar={player.avatarUrl} score={player.score ?? 0} />);
+
+
+    return (
+        <div className="global-container">
+            <Header variant="logo-and-timer" duration={10} />
+            <div className="main-container">
+
+                <div className="row-template">
+                    <div className="down-picture row-column">
+                        <div className="down-element">
+                            <img
+                                src="src/assets/defaultavatar.jpg"
+                                className="default-picture"
+                            />
+                        </div>
+                    </div>
+
+                    <div className="list-container row-column">
+                        <div className="title-text-2">
+                            Лидеры
+                        </div>
+
+
+                        {playerList}
+
+
+                    </div>
+                    <div className="down-picture row-column">
+                        <div className="up-element">
+                            <img
+                                src="src/assets/defaultavatar.jpg"
+                                className="default-picture"
+                            />
+                        </div>
+                    </div>
+                </div>
+            </div>
         </div>
-      </div>
-      <div className="list-container row-column">
-        <div className="title-text-2">
-        Лидеры
-        </div>
-        {playerList}
-      </div>
-      <div className="down-picture row-column">
-        <div className="up-element">
-        <img
-          src="src/assets/defaultavatar.jpg"
-          className="default-picture"
-        />
-        </div>
-      </div>
-    </div>
-    </div>
-    </div>
-  );
+    );
 }

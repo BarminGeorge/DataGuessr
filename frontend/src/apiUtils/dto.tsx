@@ -54,6 +54,7 @@ export interface PlayerDto {
     userId: string;
     playerName: string;
     avatarUrl: string;
+    score?: number;
 }
 
 export interface RoomDto {
@@ -96,9 +97,11 @@ export interface QuestionDto {
 }
 
 export interface StatisticDto {
-    scores: { [playerId: string]: number };
+    scores: {
+        [playerId: string]: {points: number } };
 }
 
 export interface AnswerDto {
-    value: any
+    $type: string;
+    value: any;
 }

@@ -33,6 +33,7 @@ export function in_room(props: CurrentAppState) {
 
     const onNewGame = (data: NewGameNotification) => {
         console.log(data);
+
         props.setGame(data.game);
         props.setPage("game_round");
 
@@ -44,9 +45,6 @@ export function in_room(props: CurrentAppState) {
 
 
     gameHubService.onReturnToRoom(data => {
-        console.log(data);
-    });
-    gameHubService.onShowLeaderBoard(data => {
         console.log(data);
     });
 
@@ -149,7 +147,7 @@ export async function createGame(
         roomId,
         mode: GameMode.Default,
         countQuestions: 5,
-        questionDuration: 30
+        questionDuration: 20
     });
 
     console.log(result);
@@ -158,7 +156,11 @@ export async function createGame(
         alert("Не удалось начать игру");
         return;
     }
-    await startGame(userId, roomId);
+    const res = await startGame(userId, roomId);
+    if (!res) {
+        alert("Не удалось начать игру");
+        return;
+    }
     setPage("game_round");
 }
 
@@ -180,8 +182,9 @@ export async function startGame(
 
     if (!result.success) {
         alert("Не удалось начать игру");
-        return;
+        return false;
     }
+    return true;
 
 }
 

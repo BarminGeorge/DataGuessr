@@ -98,6 +98,7 @@ class GameHubService {
     }
 
     async submitAnswer(request: SubmitAnswerRequest): Promise<OperationResult> {
+        console.log(request);
         return this.invoke('SubmitAnswer', request);
     }
 

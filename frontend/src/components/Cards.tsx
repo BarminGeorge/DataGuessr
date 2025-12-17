@@ -42,7 +42,7 @@ function LobbyCreatorCard(props: any) {
             <img
                 src={avatar}
                 alt="avatar"
-                className="w-10 h-10 rounded-full border border-gray-300"
+                className="avatar-preview"
             />
             {props.username}
             <img
@@ -78,7 +78,7 @@ function LobbyViewerCard(props: any) {
             <img
                 src={avatar}
                 alt="avatar"
-                className="w-10 h-10 rounded-full border border-gray-300"
+                className="avatar-preview "
             />
             {props.username}
             <div className="w-10 h-10 rounded-full"></div>
@@ -92,7 +92,7 @@ function ScoreCard(props: any) {
             <img
                 src="src/assets/defaultavatar.jpg"
                 alt="avatar"
-                className="w-10 h-10 rounded-full border border-gray-300"
+                className="avatar-preview "
             />
             <div className="centered">{props.username}</div>
 

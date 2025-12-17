@@ -7,13 +7,13 @@ import { useState } from "react";
 import { validateLogin, validatePassword } from "../utils/validations";
 import { apiService } from "../apiUtils/endPointsServices";
 import { LoggingStatus, type CurrentAppState } from "../App";
+import type { UserDto } from "../apiUtils/dto";
 
 
 async function handleLogin(
     login: string,
     password: string,
-    setLoggingStatus: (status: any) => void,
-    setPage: (page: any) => void) {
+    props: CurrentAppState) {
 
     const data = { login, password };
     const result = await apiService.login(data);
@@ -22,7 +22,7 @@ async function handleLogin(
         console.error(result.message);
         return;
     }
-    setLoggingStatus(LoggingStatus.Logged);
+    props.setLoggingStatus(LoggingStatus.Logged);
     console.log(result);
 
     if (result.resultObj) {
@@ -30,7 +30,9 @@ async function handleLogin(
         localStorage.setItem("player_name", result.resultObj?.playerName);
         localStorage.setItem("avatar_url", result.resultObj?.avatarUrl);
     }
-    setPage("home");
+    const user: UserDto = { id: result.resultObj?.id, avatarUrl: result.resultObj?.avatarUrl, playerName: result.resultObj?.playerName }
+    props.setUser(user);
+    props.setPage("home");
 }
 
 
@@ -84,7 +86,7 @@ export default function LoginPage(props: CurrentAppState) {
                 </div>
 
                 <button className="button-primary"
-                    onClick={() => handleLogin(login, password, props.setLoggingStatus, setPage)}>
+                    onClick={() => handleLogin(login, password, props )}>
                     Войти
                 </button>
 

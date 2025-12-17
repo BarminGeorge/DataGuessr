@@ -12,7 +12,7 @@
     transition: transform 0.4s cubic-bezier(0.34, 1.56, 0.64, 1), background-color 0.2s ease, box-shadow 0.2s ease;
 }
 
-    .button-primary:hover {
+    .button-primary:hover:not(:disabled) {
         background-color: #312ECB;
         /* Увеличиваем и добавляем "дорогое" свечение */
         transform: scale(1.05) translateY(-2px);
@@ -26,16 +26,24 @@
 
 /* 2. Поля ввода с "Неоновым" фокусом */
 .text-input-primary {
-    transition: all 0.3s cubic-bezier(0.25, 0.8, 0.25, 1);
+    transition: all 1s cubic-bezier(0.25, 0.8, 0.25, 1);
     border: 2px solid transparent;
 }
 
-.text-input-primary:focus {
-    /* Глубокая тень вместо скучной рамки */
-    box-shadow: 0 4px 20px rgba(66, 63, 229, 0.15);
-    border-color: #423FE5;
-    transform: translateY(-1px);
-}
+    .text-input-primary:hover{
+        border-color: #423FE5;
+    }
+
+    .text-input-primary:focus {
+        /*     Глубокая тень вместо скучной рамки */
+        /*        box-shadow: 0 4px 20px rgba(66, 63, 229, 0.15);*/
+        border-color: #423FE5;
+        outline: none;
+        transform: translateY(-1px);
+        }
+    .text-input-primary:invalid {
+        border-color: #dc3545;
+    }
 
 /* 3. Модальные окна: Эффект появления "Snappy" (Резко и четко) */
 @keyframes hypeSlideUp {
@@ -130,7 +138,7 @@
     }
 }
 
-.global-container {
+.main-container {
     animation: hypePageIn 0.7s var(--ease-hype) both;
 }
 
@@ -162,8 +170,13 @@
     animation: hypeTitle 0.6s var(--ease-hype) 0.35s both;
 }
 
+
 .secondary-text {
     animation: hypeFadeText 0.6s ease-out 0.5s both;
+}
+
+.accent-title-text {
+    animation: hypeFadeText 0.6s ease-out 0.65s both;
 }
 
 @keyframes hypeFadeText {

@@ -7,14 +7,14 @@ import { usePage } from "../PageContext";
 import { validateLogin, validatePassword, validateUsername } from "../utils/validations";
 import { apiService } from "../apiUtils/endPointsServices";
 import type { CurrentAppState } from "../App";
+import type { UserDto } from "../apiUtils/dto";
 
 async function handleRegistration(
     login: string,
     password: string,
     playerName: string,
     avatar: any,
-    setLoggingStatus: (status: any) => void,
-    setPage: (page: any) => void) {
+    props: CurrentAppState) {
 
     const data = { login, password, playerName, avatar };
     const result = await apiService.register(data);
@@ -23,13 +23,18 @@ async function handleRegistration(
         console.error(result.message);
         return;
     }
+
+
     if (result.resultObj) {
         localStorage.setItem("user_id", result.resultObj?.id);
         localStorage.setItem("player_name", result.resultObj?.playerName);
         localStorage.setItem("avatar_url", result.resultObj?.avatarUrl);
     }
-    setLoggingStatus(1);
-    setPage("home");
+
+    const user: UserDto = { id: result.resultObj?.id, avatarUrl: result.resultObj?.avatarUrl, playerName: result.resultObj?.playerName }
+    props.setUser(user);
+    props.setLoggingStatus(1);
+    props.setPage("home");
 }
 
 export default function RegistrationPage(props: CurrentAppState) {
@@ -80,15 +85,37 @@ export default function RegistrationPage(props: CurrentAppState) {
                     </span>
                 </div>
                 <div className="secondary-container">
-                <input
-                    type="file"
-                    className="text-input-primary"
-                    placeholder={"Выберите аватар"}
-                    onChange={(e) => setAvatar(e.target.files && e.target.files[0] ? e.target.files[0] : null)} />
+                    <label className="avatar-input-primary">
+                        <input
+                            type="file"
+                            accept="image/*"
+                            className="avatar-input-hidden"
+                            onChange={(e) => {
+                                const file = e.target.files?.[0] ?? null;
+                                setAvatar(file);
+                            }}
+                        />
+
+                        <div className="avatar-preview">
+                            {avatar ? (
+                                <img
+                                    src={URL.createObjectURL(avatar)}
+                                    alt="avatar preview"
+                                />
+                            ) : (
+                                <span>?</span>
+                            )}
+                        </div>
+
+                        <div className="avatar-text">
+                            {avatar ? avatar.name : "Выберите аватар"}
+                        </div>
+                    </label>
+
                 </div>
 
                 <button className="button-primary"
-                    onClick={() => handleRegistration(login, password, playerName, avatar, props.setLoggingStatus, setPage)}>Зарегистрироваться</button>
+                    onClick={() => handleRegistration(login, password, playerName, avatar, props)}>Зарегистрироваться</button>
 
             </div>
         </div>

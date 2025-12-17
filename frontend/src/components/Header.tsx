@@ -16,7 +16,7 @@ export default function Header(props: any) {
         );
     } else if (props.variant === "logo-and-timer") {
         return (
-            <HeaderWithLogoAndAvatarAndTimer />
+            <HeaderWithLogoAndAvatarAndTimer time={props.duration} />
         );
     } else {
         return (
@@ -29,7 +29,7 @@ function HeaderWithOnlyLogo() {
     const { setPage } = usePage();
     return (
         <div className="header-container">
-            <div className="title-text" onClick={() => setPage("home")}>FIITguesser</div>
+            <div className="title-text">FIITguesser</div>
 
         </div>
     );
@@ -87,7 +87,7 @@ function HeaderWithLogoAndAvatarAndInteractive(props: any) {
                     <img onClick={() => setPage("profile")}
                         src={avatar}
                         alt="avatar"
-                        className="w-10 h-10 rounded-full border border-gray-300"
+                        className="avatar-preview"
                     />
                 </div>
             </div>
@@ -95,27 +95,30 @@ function HeaderWithLogoAndAvatarAndInteractive(props: any) {
     );
 }
 
-function HeaderWithLogoAndAvatarAndRemoveRoomButton() {
-    const { setPage } = usePage();
-    return (
-        <div className="header-container">
-            <div className="title-text">FIITguesser</div>
-            <div className="left-aligment">
-                <div className="accent-title-text" onClick={() => alert("remove lobby")}>Remove lobby</div>
-                <div className="flex items-center gap-3">
-                    <img onClick={() => setPage("profile")}
-                        src="src/assets/defaultavatar.jpg"
-                        alt="avatar"
-                        className="w-10 h-10 rounded-full border border-gray-300"
-                    />
-                </div>
-            </div>
-        </div>
-    );
-}
+type Props = {
+    time: number
+};
 
-function HeaderWithLogoAndAvatarAndTimer() {
-    const { setPage } = usePage();
+function HeaderWithLogoAndAvatarAndTimer({ time }: Props) {
+    const [seconds, setSeconds] = useState(time); // Состояние для хранения секунд
+
+    useEffect(() => {
+        if (seconds <= 0) return;
+
+        const interval = window.setInterval(() => {
+            setSeconds(prev => Math.max(prev - 0.2, 0));
+        }, 200);
+
+        return () => clearInterval(interval);
+    }, [seconds]);
+
+    const progress = Math.min(
+        100,
+        Math.max(0, (seconds / time) * 100)
+    );
+
+
+
     return (
         <div className="header-container">
             <div className="title-text">FIITguesser</div>
@@ -124,7 +127,7 @@ function HeaderWithLogoAndAvatarAndTimer() {
                     variant="determinate"
                     size="2.2rem"
                     color="secondary"
-                    value={67}
+                    value={progress}
                     thickness={10}
                     sx={{
 

@@ -11,7 +11,7 @@ import GameLeaderboard from "./pages/game/GameLeaderboard";
 import GameLeaderboardFinal from "./pages/game/GameLeaderboardFinal";
 import { useEffect, useState } from "react";
 import { gameHubService } from "./apiUtils/HubServices";
-import type { GameDto, PlayerDto, RoomDto } from "./apiUtils/dto";
+import type { GameDto, PlayerDto, RoomDto, UserDto } from "./apiUtils/dto";
 import { in_room } from "./utils/RoomHubUtils";
 
 export enum LoggingStatus {
@@ -26,15 +26,20 @@ export interface CurrentAppState {
 
     user_id: string | null,
 
+    user: UserDto | null,
+    setUser: (x: any) => void | null,
+
     room: RoomDto | null,
     setRoom: (x: any) => void | null,
 
     game: GameDto | null,
     setGame: (x: any) => void | null,
 
+    //statistics: any,
+    //setStatistics: (x: any) => void | null,
+
     page: any,
     setPage: (x: any) => void | null
-
 };
 
 export function getPlayerId(props: CurrentAppState) {
@@ -46,9 +51,11 @@ export default function App() {
     const [loggingStatus, setLoggingStatus] = useState(LoggingStatus.NotLogged);
     const [room, setRoom] = useState(null);
     const [game, setGame] = useState(null);
+    const [user, setUser] = useState(null);
+    const [statistics, setStatistics] = useState(null);
 
 
-    useEffect(()  => {
+    useEffect(() => {
         gameHubService.connect().catch(err => {
             console.error("SignalR error", err);
             alert("Не удалось подключиться к SignalR");
@@ -57,11 +64,11 @@ export default function App() {
 
 
 
-   
-    
+
+
     const user_id = localStorage.getItem("user_id");
     // Service Locator think how to kill him 
-    const props: CurrentAppState = { loggingStatus, setLoggingStatus, user_id, room, setRoom, game, setGame, page, setPage };
+    const props: CurrentAppState = { loggingStatus, setLoggingStatus, user_id, room, setRoom, user, setUser, game, setGame, page, setPage };
     console.log(props);
 
     useEffect(() => {
@@ -82,7 +89,7 @@ export default function App() {
             {page === "profile" && <ProfilePage />}
             {page === "room" && <LobbyPage {...props} />}
             {page === "game_round" && <GameRoundPage {...props} />}
-            {page === "game_leaderboard" && <GameLeaderboard />}
+            {page === "game_leaderboard" && <GameLeaderboard {...props} />}
             {page === "game_leaderboard_final" && <GameLeaderboardFinal />}
         </div>
     );
