@@ -56,7 +56,10 @@ public class GameManager(
         Console.WriteLine(getQuestionsResult.ResultObj);
         Console.WriteLine(getQuestionsResult);
         Task.Run(() => gameCoreService.RunGameCycle(game, roomId, ct))
-            .ContinueWith(t => { }, TaskContinuationOptions.OnlyOnFaulted);
+            .ContinueWith(t =>
+            {
+                Console.WriteLine(t.Exception);
+            }, TaskContinuationOptions.OnlyOnFaulted);
         
         return OperationResult.Ok();
     }
