@@ -10,7 +10,6 @@ namespace Application.Services;
 
 public class GameCoreService(
     INotificationService notificationService,
-    IQuestionService questionService,
     IEvaluationService evaluationService,
     IPlayerAnswerRepository answerRepository)
     : IGameCoreService
@@ -20,14 +19,9 @@ public class GameCoreService(
     {
         game.StartGame();
         
-        var getQuestionsResult = await questionService.GetAllQuestionsAsync(game, ct);
-        Console.WriteLine(getQuestionsResult);
-        if (!getQuestionsResult.Success || getQuestionsResult.ResultObj == null)
-            return getQuestionsResult;
-        
         game.CurrentStatistic = new Statistic();
         
-        foreach (var question in getQuestionsResult.ResultObj)
+        foreach (var question in game.Questions)
         {
             await NotifyRoomAboutNewQuestion(question, game, roomId);
             await Task.Delay(game.QuestionDuration, ct);

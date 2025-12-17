@@ -15,16 +15,13 @@ public partial class AppHub
             return OperationResult<RoomDto>.Error.Validation(error);
         
         var result = await roomManager.CreateRoomAsync(request.UserId, request.Privacy, ct, request.Password, request.MaxPlayers);
-        Console.WriteLine('1');
         if (result is { Success: true, ResultObj: not null })
         {
             var connectionServiceResult = await connectionService.AddConnection(Context.ConnectionId, request.UserId, result.ResultObj.Id, ct);
-            Console.WriteLine('2');
             if (!connectionServiceResult.Success)
                 return connectionServiceResult.ConvertToOperationResult<RoomDto>();
 
             await Groups.AddToGroupAsync(Context.ConnectionId, $"room-{result.ResultObj.Id}", ct);
-            Console.WriteLine('3');
             var joinOperation = () => roomManager.JoinRoomAsync(result.ResultObj.Id, request.UserId, ct, request.Password);
             var joinResult = await joinOperation.WithRetry(delay: TimeSpan.FromSeconds(0.15));
             if (!joinResult.Success || joinResult.ResultObj is null)

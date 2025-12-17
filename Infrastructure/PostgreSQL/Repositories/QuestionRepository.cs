@@ -46,7 +46,7 @@ public class QuestionRepository : IQuestionRepository
                 .AsNoTracking()
                 .Where(q => selectedIds.Contains(q.Id))
                 .ToListAsync(ct);
-            Console.WriteLine(questions);
+
             return OperationResult<IEnumerable<Question>>.Ok(questions);
         });
 
