@@ -37,6 +37,7 @@ public static class ModelToUiMapper
     public static QuestionDto ToDto(this Question question, DateTime endTime, int durationSeconds)
     {
         return new QuestionDto(
+            question.Id,
             question.Mode,
             question.Formulation,
             question.GetUrl(),
