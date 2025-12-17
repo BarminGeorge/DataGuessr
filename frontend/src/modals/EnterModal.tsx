@@ -2,7 +2,7 @@
 import { usePage } from "../PageContext";
 import { http } from "../api/http";
 import { useState } from "react";
-import defaultImage from './../assets/defaultavatar.jpg';
+import defaultImage from './../assets/defaultavatar.png';
 import { apiService } from "../apiUtils/endPointsServices";
 import { LoggingStatus } from "../App";
 
