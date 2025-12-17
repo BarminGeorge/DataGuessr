@@ -55,9 +55,8 @@ public class GameManager(
             return new OperationResult(false, getQuestionsResult.ErrorMessage);
         Console.WriteLine(getQuestionsResult.ResultObj);
         Console.WriteLine(getQuestionsResult);
-        Task.Run(() => gameCoreService.RunGameCycle(game, roomId, CancellationToken.None))
-            .ContinueWith(t => { }, TaskContinuationOptions.OnlyOnFaulted);
-        
+        Task.Run(() => gameCoreService.RunGameCycle(game, roomId, CancellationToken.None));
+     
         return OperationResult.Ok();
     }
 
