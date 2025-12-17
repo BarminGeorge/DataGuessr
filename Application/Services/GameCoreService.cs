@@ -31,7 +31,7 @@ public class GameCoreService(
             await NotifyRoomAboutNewQuestion(question, game, roomId);
             await Task.Delay(game.QuestionDuration);
             await NotifyRoomAboutCloseQuestion(question, roomId);
-            
+            await Task.Delay(5000);
             var rawAnswer = await answerRepository.LoadAnswersAsync(game.Id, question.Id, CancellationToken.None);
             if (!rawAnswer.Success || rawAnswer.ResultObj == null) 
                 return rawAnswer;
@@ -42,6 +42,7 @@ public class GameCoreService(
             
             await NotifyRoomAboutResults(diff, roomId);
             await NotifyRoomAboutResults(game.CurrentStatistic, roomId);
+            await Task.Delay(10000);
         }
         
         game.FinishGame();  
