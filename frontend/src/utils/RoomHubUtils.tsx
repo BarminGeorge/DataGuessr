@@ -135,6 +135,8 @@ export async function createRoom(
 export async function createGame(
     userId: string | null,
     roomId: string | undefined,
+    mode: GameMode,
+    questionDuration: number, 
     setPage: (page: any) => void) {
 
 
@@ -145,9 +147,9 @@ export async function createGame(
     const result = await gameHubService.createGame({
         userId: userId,
         roomId,
-        mode: GameMode.Default,
+        mode: mode,
         countQuestions: 5,
-        questionDuration: 20
+        questionDuration: questionDuration
     });
 
     console.log(result);

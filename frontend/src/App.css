@@ -308,7 +308,6 @@
     z-index: 1;
 }
 
-
 .row-template {
   display: flex;
   flex-direction: row;
@@ -364,6 +363,14 @@
     flex-direction: column;
     box-sizing: border-box;
 }
+
+.centered-avatar {
+    position: absolute;
+    top: 25%;
+    left: 27%;
+  
+}
+
 
 .hide {
   display: none;

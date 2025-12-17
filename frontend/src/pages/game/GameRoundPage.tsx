@@ -89,7 +89,7 @@ function QuestionDefaultAnswer(props: any) {
     return (
 
         <div className="left-aligment">
-            <div className="left-aligment">
+            
             <Slider
                 aria-label="Small steps"
                 defaultValue={1966}
@@ -108,7 +108,7 @@ function QuestionDefaultAnswer(props: any) {
             />
 
                 <span className="accent-text">{year} год</span>
-            </div>
+            
             <button className="button-primary"
                 onClick={() => {
                     const answer: AnswerDto = { "$type": "datetime", value: new Date(Date.UTC(year, 0, 1)) };
@@ -145,6 +145,7 @@ function QuestionBoolAnswer(props: any) {
                     onClick={() => {
                         const answer: AnswerDto = { "$type": "bool", value: true };
                         sendAnswer(answer, props.game.id, playerId, props.question.questionId);
+                        setIsDisabled(true);
                     }}
                     disabled={isDisabled}
                 >
@@ -165,11 +166,13 @@ function QuestionBoolAnswer(props: any) {
 }
 
 function QuestionAnswer(props: any) {
+    console.log(props);
     if (props.question.gameMode === GameMode.Default) {
         return (<QuestionDefaultAnswer {...props} />);
     } else if (props.question.gameMode === GameMode.BoolMode) {
         return (<QuestionBoolAnswer {...props} />);
     }
+
 }
 
 function QuestionScreen(props: any) {
@@ -219,22 +222,21 @@ function QuestionScreen(props: any) {
 }
 
 export default function GameRoundPage(props: CurrentAppState) {
-    const [question, setQuestion] = useState<NewQuestionNotification>();
     const [correctAnswer, setCorrectAnswer] = useState<any>(null);
-
 
     useEffect(() => {
         if (!props.game) return;
 
         const offQuestion = gameHubService.onNewQuestion(data => {
             console.log(data);
-            setQuestion(data);
+            props.setQuestion(data);
+            
         });
 
         const offQuestionClosed = gameHubService.onQuestionClosed(data => {
             console.log(data);
             const timerId = setTimeout(() => {
-                setQuestion(null);
+                props.setQuestion(null);
             }, 5000);
             setCorrectAnswer(data.correctAnswer.value);
         });
@@ -249,8 +251,14 @@ export default function GameRoundPage(props: CurrentAppState) {
                     score: (pa.score ?? 0) + (scores[pa.playerId]?.points ?? 0)
                 }))
             }));
-            
-            props.setPage("game_leaderboard");
+
+            props.setQuestionNumber(prev => prev + 1);
+            console.log(props.questionNumber, props.game?.questionsCount);
+            if (props.questionNumber + 1 === props.game?.questionsCount) {
+                props.setPage("game_leaderboard_final");
+            } else {
+                props.setPage("game_leaderboard");
+            }
         });
 
         return () => {
@@ -261,11 +269,11 @@ export default function GameRoundPage(props: CurrentAppState) {
     }, [props.game]);
 
 
-    if (question)
+    if (props.question)
         return (
             <div className="global-container">
 
-                <QuestionScreen {...question} correctAnswer={correctAnswer} {...props} />
+                <QuestionScreen {...props} {...props.question} correctAnswer={correctAnswer}  />
             </div>
         );
     return (

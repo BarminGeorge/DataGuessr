@@ -13,6 +13,7 @@ import { useEffect, useState } from "react";
 import { gameHubService } from "./apiUtils/HubServices";
 import type { GameDto, PlayerDto, RoomDto, UserDto } from "./apiUtils/dto";
 import { in_room } from "./utils/RoomHubUtils";
+import type { NewQuestionNotification } from "./apiUtils/notifications";
 
 export enum LoggingStatus {
     NotLogged,
@@ -35,11 +36,15 @@ export interface CurrentAppState {
     game: GameDto | null,
     setGame: (x: any) => void | null,
 
-    //statistics: any,
-    //setStatistics: (x: any) => void | null,
+    question: NewQuestionNotification | null,
+    setQuestion: (x: any) => void | null,
+
+    questionNumber: number | null,
+    setQuestionNumber: (x: any) => void | null
 
     page: any,
     setPage: (x: any) => void | null
+
 };
 
 export function getPlayerId(props: CurrentAppState) {
@@ -52,7 +57,8 @@ export default function App() {
     const [room, setRoom] = useState(null);
     const [game, setGame] = useState(null);
     const [user, setUser] = useState(null);
-    const [statistics, setStatistics] = useState(null);
+    const [question, setQuestion] = useState(null);
+    const [questionNumber, setQuestionNumber] = useState(0);
 
 
     useEffect(() => {
@@ -68,7 +74,17 @@ export default function App() {
 
     const user_id = localStorage.getItem("user_id");
     // Service Locator think how to kill him 
-    const props: CurrentAppState = { loggingStatus, setLoggingStatus, user_id, room, setRoom, user, setUser, game, setGame, page, setPage };
+    const props: CurrentAppState = {
+        loggingStatus, setLoggingStatus,
+        user_id,
+        room, setRoom,
+        user, setUser,
+        game, setGame,
+        page, setPage,
+        question, setQuestion,
+        questionNumber, setQuestionNumber
+
+    };
     console.log(props);
 
     useEffect(() => {
@@ -90,7 +106,7 @@ export default function App() {
             {page === "room" && <LobbyPage {...props} />}
             {page === "game_round" && <GameRoundPage {...props} />}
             {page === "game_leaderboard" && <GameLeaderboard {...props} />}
-            {page === "game_leaderboard_final" && <GameLeaderboardFinal />}
+            {page === "game_leaderboard_final" && <GameLeaderboardFinal {...props} />}
         </div>
     );
 }

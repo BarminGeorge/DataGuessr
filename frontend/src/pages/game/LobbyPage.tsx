@@ -10,6 +10,7 @@ import { RoomPrivacy, type PlayerDto, GameMode } from '../../apiUtils/dto';
 import { usePage } from '../../PageContext';
 import type { CurrentAppState } from '../../App';
 import { leaveRoom, createGame } from '../../utils/RoomHubUtils';
+import { useState } from 'react';
 
 function BpRadio(props: any) {
     return (
@@ -26,36 +27,37 @@ function BpRadio(props: any) {
     );
 }
 
-function CustomizedRadiosGameMode() {
+function CustomizedRadiosGameMode(props: any) {
     return (
         <FormControl>
             <FormLabel id="game-mode-radios">Выберите режим игры</FormLabel>
             <RadioGroup
-                defaultValue="time_guess"
+                defaultValue="0"
                 aria-labelledby="game-mode-radios"
                 name="customized-radios"
+                onChange={(_, value) => props.setMode(Number(value))}
             >
-                <FormControlLabel className="accent-text" value="time_guess" control={<BpRadio />} label="Угадайте время" />
-                <FormControlLabel className="accent-text" disabled value="true_guess" control={<BpRadio />} label="Правда или нет" />
-                <FormControlLabel className="accent-text" disabled value="random_guess" control={<BpRadio />} label="Случайный режим" />
-            </RadioGroup>
+                <FormControlLabel className="accent-text" value="0" control={<BpRadio />} label="Угадайте время" />
+                <FormControlLabel className="accent-text" value="1" control={<BpRadio />} label="Правда или нет" />
+                 </RadioGroup>
         </FormControl>
     );
 }
 
 
-function CustomizedRadiosGameTime() {
+function CustomizedRadiosGameTime(props: any) {
     return (
         <FormControl>
             <FormLabel id="game-time-radios">Выберите время раунда</FormLabel>
             <RadioGroup
-                defaultValue="60sec"
+                defaultValue="90"
                 aria-labelledby="game-time-radios"
                 name="customized-radios"
+                onChange={(_, value) => props.setDuration(Number(value))}
             >
-                <FormControlLabel className="accent-text" value="30sec" control={<BpRadio />} label="30 секунд" />
-                <FormControlLabel className="accent-text" value="60sec" control={<BpRadio />} label="60 секунд" />
-                <FormControlLabel className="accent-text" value="90sec" control={<BpRadio />} label="90 секунд" />
+                <FormControlLabel className="accent-text" value="10" control={<BpRadio />} label="10 секунд" />
+                <FormControlLabel className="accent-text" value="30" control={<BpRadio />} label="30 секунд" />
+                <FormControlLabel className="accent-text" value="90" control={<BpRadio />} label="90 секунд" />
             </RadioGroup>
         </FormControl>
     );
@@ -80,6 +82,9 @@ export default function LobbyPage(props: CurrentAppState) {
 }
 function LobbyPageCreatorView(props: CurrentAppState) {
     const { setPage } = usePage();
+    const [mode, setMode] = useState(GameMode.Default);
+    const [duration, setDuration] = useState(10);
+
     if (props.room == null) {
         alert("undefined error");
         setPage("home");
@@ -114,14 +119,14 @@ function LobbyPageCreatorView(props: CurrentAppState) {
                             <div className="title-text-2">{props.room.inviteCode}</div>
                             <div className="settings-container">
                                 <div className="settings-element">
-                                    <CustomizedRadiosGameMode />
+                                    <CustomizedRadiosGameMode setMode={setMode} />
                                 </div>
                                 <div className="settings-element">
-                                    <CustomizedRadiosGameTime />
+                                    <CustomizedRadiosGameTime setDuration={setDuration} />
                                 </div>
                             </div>
                             <button className="button-primary"
-                                onClick={() => createGame(props.user_id, props.room?.id, setPage)}>Начать</button>
+                                onClick={() => createGame(props.user_id, props.room?.id, mode, duration, setPage)}>Начать</button>
                         </div>
                     </div>
 

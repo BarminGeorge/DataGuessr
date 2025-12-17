@@ -19,12 +19,30 @@ export default function GameLeaderboard(props: CurrentAppState) {
         if (!props.game) return;
 
         const offQuestion = gameHubService.onNewQuestion(data => {
-            console.warn(data);
+            props.setQuestion(data);
+            setPage("game_round");
+        })
+
+        const offLeaderboard = gameHubService.onShowLeaderBoard(data => {
+            console.log(data);
+            const scores = data.statistic.scores;
+            props.setRoom(prev => ({
+                ...prev,
+                players: prev.players.map(pa => ({
+                    ...pa,
+                    score: scores[pa.playerId]?.points ?? 0
+                }))
+            }));
         });
+
+        return () => {
+            offQuestion();
+            offLeaderboard();
+        };
     });
 
 
-    const playerList = props.room.players.sort(p => p.score ?? 0).map(
+    const playerList = props.room.players.sort((a, b) => (b.score ?? 0) - (a.score ?? 0)).map(
         player =>
             <PlayerCard variant="score" username={player.playerName} avatar={player.avatarUrl} score={player.score ?? 0} />);
 
