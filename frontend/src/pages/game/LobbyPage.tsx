@@ -73,7 +73,7 @@ export default function LobbyPage(props: CurrentAppState) {
         setPage("home");
         return;
     }
-    if (props.room.ownerId === props.user_id) {
+    if (props.room.ownerId === props.user?.id) {
         return (<LobbyPageCreatorView {...props} />);
     } else {
         return (<LobbyPageGuestView {...props} />);
@@ -100,8 +100,10 @@ function LobbyPageCreatorView(props: CurrentAppState) {
     return (
         <div className="global-container">
             <Header variant="logo-and-avatar-and-interactive"
-                interact_action={() => leaveRoom(props.user_id, props.room?.id, setPage, props.setRoom)}
+                interact_action={() => leaveRoom(props.user?.id || "", props.room?.id, setPage, props.setRoom)}
                 interact_label={"Leave lobby"}
+                playerName={props.user?.playerName}
+                avatarUrl={props.user?.avatarUrl}
             />
             <div className="main-container">
 
@@ -126,7 +128,7 @@ function LobbyPageCreatorView(props: CurrentAppState) {
                                 </div>
                             </div>
                             <button className="button-primary"
-                                onClick={() => createGame(props.user_id, props.room?.id, mode, duration, setPage)}>Начать</button>
+                                onClick={() => createGame(props.user?.id, props.room?.id, mode, duration, setPage)}>Начать</button>
                         </div>
                     </div>
 
@@ -151,7 +153,7 @@ function LobbyPageGuestView(props: CurrentAppState) {
     return (
         <div className="global-container">
             <Header variant="logo-and-avatar-and-interactive"
-                interact_action={() => leaveRoom(props.user_id, props.room?.id, setPage, props.setRoom)}
+                interact_action={() => leaveRoom(props.user?.id, props.room?.id, setPage, props.setRoom)}
                 interact_label={"Leave lobby"}
             />
             <div className="main-container">

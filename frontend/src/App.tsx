@@ -25,8 +25,6 @@ export interface CurrentAppState {
     loggingStatus: LoggingStatus,
     setLoggingStatus: (x: any) => void,
 
-    user_id: string | null,
-
     user: UserDto | null,
     setUser: (x: any) => void | null,
 
@@ -48,7 +46,7 @@ export interface CurrentAppState {
 };
 
 export function getPlayerId(props: CurrentAppState) {
-    return props.room?.players.find((x: PlayerDto) => x.userId == props.user_id)?.playerId;
+    return props.room?.players.find((x: PlayerDto) => x.userId == props.user?.id)?.playerId;
 }
 
 export default function App() {
@@ -69,14 +67,9 @@ export default function App() {
     }, []);
 
 
-
-
-
-    const user_id = localStorage.getItem("user_id");
     // Service Locator think how to kill him 
     const props: CurrentAppState = {
         loggingStatus, setLoggingStatus,
-        user_id,
         room, setRoom,
         user, setUser,
         game, setGame,
@@ -102,7 +95,7 @@ export default function App() {
             {page === "home" && <Home {...props} />}
             {page === "login" && <LoginPage {...props} />}
             {page === "registration" && <RegistrationPage {...props} />}
-            {page === "profile" && <ProfilePage />}
+            {page === "profile" && <ProfilePage  {...props} />}
             {page === "room" && <LobbyPage {...props} />}
             {page === "game_round" && <GameRoundPage {...props} />}
             {page === "game_leaderboard" && <GameLeaderboard {...props} />}

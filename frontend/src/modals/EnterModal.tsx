@@ -4,13 +4,15 @@ import { http } from "../api/http";
 import { useState } from "react";
 import defaultImage from './../assets/defaultavatar.jpg';
 import { apiService } from "../apiUtils/endPointsServices";
-import { LoggingStatus } from "../App";
+import { LoggingStatus, type CurrentAppState } from "../App";
+import type { UserDto } from "../apiUtils/dto";
 
 
 async function handleGuest(
     playerName: string,
     avatarUrl: any,
-    setLoggingStatus: (status: any) => void) {
+    setLoggingStatus: (status: any) => void,
+    props: CurrentAppState) {
 
     const avatarFile = await urlToFile(avatarUrl, "avatar.jpg");
     const data = { playerName, avatar: avatarFile };
@@ -21,8 +23,10 @@ async function handleGuest(
         return;
     }
     setLoggingStatus(LoggingStatus.Guest);
-    if (result.resultObj)
-        localStorage.setItem("user_id", result.resultObj?.id);
+    const user: UserDto = { id : result.resultObj?.id || 
+        "handleGuest error", avatarUrl, playerName
+    }
+    props.setUser(user);
 }
 
 async function urlToFile(url: string, filename: string): Promise<File> {
@@ -62,7 +66,7 @@ export default function EnterModal(props: any) {
                         </div>
                     </div>
                     <div className="centered-aligment">
-                        <button className="button-primary" onClick={() => handleGuest(playerName, avatar, props.setLoggingStatus)}>Продолжить как гость</button>
+                        <button className="button-primary" onClick={() => handleGuest(playerName, avatar, props.setLoggingStatus, props)}>Продолжить как гость</button>
                     </div>
                 </div>
             </div>

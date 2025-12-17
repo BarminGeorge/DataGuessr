@@ -29,7 +29,7 @@ export default function HomePage(props: CurrentAppState) {
 
             {/* <button className="button-primary" onClick={() => setPage("game")}>В Игре</button>;   */}
             <div className={`modal centered-vertical-aligment ${checkLogging(props.loggingStatus) ? 'hide' : ''}`}>
-                <EnterModal setLoggingStatus={props.setLoggingStatus} />
+                <EnterModal {...props} />
             </div>
 
             <div className={`content-wrapper ${checkLogging(props.loggingStatus) ? "" : "blur"}`}>
@@ -38,8 +38,10 @@ export default function HomePage(props: CurrentAppState) {
                 <Header variant={props.loggingStatus == LoggingStatus.Logged ?
                     "logo-and-avatar-and-interactive"
                     : "logo-and-login-button"}
-                    interact_action={() => createRoom(props.user_id, setPage, props.room, props.setRoom)}
+                    interact_action={() => createRoom(props.user?.id, setPage, props.room, props.setRoom)}
                     interact_label={"Create lobby"}
+                    playerName={props.user?.playerName}
+                    avatarUrl={props.user?.avatarUrl}
                 />
 
                 <div className="main-container">
@@ -73,7 +75,7 @@ export default function HomePage(props: CurrentAppState) {
 
                             <button
                                 className="button-primary"
-                                onClick={() => joinRoomByCode(props.user_id, roomCode, setPage, props.room, props.setRoom)}
+                                onClick={() => joinRoomByCode(props.user?.id, roomCode, setPage, props.room, props.setRoom)}
                             >
                                 Присоединиться
                             </button>
@@ -83,7 +85,7 @@ export default function HomePage(props: CurrentAppState) {
 
                             <button
                                 className="button-primary"
-                                onClick={() => findRandomRoom(props.user_id, setPage, props.room, props.setRoom)}
+                                onClick={() => findRandomRoom(props.user?.id, setPage, props.room, props.setRoom)}
                             >
                                 Случайная игра
                             </button>

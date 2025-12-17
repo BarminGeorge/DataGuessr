@@ -1,5 +1,9 @@
 
 export default async function fetchImageUrl(url: string): Promise<string> {
+    if (url.startsWith("blob:")) {
+        return url;
+    }
+
     if (!url)
         return "";
     const res = await fetch("https://fiitguesser.ru" + url);

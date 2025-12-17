@@ -216,8 +216,8 @@
 
 .picture-xl-container {
   background-color: #FFFFFF;
-  min-width: 30vw;
-  min-height: 50vh;
+  min-width: 35vw;
+  min-height: 10vh;
   max-height: 55vh;
   border-radius: 2rem;
   
@@ -233,7 +233,7 @@
 .default-picture {
   max-width: 100%;
   max-height: 100%;
-  object-fit: contain;
+  object-fit: cover;
   display: block;
   margin-left: auto;
   margin-right: auto;

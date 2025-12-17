@@ -24,13 +24,6 @@ async function handleRegistration(
         return;
     }
 
-
-    if (result.resultObj) {
-        localStorage.setItem("user_id", result.resultObj?.id);
-        localStorage.setItem("player_name", result.resultObj?.playerName);
-        localStorage.setItem("avatar_url", result.resultObj?.avatarUrl);
-    }
-
     const user: UserDto = { id: result.resultObj?.id, avatarUrl: result.resultObj?.avatarUrl, playerName: result.resultObj?.playerName }
     props.setUser(user);
     props.setLoggingStatus(1);

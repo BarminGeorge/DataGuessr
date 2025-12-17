@@ -4,6 +4,9 @@ import '../App.css';
 import { usePage } from "../PageContext";
 import { CircularProgress } from "@mui/material";
 import fetchImageUrl from "./ImageDownloader";
+import type { CurrentAppState } from "../App";
+
+
 
 export default function Header(props: any) {
     if (props.variant === "logo-and-login-button") {
@@ -12,7 +15,7 @@ export default function Header(props: any) {
         );
     } else if (props.variant === "logo-and-avatar-and-interactive") {
         return (
-            <HeaderWithLogoAndAvatarAndInteractive props={props} />
+            <HeaderWithLogoAndAvatarAndInteractive {...props} />
         );
     } else if (props.variant === "logo-and-timer") {
         return (
@@ -50,12 +53,11 @@ function HeaderWithLogoAndLoginButton() {
 
 function HeaderWithLogoAndAvatarAndInteractive(props: any) {
 
-    props = props.props;
+    //props = props.props;
 
     const { setPage } = usePage();
-    const playerName = localStorage.getItem("player_name");
-    const avatarUrl =
-        localStorage.getItem("avatar_url") ?? "";
+    const playerName = props.playerName;
+    const avatarUrl = props.avatarUrl ?? ""
 
     const [avatar, setAvatar] = useState<string>("src/assets/defaultavatar.jpg");
 

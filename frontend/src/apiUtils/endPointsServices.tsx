@@ -59,7 +59,7 @@ class ApiService {
         formData.append('avatar', data.avatar);
 
         try {
-            const response = await http.post<UserDto>(`/api/${data.userId}/userUpdate`, formData, {
+            const response = await http.post<UserDto>(`/api/userUpdate`, formData, {
                 headers: {
                     'Content-Type': 'multipart/form-data',
                 },
