@@ -72,22 +72,38 @@ export default function EnterModal(props: any) {
                 <div className="centered-vertical-aligment">
                     <div className="secondary-container">
 
-                        <div className="left-aligment" style={{ display: 'flex', flexDirection: 'column', alignItems: 'center', gap: '10px' }}>
+                        <div className="left-aligment" style={{ display: 'flex', flexDirection: 'column', alignItems: 'center', gap: '20px' }}>
 
-                            <img
-                                src={avatar}
-                                alt="avatar"
-                                className="w-10 h-10 rounded-full border border-gray-300"
-                                style={{ width: '100px', height: '100px', objectFit: 'cover' }}
-                            />
+                            <div style={{ position: 'relative', width: '100px', height: '100px' }}>
+                                <img
+                                    src={avatar}
+                                    alt="avatar"
+                                    className="w-10 h-10 rounded-full border border-gray-300"
+                                    style={{ width: '100%', height: '100%', objectFit: 'cover' }}
+                                />
 
-                            <button
-                                className="button-secondary"
-                                onClick={handleChangeAvatar}
-                                style={{ width: '40px', height: '40px', fontSize: '20px', padding: 0, display: 'flex', justifyContent: 'center', alignItems: 'center' }}
-                            >
-                                ↻
-                            </button>
+                                <button
+                                    className="button-secondary"
+                                    onClick={handleChangeAvatar}
+                                    style={{
+                                        position: 'absolute',
+                                        bottom: '-5px',
+                                        right: '-5px',
+                                        width: '32px',
+                                        height: '32px',
+                                        borderRadius: '50%',
+                                        padding: 0,
+                                        display: 'flex',
+                                        justifyContent: 'center',
+                                        alignItems: 'center',
+                                        fontSize: '18px',
+                                        lineHeight: 1,
+                                        boxShadow: '0 2px 4px rgba(0,0,0,0.2)'
+                                    }}
+                                >
+                                    ↻
+                                </button>
+                            </div>
 
                             <input
                                 type="text"
