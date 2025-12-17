@@ -23,10 +23,12 @@ public class GameCoreService(
         Console.WriteLine(game.Questions);
         foreach (var question in game.Questions)
         {
+            Console.WriteLine(question);
             await NotifyRoomAboutNewQuestion(question, game, roomId);
+            Console.WriteLine(game.QuestionDuration);
             await Task.Delay(game.QuestionDuration, ct);
             await NotifyRoomAboutCloseQuestion(question, roomId);
-            
+            Console.WriteLine(game.QuestionDuration);
             var rawAnswer = await answerRepository.LoadAnswersAsync(game.Id, question.Id, ct);
             if (!rawAnswer.Success || rawAnswer.ResultObj == null) 
                 return rawAnswer;
