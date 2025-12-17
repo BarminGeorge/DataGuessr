@@ -17,17 +17,7 @@ public partial class AppHub
         var result = await roomManager.CreateRoomAsync(request.UserId, request.Privacy, ct, request.Password, request.MaxPlayers);
         if (result is { Success: true, ResultObj: not null })
         {
-            var connectionServiceResult = await connectionService.AddConnection(Context.ConnectionId, request.UserId, result.ResultObj.Id, ct);
-            if (!connectionServiceResult.Success)
-                return connectionServiceResult.ConvertToOperationResult<RoomDto>();
-
-            await Groups.AddToGroupAsync(Context.ConnectionId, $"room-{result.ResultObj.Id}", ct);
-            var joinOperation = () => roomManager.JoinRoomAsync(result.ResultObj.Id, request.UserId, ct, request.Password);
-            var joinResult = await joinOperation.WithRetry(delay: TimeSpan.FromSeconds(0.15));
-            if (!joinResult.Success || joinResult.ResultObj is null)
-                return joinResult.ConvertToOperationResult<RoomDto>();
-            
-            return OperationResult<RoomDto>.Ok(joinResult.ResultObj.ToDto());
+            return await AddPlayerToRoomAsync(Context.ConnectionId, request.UserId, result.ResultObj.Id, ct, request.Password);
         }
         
         return result.ConvertToOperationResult<RoomDto>();
@@ -44,19 +34,7 @@ public partial class AppHub
         if (!roomResult.Success || roomResult.ResultObj is null)
             return roomResult.ConvertToOperationResult<RoomDto>();
         
-        var roomId = roomResult.ResultObj.Id;
-        var connectionServiceResult = await connectionService.AddConnection(Context.ConnectionId, request.UserId, roomId, ct);
-        if (!connectionServiceResult.Success)
-            return connectionServiceResult.ConvertToOperationResult<RoomDto>();
-
-        await Groups.AddToGroupAsync(Context.ConnectionId, $"room-{roomId}", ct);
-        
-        var joinOperation = () => roomManager.JoinRoomAsync(roomId, request.UserId, ct, request.Password);
-        var joinResult = await joinOperation.WithRetry(delay: TimeSpan.FromSeconds(0.15));
-        if (!joinResult.Success || joinResult.ResultObj is null)
-            return joinResult.ConvertToOperationResult<RoomDto>();
-            
-        return OperationResult<RoomDto>.Ok(joinResult.ResultObj.ToDto());
+        return await AddPlayerToRoomAsync(Context.ConnectionId, request.UserId, roomResult.ResultObj.Id, ct, request.Password);
     }
 
     public async Task<OperationResult> LeaveRoom(LeaveRoomRequest request)
@@ -129,5 +107,22 @@ public partial class AppHub
         }
 
         return result;
+    }
+    
+    private async Task<OperationResult<RoomDto>> AddPlayerToRoomAsync(string connectionId, Guid userId, Guid roomId, CancellationToken ct,
+        string? password)
+    {
+        var connectionServiceResult = await connectionService.AddConnection(connectionId, userId, roomId, ct);
+        if (!connectionServiceResult.Success)
+            return connectionServiceResult.ConvertToOperationResult<RoomDto>();
+
+        await Groups.AddToGroupAsync(Context.ConnectionId, $"room-{roomId}", ct);
+        
+        var joinOperation = () => roomManager.JoinRoomAsync(roomId, userId, ct, password);
+        var joinResult = await joinOperation.WithRetry(delay: TimeSpan.FromSeconds(0.15));
+        if (!joinResult.Success || joinResult.ResultObj is null)
+            return joinResult.ConvertToOperationResult<RoomDto>();
+            
+        return OperationResult<RoomDto>.Ok(joinResult.ResultObj.ToDto());
     }
 }
