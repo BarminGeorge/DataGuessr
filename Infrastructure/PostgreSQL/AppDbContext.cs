@@ -1,4 +1,6 @@
-﻿using Domain.Entities;
+﻿using System.Text.Json;
+using Domain.Entities;
+using Domain.ValueTypes;
 using Infrastructure.Interfaces;
 using Microsoft.EntityFrameworkCore;
 
@@ -139,7 +141,11 @@ public class AppDbContext : DbContext, IDataContext
 
             entity.Property(q => q.RightAnswer)
                 .HasColumnType("jsonb")
-                .IsRequired();
+                .IsRequired()
+                .HasConversion(
+                    v => JsonSerializer.Serialize(v, (JsonSerializerOptions)null),
+                    v => JsonSerializer.Deserialize<Answer>(v, (JsonSerializerOptions)null)
+                );;
 
             entity.Property(q => q.Mode)
                 .IsRequired()

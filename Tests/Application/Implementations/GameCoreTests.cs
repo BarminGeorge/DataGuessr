@@ -43,7 +43,6 @@ public class GameCoreServiceTests
         
         service = new GameCoreService(
             notificationService, 
-            questionService, 
             evaluationService, 
             answerRepository
         );
