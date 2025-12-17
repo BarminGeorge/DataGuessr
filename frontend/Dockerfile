@@ -1,9 +1,9 @@
 ﻿FROM node:18-alpine AS builder
 WORKDIR /app
 COPY package*.json ./
-RUN npx install
+RUN npm install
 COPY . .
-RUN npx run build
+RUN npm run build
 
 
 FROM caddy:latest
