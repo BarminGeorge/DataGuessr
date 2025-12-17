@@ -8,4 +8,4 @@ RUN npm run build
 
 FROM caddy:latest
 
-COPY --from=builder /app/build /srv
+COPY --from=builder /app/dist /srv
