@@ -7,7 +7,8 @@ import { gameHubService } from "../../apiUtils/HubServices";
 import { GameMode, type AnswerDto, type QuestionDto, type RoomDto, type PlayerDto } from "../../apiUtils/dto";
 import type { NewQuestionNotification } from "../../apiUtils/notifications";
 import fetchImageUrl from "../../components/ImageDownloader";
-
+import defaultAvatarImg from "../../assets/defaultavatar.png";
+import tronImg from "../../assets/tron.png";
 function valuetext(value: number) {
     return `${value}`;
 }
@@ -176,7 +177,7 @@ function QuestionAnswer(props: any) {
 }
 
 function QuestionScreen(props: any) {
-    const [imageSrc, setimageSrc] = useState<string>("src/assets/defaultavatar.jpg");
+    const [imageSrc, setimageSrc] = useState<string>(defaultAvatarImg);
 
     if (props.game == null) {
         return;

@@ -51,7 +51,7 @@ export default function EnterModal(props: any) {
                         <div className="left-aligment">
 
                             <img
-                                src="src/assets/defaultavatar.jpg"
+                                src={defaultImage}
                                 alt="avatar"
                                 className="w-10 h-10 rounded-full border border-gray-300"
 

@@ -11,6 +11,7 @@ import { usePage } from '../../PageContext';
 import type { CurrentAppState } from '../../App';
 import { leaveRoom, createGame } from '../../utils/RoomHubUtils';
 import { useState } from 'react';
+import defaultAvatarImg from "../../assets/defaultavatar.png";
 
 function BpRadio(props: any) {
     return (
@@ -173,7 +174,7 @@ function LobbyPageGuestView(props: CurrentAppState) {
                             <div className="settings-container">
                                 <div className="picture-xl-container">
                                     <img
-                                        src="src/assets/defaultavatar.jpg"
+                                        src={defaultAvatarImg}
                                         className="default-picture"
                                     />
                                 </div>

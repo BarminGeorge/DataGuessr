@@ -4,7 +4,8 @@ import PlayerCard from "../../components/Cards";
 import type { CurrentAppState } from "../../App";
 import { usePage } from "../../PageContext";
 import fetchImageUrl from "../../components/ImageDownloader";
-
+import defaultAvatarImg from "../../assets/defaultavatar.png";
+import tronImg from "../../assets/tron.png";
 export default function GameLeaderboardFinal(props: CurrentAppState) {
     const { setPage } = usePage();
 
@@ -19,7 +20,7 @@ export default function GameLeaderboardFinal(props: CurrentAppState) {
         player =>
             <PlayerCard variant="score" username={player.playerName} avatar={player.avatarUrl} score={player.score ?? 0} />);
 
-    const [avatar, setAvatar] = useState<string>("src/assets/defaultavatar.jpg");
+    const [avatar, setAvatar] = useState<string>(defaultAvatarImg);
     const avatarUrl = props.room.players.sort((a, b) => (b.score ?? 0) - (a.score ?? 0)).at(0)?.avatarUrl;
     useEffect(() => {
         let cancelled = false;
@@ -46,7 +47,7 @@ export default function GameLeaderboardFinal(props: CurrentAppState) {
 
 
                             <img
-                                src="src/assets/tron.png"
+                                src={tronImg}
                                 className="default-picture"
                             />
                             <img

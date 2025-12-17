@@ -5,7 +5,7 @@ import { usePage } from "../PageContext";
 import { CircularProgress } from "@mui/material";
 import fetchImageUrl from "./ImageDownloader";
 import type { CurrentAppState } from "../App";
-
+import defaultImage from './../assets/defaultavatar.png';
 
 
 export default function Header(props: any) {
@@ -59,7 +59,7 @@ function HeaderWithLogoAndAvatarAndInteractive(props: any) {
     const playerName = props.playerName;
     const avatarUrl = props.avatarUrl ?? ""
 
-    const [avatar, setAvatar] = useState<string>("src/assets/defaultavatar.jpg");
+    const [avatar, setAvatar] = useState<string>(defaultImage);
 
     useEffect(() => {
         let cancelled = false;

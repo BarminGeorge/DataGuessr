@@ -1,5 +1,7 @@
 import React, { useEffect, useState } from "react";
 import fetchImageUrl from "./ImageDownloader";
+import defaultImage from './../assets/defaultavatar.png';
+import krestImage from './../assets/krest.png';
 
 export default function PlayerCard(props: any) {
     switch (props.variant) {
@@ -21,7 +23,7 @@ export default function PlayerCard(props: any) {
 }
 
 function LobbyCreatorCard(props: any) {
-    const [avatar, setAvatar] = useState<string>("src/assets/defaultavatar.jpg");
+    const [avatar, setAvatar] = useState<string>(defaultImage);
 
     useEffect(() => {
         let cancelled = false;
@@ -46,7 +48,7 @@ function LobbyCreatorCard(props: any) {
             />
             {props.username}
             <img
-                src="src/assets/krest.png"
+                src={krestImage}
                 alt="avatar"
                 className="w-8 h-8 rounded-full border border-gray-300"
                 onClick={props.action}
@@ -57,7 +59,7 @@ function LobbyCreatorCard(props: any) {
 }
 
 function LobbyViewerCard(props: any) {
-    const [avatar, setAvatar] = useState<string>("src/assets/defaultavatar.jpg");
+    const [avatar, setAvatar] = useState<string>(defaultImage);
 
     useEffect(() => {
         let cancelled = false;
@@ -90,7 +92,7 @@ function ScoreCard(props: any) {
     return (
         <div className="score-card">
             <img
-                src="src/assets/defaultavatar.jpg"
+                src={defaultImage}
                 alt="avatar"
                 className="avatar-preview "
             />
