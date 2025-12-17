@@ -136,7 +136,7 @@ public class UserEndpointsTests
         var userId = Guid.NewGuid();
         
         A.CallTo(() => userServiceFake.UpdateUser(A<Guid>._, A<string>._, A<IFormFile>._, A<CancellationToken>._))
-            .Returns(new OperationResult<string>(true, A<string>._));
+            .Returns(new OperationResult<string>(true, ""));
 
         using var client = factory.CreateClient();
     
@@ -166,7 +166,7 @@ public class UserEndpointsTests
         var userId = Guid.NewGuid();
         
         A.CallTo(() => userServiceFake.UpdateUser(A<Guid>._, A<string>._, A<IFormFile>._, A<CancellationToken>._))
-            .Returns(new OperationResult<string>(true, ""));
+            .Returns(OperationResult<string>.Error.InternalError());
 
         using var client = factory.CreateClient();
     
