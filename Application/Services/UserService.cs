@@ -43,15 +43,18 @@ public class UserService(
         return OperationResult<(string token, User userId)>.Ok(result);
     }
     
-    public async Task<OperationResult> UpdateUser(Guid userId, string playerName, IFormFile avatar,  CancellationToken ct)
+    public async Task<OperationResult<string>> UpdateUser(Guid userId, string playerName, IFormFile avatar,  CancellationToken ct)
     {
         var operation = () => imageRepository.SaveUserAvatarAsync(avatar, ct);
         var avatarResult = await operation.WithRetry(3, TimeSpan.FromSeconds(0.2));
         if (!avatarResult.Success || avatarResult.ResultObj == null)
-            return avatarResult;
-
+            return avatarResult.ConvertToOperationResult<string>();
+     
         var updateOperation = () => userRepository.UpdateUserAsync(userId, avatarResult.ResultObj, playerName, ct);
-        return await updateOperation.WithRetry(3, TimeSpan.FromSeconds(0.15));
+        var updateOperationResult = await updateOperation.WithRetry(3, TimeSpan.FromSeconds(0.15));
+        if (!updateOperationResult.Success)
+            return updateOperationResult.ConvertToOperationResult<string>();
+        return new OperationResult<string>(true, avatarResult.ResultObj.Filename);
     }
 
     public async Task<OperationResult<User>> CreateGuest(string playerName, IFormFile image, CancellationToken ct)
