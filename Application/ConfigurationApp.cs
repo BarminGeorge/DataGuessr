@@ -1,6 +1,8 @@
 using Application.Endpoints;
 using Application.EndPoints;
 using Application.Endpoints.Hubs;
+using Application.Interfaces;
+using Hangfire;
 using Infrastructure.PostgreSQL;
 using Microsoft.AspNetCore.CookiePolicy;
 using Microsoft.EntityFrameworkCore;
@@ -36,7 +38,7 @@ public static class ConfigurationApp
         app.UseAuthorization();
         app.UseAntiforgery();
 
-//app.UseHangfireDashboard("/hangfire");
+        app.UseHangfireDashboard("/hangfire");
 
         using (var scope = app.Services.CreateScope())
         {
@@ -47,15 +49,15 @@ public static class ConfigurationApp
         app.AddMappedEndPoints();
         app.MapControllers();
 
-//RecurringJob.AddOrUpdate<IGuestCleanupService>(
-        //"cleanup-orphaned-guests",
-        //service => service.CleanupOrphanedGuestsAsync(CancellationToken.None),
-        //Cron.Hourly);
+        RecurringJob.AddOrUpdate<IGuestCleanupService>(
+          "cleanup-orphaned-guests",
+        service => service.CleanupOrphanedGuestsAsync(CancellationToken.None),
+                Cron.Hourly);
 
-//RecurringJob.AddOrUpdate<IGuestCleanupService>(
-        //"cleanup-expired-rooms",
-        //service => service.CleanupExpiredRoomsAsync(CancellationToken.None),
-        //Cron.Daily);
+        RecurringJob.AddOrUpdate<IGuestCleanupService>(
+        "cleanup-expired-rooms",
+        service => service.CleanupExpiredRoomsAsync(CancellationToken.None),
+                Cron.Daily);
     }
     
     private static void AddMappedEndPoints(this IEndpointRouteBuilder app)

@@ -52,6 +52,7 @@ public partial class AppHub
             return OperationResult<RoomDto>.Error.Validation(error);
 
         var result = await gameManager.FinishGameAsync(request.UserId, request.RoomId, ct);
+        
         return result is { Success: true, ResultObj: not null }
             ? OperationResult<RoomDto>.Ok(result.ResultObj.ToDto())
             : result.ConvertToOperationResult<RoomDto>();
