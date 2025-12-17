@@ -11,7 +11,6 @@ using Microsoft.Extensions.Logging;
 
 namespace Tests.Application.Implementations;
 
-[TestFixture]
 public class GameManagerTests
 {
     protected IGameCoreService GameCoreService;
