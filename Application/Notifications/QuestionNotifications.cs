@@ -9,7 +9,7 @@ public record NewQuestionNotification(QuestionDto Question)
     public override string MethodName => "QuestionWasAsked";
 }
 
-public record QuestionClosedNotification(Answer CorrectAnswer)
+public record QuestionClosedNotification(AnswerDto CorrectAnswer)
     : GameNotification
 {
     public override string MethodName => "QuestionClosed";

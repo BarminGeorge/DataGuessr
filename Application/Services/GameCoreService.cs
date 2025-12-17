@@ -61,7 +61,7 @@ public class GameCoreService(
 
     private async Task NotifyRoomAboutCloseQuestion(Question question, Guid roomId)
     {
-        var closedQuestionNotification = new QuestionClosedNotification(question.RightAnswer);
+        var closedQuestionNotification = new QuestionClosedNotification(question.RightAnswer.ToDto());
         var operation = () => notificationService.NotifyGameRoomAsync(roomId,closedQuestionNotification);
         await operation.WithRetry(delay: TimeSpan.FromSeconds(0.2));
     }
