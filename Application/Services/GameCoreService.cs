@@ -41,6 +41,7 @@ public class GameCoreService(
             var diff = game.CurrentStatistic.Diff(oldStatistic);
             
             await NotifyRoomAboutResults(diff, roomId);
+            await Task.Delay(1000);
             await NotifyRoomAboutResults(game.CurrentStatistic, roomId);
             await Task.Delay(10000);
         }
