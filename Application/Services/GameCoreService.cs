@@ -20,9 +20,11 @@ public class GameCoreService(
         game.StartGame();
         
         game.CurrentStatistic = new Statistic();
+        Console.WriteLine("RunGameCycle");
         Console.WriteLine(game.Questions);
         foreach (var question in game.Questions)
         {
+            Console.WriteLine("RunGameCycle");
             Console.WriteLine(question);
             await NotifyRoomAboutNewQuestion(question, game, roomId);
             Console.WriteLine(game.QuestionDuration);
