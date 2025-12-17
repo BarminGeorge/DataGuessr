@@ -13,8 +13,7 @@ public class DesignTimeDbContextFactory : IDesignTimeDbContextFactory<AppDbConte
             .SetBasePath(Path.Combine(Directory.GetCurrentDirectory(), "..", "Application"))
             .AddJsonFile("appsettings.json")
             .Build();
-        var builderNpgsql = new NpgsqlDataSourceBuilder();
-        builderNpgsql.EnableDynamicJson();
+        
         var optionsBuilder = new DbContextOptionsBuilder<AppDbContext>();
         optionsBuilder.UseNpgsql(configuration.GetConnectionString("DefaultConnection"));
 

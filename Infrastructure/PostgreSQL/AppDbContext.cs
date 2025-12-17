@@ -145,7 +145,7 @@ public class AppDbContext : DbContext, IDataContext
                 .HasConversion(
                     v => JsonSerializer.Serialize(v, (JsonSerializerOptions)null),
                     v => JsonSerializer.Deserialize<Answer>(v, (JsonSerializerOptions)null)
-                );;
+                );
 
             entity.Property(q => q.Mode)
                 .IsRequired()
@@ -238,6 +238,10 @@ public class AppDbContext : DbContext, IDataContext
 
             entity.Property(pa => pa.Answer)
                 .HasColumnType("jsonb")
+                .HasConversion(
+                    v => JsonSerializer.Serialize(v, (JsonSerializerOptions)null),
+                    v => JsonSerializer.Deserialize<Answer>(v, (JsonSerializerOptions)null)
+                )
                 .IsRequired();
 
             entity.HasIndex(pa => new { pa.GameId, pa.QuestionId, pa.PlayerId }).IsUnique();
