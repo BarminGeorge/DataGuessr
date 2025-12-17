@@ -20,7 +20,7 @@ public class GameCoreService(
         game.StartGame();
         
         game.CurrentStatistic = new Statistic();
-        
+        Console.WriteLine(game.Questions);
         foreach (var question in game.Questions)
         {
             await NotifyRoomAboutNewQuestion(question, game, roomId);

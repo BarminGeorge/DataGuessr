@@ -53,6 +53,8 @@ public class GameManager(
         var getQuestionsResult = await getQuestions.WithRetry(delay: TimeSpan.FromSeconds(0.15));
         if (!getQuestionsResult.Success || getQuestionsResult.ResultObj == null)
             return new OperationResult(false, getQuestionsResult.ErrorMessage);
+        Console.WriteLine(getQuestionsResult.ResultObj);
+        Console.WriteLine(getQuestionsResult);
         Task.Run(() => gameCoreService.RunGameCycle(game, roomId, ct))
             .ContinueWith(t => { }, TaskContinuationOptions.OnlyOnFaulted);
         
