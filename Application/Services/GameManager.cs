@@ -10,11 +10,11 @@ using Infrastructure.Interfaces;
 namespace Application.Services;
 
 public class GameManager(
-    IGameCoreService gameCoreService,
     IRoomRepository roomRepository, 
     INotificationService notificationService,
     IQuestionService questionService,
-    IGameRepository gameRepository)
+    IGameRepository gameRepository,
+    IServiceScopeFactory scopeFactory)
     : IGameManager
 {
     private static bool IsOwnerRoom(Room room, Guid userId) => room.Owner == userId;
@@ -49,17 +49,19 @@ public class GameManager(
 
         var game = getGameResult.ResultObj;
 
-        var getQuestions = () => questionService.GetAllQuestionsAsync(game, ct);
-        var getQuestionsResult = await getQuestions.WithRetry(delay: TimeSpan.FromSeconds(0.15));
-        if (!getQuestionsResult.Success || getQuestionsResult.ResultObj == null)
-            return new OperationResult(false, getQuestionsResult.ErrorMessage);
-        Console.WriteLine(getQuestionsResult.ResultObj);
-        Console.WriteLine(getQuestionsResult);
-        Task.Run(() => gameCoreService.RunGameCycle(game, roomId, ct))
-            .ContinueWith(t =>
+        _ = Task.Run(async () =>
+        {
+            using var scope = scopeFactory.CreateScope();
+            try
             {
-                Console.WriteLine(t.Exception);
-            }, TaskContinuationOptions.OnlyOnFaulted);
+                var gameCoreService = scope.ServiceProvider.GetRequiredService<IGameCoreService>();
+                await gameCoreService.RunGameCycle(game, roomId);
+            }
+            catch (Exception ex)
+            {
+                Console.WriteLine($"Game cycle failed for room {roomId}: {ex}");
+            }
+        }, ct);
         
         return OperationResult.Ok();
     }

@@ -10,28 +10,29 @@ namespace Application.Services;
 
 public class GameCoreService(
     INotificationService notificationService,
+    IQuestionService questionService,
     IEvaluationService evaluationService,
     IPlayerAnswerRepository answerRepository)
     : IGameCoreService
 {
     
-    public async Task<OperationResult> RunGameCycle(Game game, Guid roomId, CancellationToken ct)
+    public async Task<OperationResult> RunGameCycle(Game game, Guid roomId)
     {
         game.StartGame();
         
+        var getQuestionsResult = await questionService.GetAllQuestionsAsync(game, CancellationToken.None);
+        if (!getQuestionsResult.Success || getQuestionsResult.ResultObj == null)
+            return getQuestionsResult;
+        
         game.CurrentStatistic = new Statistic();
-        Console.WriteLine("RunGameCycle");
-        Console.WriteLine(game.Questions);
-        foreach (var question in game.Questions)
+        
+        foreach (var question in getQuestionsResult.ResultObj)
         {
-            Console.WriteLine("RunGameCycle");
-            Console.WriteLine(question);
             await NotifyRoomAboutNewQuestion(question, game, roomId);
-            Console.WriteLine(game.QuestionDuration);
-            await Task.Delay(game.QuestionDuration, ct);
+            await Task.Delay(game.QuestionDuration);
             await NotifyRoomAboutCloseQuestion(question, roomId);
-            Console.WriteLine(game.QuestionDuration);
-            var rawAnswer = await answerRepository.LoadAnswersAsync(game.Id, question.Id, ct);
+            
+            var rawAnswer = await answerRepository.LoadAnswersAsync(game.Id, question.Id, CancellationToken.None);
             if (!rawAnswer.Success || rawAnswer.ResultObj == null) 
                 return rawAnswer;
 

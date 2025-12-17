@@ -19,7 +19,7 @@ public class GameManagerTests
     protected INotificationService NotificationService;
     protected IQuestionService QuestionService;
     protected IGameRepository GameRepository;
-
+    protected IServiceScopeFactory ServiceScopeFactory;
 
     protected GameManager GameManager;
     
@@ -31,9 +31,10 @@ public class GameManagerTests
         NotificationService = A.Fake<INotificationService>();
         QuestionService = A.Fake<IQuestionService>();
         GameRepository = A.Fake<IGameRepository>();
+        ServiceScopeFactory = A.Fake<IServiceScopeFactory>();
         A.Fake<ILogger<GameManager>>();
 
-        GameManager = new GameManager(GameCoreService, RoomRepository, NotificationService, QuestionService, GameRepository);
+        GameManager = new GameManager(RoomRepository, NotificationService, QuestionService, GameRepository, ServiceScopeFactory);
     }
 }
 
@@ -95,7 +96,7 @@ public class StartNewGameTests : GameManagerTests
         
         A.CallTo(() => RoomRepository.GetCurrentGameAsync(A<Guid>._, A<CancellationToken>._))
             .MustNotHaveHappened();
-        A.CallTo(() => GameCoreService.RunGameCycle(existingGame, notOwnerRoom.Id, A<CancellationToken>._))
+        A.CallTo(() => GameCoreService.RunGameCycle(existingGame, notOwnerRoom.Id))
             .MustNotHaveHappened();
     }
     
@@ -187,7 +188,7 @@ public class StartNewGameTests : GameManagerTests
             Assert.That(result.ErrorType, Is.EqualTo(ErrorType.NotFound));
         });
         
-        A.CallTo(() => GameCoreService.RunGameCycle(existingGame, validRoom.Id, A<CancellationToken>._))
+        A.CallTo(() => GameCoreService.RunGameCycle(existingGame, validRoom.Id))
             .MustNotHaveHappened();
     }
     
@@ -204,7 +205,7 @@ public class StartNewGameTests : GameManagerTests
             .Returns(OperationResult<Game>.Ok(existingGame));
         
         var exception = new Exception("Game core error");
-        A.CallTo(() => GameCoreService.RunGameCycle(existingGame, validRoom.Id,  A<CancellationToken>._))
+        A.CallTo(() => GameCoreService.RunGameCycle(existingGame, validRoom.Id))
             .ThrowsAsync(exception);
         
         var result = await GameManager.StartNewGameAsync(roomId, userId, ct);
@@ -227,7 +228,7 @@ public class StartNewGameTests : GameManagerTests
         A.CallTo(() => RoomRepository.GetCurrentGameAsync(roomId, ct))
             .Returns(OperationResult<Game>.Ok(existingGame));
         
-        A.CallTo(() => GameCoreService.RunGameCycle(existingGame, validRoom.Id, A<CancellationToken>._))
+        A.CallTo(() => GameCoreService.RunGameCycle(existingGame, validRoom.Id))
             .Invokes(async () => 
             {
                 runGameCycleCalled = true;

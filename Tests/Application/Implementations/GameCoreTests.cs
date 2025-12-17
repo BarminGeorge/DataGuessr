@@ -41,11 +41,7 @@ public class GameCoreServiceTests
         evaluationService = A.Fake<IEvaluationService>();
         answerRepository = A.Fake<IPlayerAnswerRepository>();
         
-        service = new GameCoreService(
-            notificationService, 
-            evaluationService, 
-            answerRepository
-        );
+        service = new GameCoreService(notificationService, questionService, evaluationService, answerRepository);
     }
     
     private List<Question> CreateQuestionsList()
@@ -82,7 +78,7 @@ public class GameCoreServiceTests
             .Returns(OperationResult.Ok());
 
 
-        var result = await service.RunGameCycle(game, roomId, ct);
+        var result = await service.RunGameCycle(game, roomId);
         
         Multiple(() =>
         {
@@ -107,7 +103,7 @@ public class GameCoreServiceTests
         A.CallTo(() => questionService.GetAllQuestionsAsync(game, ct))
             .Returns(OperationResult<IEnumerable<Question>>.Error.ServiceUnavailable(errorMsg));
         
-        var result = await service.RunGameCycle(game, roomId, ct);
+        var result = await service.RunGameCycle(game, roomId);
         
         Multiple(() =>
         {
@@ -126,7 +122,7 @@ public class GameCoreServiceTests
             .Returns(OperationResult<IEnumerable<Question>>.Ok(null));
         
         ThrowsAsync<InvalidCastException>(async () => 
-            await service.RunGameCycle(game, roomId, ct));
+            await service.RunGameCycle(game, roomId));
         
     }
 
@@ -140,7 +136,7 @@ public class GameCoreServiceTests
         A.CallTo(() => answerRepository.LoadAnswersAsync(game.Id, A<Guid>._, ct))
             .Returns(OperationResult<Dictionary<Guid, Answer>>.Error.ServiceUnavailable("Some db error"));
         
-        var result = await service.RunGameCycle(game, roomId, ct);
+        var result = await service.RunGameCycle(game, roomId);
         Multiple(() =>
         {
             That(result.Success, Is.False);
