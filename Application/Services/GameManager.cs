@@ -10,11 +10,11 @@ using Infrastructure.Interfaces;
 namespace Application.Services;
 
 public class GameManager(
+    IGameCoreService gameCoreService,
     IRoomRepository roomRepository, 
     INotificationService notificationService,
     IQuestionService questionService,
-    IGameRepository gameRepository,
-    IServiceScope scope)
+    IGameRepository gameRepository)
     : IGameManager
 {
     private static bool IsOwnerRoom(Room room, Guid userId) => room.Owner == userId;
@@ -55,24 +55,8 @@ public class GameManager(
             return new OperationResult(false, getQuestionsResult.ErrorMessage);
         Console.WriteLine(getQuestionsResult.ResultObj);
         Console.WriteLine(getQuestionsResult);
-        _ = Task.Run(async ()  =>
-            {
-                using (scope)
-                {
-                    var gameCoreService = scope.ServiceProvider.GetService<IGameCoreService>();
-                    try 
-                    {
-                        await gameCoreService.RunGameCycle(game, roomId, CancellationToken.None);
-                    }
-                    catch (Exception ex)
-                    {
-                        // Логируем ошибки, так как иначе они просто пропадут в фоне
-                        Console.WriteLine($"BACKGROUND ERROR: {ex}");
-                    }
-                    
-                }
-     
-            }, CancellationToken.None);
+        Task.Run(() => gameCoreService.RunGameCycle(game, roomId, ct))
+            .ContinueWith(t => { }, TaskContinuationOptions.OnlyOnFaulted);
         
         return OperationResult.Ok();
     }
