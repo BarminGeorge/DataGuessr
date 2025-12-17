@@ -16,11 +16,11 @@ public class GameCoreService(
     : IGameCoreService
 {
     
-    public async Task<OperationResult> RunGameCycle(Game game, Guid roomId, CancellationToken ct)
+    public async Task<OperationResult> RunGameCycle(Game game, Guid roomId)
     {
         game.StartGame();
         
-        var getQuestionsResult = await questionService.GetAllQuestionsAsync(game, ct);
+        var getQuestionsResult = await questionService.GetAllQuestionsAsync(game, CancellationToken.None);
         if (!getQuestionsResult.Success || getQuestionsResult.ResultObj == null)
             return getQuestionsResult;
         
@@ -29,10 +29,10 @@ public class GameCoreService(
         foreach (var question in getQuestionsResult.ResultObj)
         {
             await NotifyRoomAboutNewQuestion(question, game, roomId);
-            await Task.Delay(game.QuestionDuration, ct);
+            await Task.Delay(game.QuestionDuration);
             await NotifyRoomAboutCloseQuestion(question, roomId);
-            
-            var rawAnswer = await answerRepository.LoadAnswersAsync(game.Id, question.Id, ct);
+            await Task.Delay(5000);
+            var rawAnswer = await answerRepository.LoadAnswersAsync(game.Id, question.Id, CancellationToken.None);
             if (!rawAnswer.Success || rawAnswer.ResultObj == null) 
                 return rawAnswer;
 
@@ -41,7 +41,9 @@ public class GameCoreService(
             var diff = game.CurrentStatistic.Diff(oldStatistic);
             
             await NotifyRoomAboutResults(diff, roomId);
+            await Task.Delay(1000);
             await NotifyRoomAboutResults(game.CurrentStatistic, roomId);
+            await Task.Delay(10000);
         }
         
         game.FinishGame();  

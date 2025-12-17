@@ -35,13 +35,13 @@ public class QuestionRepository : IQuestionRepository
             if (allIds.Count == 0)
                 return OperationResult<IEnumerable<Question>>.Error.NotFound(
                     $"Вопросы для режима {mode} не найдены в базе данных");
-
+            
             if (count > allIds.Count)
                 count = allIds.Count;
 
             var random = new Random();
             var selectedIds = allIds.OrderBy(_ => random.Next()).Take(count).ToList();
-
+            
             var questions = await db.Questions
                 .AsNoTracking()
                 .Where(q => selectedIds.Contains(q.Id))

@@ -95,10 +95,13 @@ public class RoomRepository : IRoomRepository
                 .AsNoTracking()
                 .Where(r => r.Privacy == RoomPrivacy.Public
                     && r.Status == RoomStatus.Available
-                    && r.ClosedAt > DateTime.UtcNow)
+                    && r.ClosedAt > DateTime.UtcNow
+                    && r.Players.Count < r.MaxPlayers)
+                .OrderByDescending(r => r.Players.Count)
                 .Include(r => r.Players)
                 .ToListAsync(ct);
-
+            
+            Console.WriteLine($"74 roomRep {rooms.Count}");
             return OperationResult<IEnumerable<Room>>.Ok(rooms);
         });
 

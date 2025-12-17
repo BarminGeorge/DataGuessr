@@ -180,6 +180,11 @@ namespace Infrastructure.Migrations
                     b.Property<DateTime>("ClosedAt")
                         .HasColumnType("timestamp with time zone");
 
+                    b.Property<string>("InviteCode")
+                        .IsRequired()
+                        .HasMaxLength(50)
+                        .HasColumnType("character varying(50)");
+
                     b.Property<int>("MaxPlayers")
                         .HasColumnType("integer");
 
@@ -201,6 +206,9 @@ namespace Infrastructure.Migrations
                     b.HasIndex("ClosedAt");
 
                     b.HasIndex("Status");
+
+                    b.HasIndex("InviteCode", "Id")
+                        .IsUnique();
 
                     b.ToTable("rooms", (string)null);
                 });

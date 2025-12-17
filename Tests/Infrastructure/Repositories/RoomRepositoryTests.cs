@@ -180,7 +180,7 @@ public class RoomRepositoryTests
         await dbContext.SaveChangesAsync();
 
         var validRoom = CreateTestRoom(user.Id, RoomPrivacy.Public);
-        var expiredRoom = new Room(user.Id, RoomPrivacy.Public, 4, "aaa", null, TimeSpan.FromHours(-1));
+        var expiredRoom = new Room(user.Id, RoomPrivacy.Public, 4, "aaa", TimeSpan.FromHours(-1));
 
         await dbContext.Rooms.AddRangeAsync(validRoom, expiredRoom);
         await dbContext.SaveChangesAsync();

@@ -1,3 +1,4 @@
+using System.Security.Cryptography;
 using Domain.Enums;
 using Domain.Interfaces;
 
@@ -21,16 +22,16 @@ public class Room : IEntity<Guid>
 
     protected Room() { }
 
-    public Room(Guid ownerId, RoomPrivacy privacy, int maxPlayers, string inviteCode, string? password = null, TimeSpan? ttl = null)
+    public Room(Guid ownerId, RoomPrivacy privacy, int maxPlayers, string? password = null, TimeSpan? ttl = null)
     {
         Id = Guid.NewGuid();
+        InviteCode = GenerateInviteCode();
         Owner = ownerId;
         Privacy = privacy;
         Status = RoomStatus.Available;
         Password = password;
         MaxPlayers = maxPlayers;
-        InviteCode = inviteCode;
-
+        
         ClosedAt = DateTime.UtcNow + (ttl ?? TimeSpan.FromDays(1));
     }
 
@@ -69,5 +70,31 @@ public class Room : IEntity<Guid>
         foreach (var player in Players)
             if (userDict.TryGetValue(player.UserId, out var user))
                 player.SetUserInfo(user);
+    }
+
+    public void SetNewOwner()
+    {
+        if (Players.Count < 2)
+            throw new InvalidOperationException("В комнате нет других игроков");
+        
+        Owner = Players
+            .Select(x => x.Id)
+            .First(x => x != Owner);
+    }
+
+    public void SetArchivedStatus() => Status = RoomStatus.Archived;
+
+    private static string GenerateInviteCode(int length = 6)
+    {
+        var rng = RandomNumberGenerator.Create();
+        var characters = "ABCDEFGHJKLMNPQRSTUVWXYZ23456789".AsSpan();
+        Span<byte> bytes = stackalloc byte[length];
+        rng.GetBytes(bytes);
+        
+        Span<char> chars = stackalloc char[length];
+        for (var i = 0; i < length; i++)
+            chars[i] = characters[bytes[i] % characters.Length];
+        
+        return new string(chars);
     }
 }

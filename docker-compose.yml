@@ -26,6 +26,8 @@ services:
       ConnectionStrings__DefaultConnection: Host=postgres;Port=5432;Database=DataGuessrDB;Username=dataguessr_user;Password=YourStrongPassword123;Include Error Detail=true
     ports:
       - "5000:8080"
+    volumes:
+      - ./files:/app/files
     depends_on:
       postgres:
         condition: service_healthy

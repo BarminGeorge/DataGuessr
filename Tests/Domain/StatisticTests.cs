@@ -16,7 +16,7 @@ public class ScoreTests
 
         var result = scoreA + scoreB;
 
-        Assert.That(result.score, Is.EqualTo(expected));
+        Assert.That(result.Points, Is.EqualTo(expected));
     }
 
     [TestCase(0, 0, 0)]
@@ -30,14 +30,14 @@ public class ScoreTests
 
         var result = scoreA - scoreB;
             
-        Assert.That(result.score, Is.EqualTo(expected));
+        Assert.That(result.Points, Is.EqualTo(expected));
     }
 
     [Test]
     public void Score_Zero_ReturnsZeroScore()
     {
         var zero = Score.Zero;
-        Assert.That(zero.score, Is.EqualTo(0));
+        Assert.That(zero.Points, Is.EqualTo(0));
     }
 }
 
@@ -69,7 +69,7 @@ public class StatisticTests
         statistic.Update(answers, rightAnswer, (_, _) => new Score(1));
 
         Assert.That(statistic.Scores, Has.Count.EqualTo(1));
-        Assert.That(statistic.Scores[userId1].score, Is.EqualTo(1));
+        Assert.That(statistic.Scores[userId1].Points, Is.EqualTo(1));
     }
 
     [Test]
@@ -92,7 +92,7 @@ public class StatisticTests
         statistic.Update(updatedAnswers, rightAnswer2, (_, _) => new Score(1));
 
         Assert.That(statistic.Scores, Has.Count.EqualTo(1));
-        Assert.That(statistic.Scores[userId1].score, Is.EqualTo(2));
+        Assert.That(statistic.Scores[userId1].Points, Is.EqualTo(2));
     }
 
     [Test]
@@ -111,8 +111,8 @@ public class StatisticTests
         Assert.That(statistic.Scores, Has.Count.EqualTo(2));
         Assert.Multiple(() =>
         {
-            Assert.That(statistic.Scores[userId1].score, Is.EqualTo(1));
-            Assert.That(statistic.Scores[userId2].score, Is.EqualTo(1));
+            Assert.That(statistic.Scores[userId1].Points, Is.EqualTo(1));
+            Assert.That(statistic.Scores[userId2].Points, Is.EqualTo(1));
         });
     }
 
@@ -144,9 +144,9 @@ public class StatisticTests
         Assert.That(diff.Scores, Has.Count.EqualTo(3));
         Assert.Multiple(() =>
         {
-            Assert.That(diff.Scores[userId1].score, Is.EqualTo(0));
-            Assert.That(diff.Scores[userId2].score, Is.EqualTo(1));
-            Assert.That(diff.Scores[userId3].score, Is.EqualTo(-1));
+            Assert.That(diff.Scores[userId1].Points, Is.EqualTo(0));
+            Assert.That(diff.Scores[userId2].Points, Is.EqualTo(1));
+            Assert.That(diff.Scores[userId3].Points, Is.EqualTo(-1));
         });
     }
 
@@ -174,7 +174,7 @@ public class StatisticTests
         var result = stat1 - stat2;
 
         Assert.That(result.Scores, Has.Count.EqualTo(1));
-        Assert.That(result.Scores[userId1].score, Is.EqualTo(2));
+        Assert.That(result.Scores[userId1].Points, Is.EqualTo(2));
     }
 
     [Test]
@@ -196,8 +196,8 @@ public class StatisticTests
         Assert.That(copy.Scores, Has.Count.EqualTo(original.Scores.Count));
         Assert.Multiple(() =>
         {
-            Assert.That(copy.Scores[userId1].score, Is.EqualTo(original.Scores[userId1].score));
-            Assert.That(copy.Scores[userId2].score, Is.EqualTo(original.Scores[userId2].score));
+            Assert.That(copy.Scores[userId1].Points, Is.EqualTo(original.Scores[userId1].Points));
+            Assert.That(copy.Scores[userId2].Points, Is.EqualTo(original.Scores[userId2].Points));
         });
     }
 
@@ -246,6 +246,6 @@ public class StatisticTests
         var diff = statWithValues.Diff(emptyStat);
 
         Assert.That(diff.Scores, Has.Count.EqualTo(1));
-        Assert.That(diff.Scores[userId1].score, Is.EqualTo(5));
+        Assert.That(diff.Scores[userId1].Points, Is.EqualTo(5));
     }
 }

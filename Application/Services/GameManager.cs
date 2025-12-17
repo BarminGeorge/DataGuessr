@@ -10,11 +10,11 @@ using Infrastructure.Interfaces;
 namespace Application.Services;
 
 public class GameManager(
-    IGameCoreService gameCoreService,
     IRoomRepository roomRepository, 
     INotificationService notificationService,
     IQuestionService questionService,
-    IGameRepository gameRepository)
+    IGameRepository gameRepository,
+    IServiceScopeFactory scopeFactory)
     : IGameManager
 {
     private static bool IsOwnerRoom(Room room, Guid userId) => room.Owner == userId;
@@ -49,8 +49,19 @@ public class GameManager(
 
         var game = getGameResult.ResultObj;
 
-        Task.Run(() => gameCoreService.RunGameCycle(game, roomId, ct))
-            .ContinueWith(t => { }, TaskContinuationOptions.OnlyOnFaulted);
+        _ = Task.Run(async () =>
+        {
+            using var scope = scopeFactory.CreateScope();
+            try
+            {
+                var gameCoreService = scope.ServiceProvider.GetRequiredService<IGameCoreService>();
+                await gameCoreService.RunGameCycle(game, roomId);
+            }
+            catch (Exception ex)
+            {
+                Console.WriteLine($"Game cycle failed for room {roomId}: {ex}");
+            }
+        }, ct);
         
         return OperationResult.Ok();
     }

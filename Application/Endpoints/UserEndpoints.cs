@@ -39,7 +39,7 @@ public static class UserEndpoints
             : result.ToResult();
     }
 
-    private static async Task<IResult> Login(LoginUserRequest request, 
+    private static async Task<IResult> Login([FromBody] LoginUserRequest request, 
         [FromServices] IUserService userService, HttpContext context, CancellationToken ct)
     {
         var loginResult = await userService.Login(request.Login, request.Password, ct);

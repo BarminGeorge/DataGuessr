@@ -1,5 +1,6 @@
 using System.Text.Json.Serialization;
 using Application.DI;
+using Application.Endpoints;
 using Application.EndPoints;
 using Application.Endpoints.Hubs;
 using Domain.ValueTypes;

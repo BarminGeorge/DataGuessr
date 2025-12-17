@@ -12,7 +12,8 @@ public static class ModelToUiMapper
             room.Id, 
             room.Owner, 
             room.Players.Select(x => x.ToDto()),
-            room.ClosedAt);
+            room.ClosedAt,
+            room.InviteCode);
     }
 
     public static GameDto ToDto(this Game game)
@@ -22,7 +23,7 @@ public static class ModelToUiMapper
             game.Mode,
             game.Status,
             game.QuestionsCount,
-            game.QuestionDuration);
+            game.QuestionDuration.Seconds);
     }
 
     public static UserDto ToDto(this User user)
@@ -36,6 +37,7 @@ public static class ModelToUiMapper
     public static QuestionDto ToDto(this Question question, DateTime endTime, int durationSeconds)
     {
         return new QuestionDto(
+            question.Id,
             question.Mode,
             question.Formulation,
             question.GetUrl(),
@@ -47,6 +49,7 @@ public static class ModelToUiMapper
     {
         return new PlayerDto(
             player.Id,
+            player.UserId,
             player.Name,
             player.Avatar.GetUrl());
     }

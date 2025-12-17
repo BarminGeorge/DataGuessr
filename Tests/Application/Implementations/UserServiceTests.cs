@@ -8,7 +8,6 @@ using Microsoft.AspNetCore.Http;
 
 namespace Tests.Application.Implementations;
 
-[TestFixture]
 public class UserServiceTests
 {
     protected IImageRepository ImageRepository;

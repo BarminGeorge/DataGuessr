@@ -2,6 +2,7 @@ namespace Application.DtoUI;
 
 public record RoomDto(
     Guid Id,
-    Guid Host,
+    Guid OwnerId,
     IEnumerable<PlayerDto> Players,
-    DateTime ClosedAt);
+    DateTime ClosedAt,
+    string InviteCode);

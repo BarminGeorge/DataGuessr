@@ -6,9 +6,9 @@ namespace Application.Services;
 
 public class ConnectionService(IPlayerRepository playerRepository) : IConnectionService
 {
-    public async Task<OperationResult> AddConnection(string connectionId, Guid playerId, Guid roomId, CancellationToken ct)
+    public async Task<OperationResult> AddConnection(string connectionId, Guid userId, Guid roomId, CancellationToken ct)
     {
-        return await playerRepository.CreatePlayerAsync(connectionId, playerId, roomId, ct);
+        return await playerRepository.CreatePlayerAsync(connectionId, userId, roomId, ct);
     }
 
     public async Task<OperationResult> RemoveConnection(string connectionId)

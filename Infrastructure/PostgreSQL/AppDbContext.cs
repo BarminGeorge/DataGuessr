@@ -1,4 +1,6 @@
-﻿using Domain.Entities;
+﻿using System.Text.Json;
+using Domain.Entities;
+using Domain.ValueTypes;
 using Infrastructure.Interfaces;
 using Microsoft.EntityFrameworkCore;
 
@@ -121,7 +123,8 @@ public class AppDbContext : DbContext, IDataContext
                 .HasForeignKey(g => g.RoomId)
                 .OnDelete(DeleteBehavior.Cascade);
 
-            entity.HasIndex(r => r.InviteCode).IsUnique();
+            entity.HasIndex(r => new { r.InviteCode, r.Id })
+                .IsUnique();
             entity.HasIndex(r => r.Status);
             entity.HasIndex(r => r.ClosedAt);
         });
@@ -138,7 +141,11 @@ public class AppDbContext : DbContext, IDataContext
 
             entity.Property(q => q.RightAnswer)
                 .HasColumnType("jsonb")
-                .IsRequired();
+                .IsRequired()
+                .HasConversion(
+                    v => JsonSerializer.Serialize(v, (JsonSerializerOptions)null),
+                    v => JsonSerializer.Deserialize<Answer>(v, (JsonSerializerOptions)null)
+                );
 
             entity.Property(q => q.Mode)
                 .IsRequired()
@@ -231,6 +238,10 @@ public class AppDbContext : DbContext, IDataContext
 
             entity.Property(pa => pa.Answer)
                 .HasColumnType("jsonb")
+                .HasConversion(
+                    v => JsonSerializer.Serialize(v, (JsonSerializerOptions)null),
+                    v => JsonSerializer.Deserialize<Answer>(v, (JsonSerializerOptions)null)
+                )
                 .IsRequired();
 
             entity.HasIndex(pa => new { pa.GameId, pa.QuestionId, pa.PlayerId }).IsUnique();
