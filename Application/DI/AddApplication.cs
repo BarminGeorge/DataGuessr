@@ -26,6 +26,7 @@ public static class AddApplicationExtensions
         services.AddScoped<IValidator<string>, PasswordUserValidator>();
         services.AddScoped<IValidator<string>, PlayerNameValidator>();
         services.AddScoped<IValidator<string?>, RoomPasswordValidator>();
+        services.AddScoped<IValidator<string>, InviteCodeValidator>();
         services.AddScoped<IValidator<CreateGameRequest>, CreateGameRequestValidator>();
         services.AddScoped<IValidator<CreateGuestRequest>, CreateGuestRequestValidator>();
         services.AddScoped<IValidator<CreateRoomRequest>, CreateRoomRequestValidator>();
@@ -39,6 +40,7 @@ public static class AddApplicationExtensions
         services.AddScoped<IValidator<UpdateUserRequest>, UpdateUserRequestValidator>();
         services.AddScoped<IValidator<KickPlayerRequest>, KickPlayerRequestValidator>();
         services.AddScoped<IValidator<FinishGameRequest>, FinishGameRequsetValidator>();
+        services.AddScoped<IValidator<GetRoomPrivacyRequest>, GetRoomPrivacyRequestValidator>();
         
         services.AddFluentValidationAutoValidation();
         

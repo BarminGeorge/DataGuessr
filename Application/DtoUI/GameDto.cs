@@ -7,4 +7,4 @@ public record GameDto(
     GameMode Mode,
     GameStatus Status,
     int QuestionsCount,
-    TimeSpan QuestionDuration);
+    int QuestionDuration);

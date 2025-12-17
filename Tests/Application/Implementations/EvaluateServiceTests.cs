@@ -27,7 +27,7 @@ public class EvaluateServiceTests
             
         Assert.IsNotNull(scoreCalculator);
         Assert.IsNotNull(score);
-        Assert.That(score.score, Is.GreaterThan(0));
+        Assert.That(score.Points, Is.GreaterThan(0));
     }
 
     [Test]
@@ -41,7 +41,7 @@ public class EvaluateServiceTests
         var scoreCalculator = evaluateService.CalculateScore(mode);
         var score = scoreCalculator(answer, rightAnswer);
             
-        Assert.That(score.score, Is.EqualTo(2222));
+        Assert.That(score.Points, Is.EqualTo(2222));
     }
 
     [Test]
@@ -56,7 +56,7 @@ public class EvaluateServiceTests
         var score = scoreCalculator(answer, rightAnswer);
             
         var expected = (int)Math.Round(2222 * Math.Exp(-1 * 1.0 / 10000));
-        Assert.That(score.score, Is.EqualTo(expected));
+        Assert.That(score.Points, Is.EqualTo(expected));
     }
 
     [Test]
@@ -72,8 +72,8 @@ public class EvaluateServiceTests
         var score = scoreCalculator(answer, rightAnswer);
 
 
-        Assert.That(score.score, Is.GreaterThanOrEqualTo(0));
-        Assert.That(score.score, Is.LessThan(100));
+        Assert.That(score.Points, Is.GreaterThanOrEqualTo(0));
+        Assert.That(score.Points, Is.LessThan(100));
     }
 
     [Test]
@@ -89,7 +89,7 @@ public class EvaluateServiceTests
         var score = scoreCalculator(answer, rightAnswer);
             
         var expected = (int)Math.Round(2222 * Math.Exp(-1 * 9.0 / 10000));
-        Assert.That(score.score, Is.EqualTo(expected));
+        Assert.That(score.Points, Is.EqualTo(expected));
     }
 
     [Test]

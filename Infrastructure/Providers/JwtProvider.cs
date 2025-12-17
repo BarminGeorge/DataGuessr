@@ -15,8 +15,6 @@ public class JwtProvider(IOptions<JwtOptions> options) : IJwtProvider
 
     public string GenerateToken(User user)
     {
-        // TODO: пока небезопасно храниться в appsettings.json, переделать
-
         var signingCredentials = new SigningCredentials(
             new SymmetricSecurityKey(Encoding.UTF8.GetBytes(options.SecretKey)),
             SecurityAlgorithms.HmacSha256);

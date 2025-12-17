@@ -12,28 +12,34 @@ public class RoomHubTests: HubTests
 {
     private readonly Guid userId = Guid.NewGuid();
     private readonly int maxPlayers = 10;
+    private const string inviteCode = "ABC245";
 
     [Test]
     public async Task CreateRoom_WithPassword_ShouldReturnRoom()
     {
-        var room = new Room(userId, RoomPrivacy.Private, maxPlayers, "password");
+        var room = new Room(userId, RoomPrivacy.Private, maxPlayers, "password12P");
 
         A.CallTo(() =>
                 RoomManagerFake.CreateRoomAsync(userId, room.Privacy, A<CancellationToken>._, room.Password,
                     maxPlayers))
             .Returns(new OperationResult<Room>(true, room));
+        A.CallTo(() => RoomManagerFake.JoinRoomAsync(room.Id, userId, A<CancellationToken>._, A<string>._))
+            .Returns(new OperationResult<Room>(true, room));
+        A.CallTo(() => ConnectionServiceFake.AddConnection(A<string>._, userId, room.Id, A<CancellationToken>._))
+            .Returns(OperationResult.Ok());
         
         var requestWithPassword = new CreateRoomRequest(userId, RoomPrivacy.Private, room.Password, maxPlayers);
         await HubConnection.StartAsync();
         var result = await HubConnection.InvokeAsync<OperationResult<RoomDto>>("CreateRoom", requestWithPassword);
-        
+        Console.WriteLine(result);
+
         Assert.Multiple(() =>
         {
             Assert.That(result.Success, Is.True);
             Assert.That(result.ResultObj, Is.Not.Null);
         });
         
-        Assert.That(result.ResultObj.Host, Is.EqualTo(userId));
+        Assert.That(result.ResultObj.OwnerId, Is.EqualTo(userId));
         
         A.CallTo(() =>
             RoomManagerFake.CreateRoomAsync(userId, room.Privacy, A<CancellationToken>._, room.Password,
@@ -96,13 +102,16 @@ public class RoomHubTests: HubTests
         [Test]
     public async Task JoinRoom_CorrectRequest_ShouldReturnRoomAndAddConnection()
     {
-        var password = "12345";
+        const string password = "12345";
         var room = new Room(Guid.NewGuid(), RoomPrivacy.Private, maxPlayers, password);
         
-        A.CallTo(() => RoomManagerFake.JoinRoomAsync(userId, room.Id, A<CancellationToken>._, password))
+        A.CallTo(() => RoomManagerFake.JoinRoomAsync(room.Id, userId,A<CancellationToken>._, password))
             .Returns(OperationResult<Room>.Ok(room));
-
-        var request = new JoinRoomRequest(userId, room.Id, password);
+        A.CallTo(() => RoomManagerFake.GetRoomAsync(A<string>._, A<CancellationToken>._))
+            .Returns(OperationResult<Room>.Ok(room));
+        A.CallTo(() => ConnectionServiceFake.AddConnection(A<string>._, userId, room.Id, A<CancellationToken>._))
+            .Returns(OperationResult.Ok());
+        var request = new JoinRoomRequest(userId, inviteCode, password);
         
         await HubConnection.StartAsync();
         var result = await HubConnection.InvokeAsync<OperationResult<RoomDto>>("JoinRoom", request);
@@ -115,7 +124,7 @@ public class RoomHubTests: HubTests
         });
         Assert.That(result.ResultObj.Id, Is.EqualTo(room.Id));
 
-        A.CallTo(() => RoomManagerFake.JoinRoomAsync(userId, room.Id, A<CancellationToken>._, password))
+        A.CallTo(() => RoomManagerFake.JoinRoomAsync(room.Id, userId,  A<CancellationToken>._, password))
             .MustHaveHappenedOnceExactly();
         
         A.CallTo(() => ConnectionServiceFake.AddConnection(A<string>._, userId, room.Id, A<CancellationToken>._))
@@ -127,7 +136,7 @@ public class RoomHubTests: HubTests
     {
         var roomId = Guid.NewGuid();
 
-        A.CallTo(() => RoomManagerFake.LeaveRoomAsync(userId, roomId, A<CancellationToken>._))
+        A.CallTo(() => RoomManagerFake.LeaveRoomAsync(roomId, userId, A<CancellationToken>._))
             .Returns(OperationResult.Ok());
 
         var request = new LeaveRoomRequest(userId, roomId);
@@ -137,7 +146,7 @@ public class RoomHubTests: HubTests
 
         Assert.That(result.Success, Is.True);
 
-        A.CallTo(() => RoomManagerFake.LeaveRoomAsync(userId, roomId, A<CancellationToken>._))
+        A.CallTo(() => RoomManagerFake.LeaveRoomAsync(roomId, userId, A<CancellationToken>._))
             .MustHaveHappenedOnceExactly();
         
         A.CallTo(() => ConnectionServiceFake.RemoveConnection(A<string>._))
@@ -151,7 +160,11 @@ public class RoomHubTests: HubTests
         
         A.CallTo(() => RoomManagerFake.FindOrCreateQuickRoomAsync(userId, A<CancellationToken>._))
             .Returns(OperationResult<Room>.Ok(room));
-
+        A.CallTo(() => RoomManagerFake.JoinRoomAsync(room.Id, userId, A<CancellationToken>._, null))
+            .Returns(OperationResult<Room>.Ok(room));
+        A.CallTo(() => ConnectionServiceFake.AddConnection(A<string>._, userId, room.Id, A<CancellationToken>._))
+            .Returns(OperationResult.Ok());
+        
         var request = new FindQuickRoomRequest(userId);
 
         await HubConnection.StartAsync();

@@ -2,8 +2,12 @@ using System.Text;
 using System.Text.Json.Serialization;
 using Application.DI;
 using Domain.ValueTypes;
+using Hangfire;
+using Hangfire.PostgreSql;
 using Infrastructure.DI;
+using Infrastructure.PostgreSQL;
 using Microsoft.AspNetCore.Authentication.JwtBearer;
+using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Options;
 using Microsoft.IdentityModel.Tokens;
 
@@ -23,9 +27,10 @@ public static class ConfigurationBuilder
 
         services.AddAntiforgery();
 
-//services.AddHangfire(config => config.UsePostgreSqlStorage(configuration.GetConnectionString("DefaultConnection")));
+        services.AddHangfire(config => config
+            .UsePostgreSqlStorage(configuration.GetConnectionString("DefaultConnection")));
 
-//services.AddHangfireServer();
+        services.AddHangfireServer();
 
         services.ConfigureCors(configuration);
         
@@ -44,6 +49,12 @@ public static class ConfigurationBuilder
         {
             options.SerializerOptions.Converters.Add(new JsonStringEnumConverter());
         });
+        
+        builder.Services.AddDbContext<AppDbContext>(options =>
+            options.UseNpgsql(
+                builder.Configuration.GetConnectionString("DefaultConnection"),
+                npgsqlOptions => npgsqlOptions.MigrationsAssembly("Infrastructure")
+                ));
     }
     
     private static void ConfigureJwt(this IServiceCollection services, IConfiguration configuration, IWebHostEnvironment environment)
@@ -100,8 +111,8 @@ public static class ConfigurationBuilder
         rng.GetBytes(bytes);
         return Convert.ToBase64String(bytes);
     }
-    
-    public static void AddApiAuthentication(this IServiceCollection services, IOptions<JwtOptions> jwtoptions)
+
+    private static void AddApiAuthentication(this IServiceCollection services, IOptions<JwtOptions> jwtoptions)
     {
         services.AddAuthentication(JwtBearerDefaults.AuthenticationScheme)
             .AddJwtBearer(JwtBearerDefaults.AuthenticationScheme, options =>

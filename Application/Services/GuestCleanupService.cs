@@ -1,6 +1,5 @@
 using Domain.Common;
 using Microsoft.EntityFrameworkCore;
-using Infrastructure.PostgreSQL;
 using Application.Interfaces;
 using Infrastructure.Interfaces;
 
