@@ -1,5 +1,5 @@
+using Application.DtoUI;
 using Domain.Enums;
-using Domain.ValueTypes;
 using Microsoft.AspNetCore.Mvc;
 
 namespace Application.Requests;
@@ -23,6 +23,6 @@ public record CreateGameRequest(
 
 public record StartGameRequest(Guid UserId, Guid RoomId);
 public record FinishGameRequest(Guid UserId, Guid RoomId);
-public record SubmitAnswerRequest(Guid GameId, Guid QuestionId, Guid PlayerId, Answer Answer);
+public record SubmitAnswerRequest(Guid GameId, Guid QuestionId, Guid PlayerId, AnswerDto Answer);
 public record KickPlayerRequest(Guid UserId, Guid RoomId, Guid RemovedPlayerId);
 public record GetRoomPrivacyRequest([FromRoute] string InviteCode);

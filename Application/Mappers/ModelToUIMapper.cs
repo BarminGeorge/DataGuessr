@@ -1,6 +1,7 @@
 using Application.DtoUI;
 using Application.Extensions;
 using Domain.Entities;
+using Domain.ValueTypes;
 
 namespace Application.Mappers;
 
@@ -52,5 +53,15 @@ public static class ModelToUiMapper
             player.UserId,
             player.Name,
             player.Avatar.GetUrl());
+    }
+
+    public static AnswerDto ToDto(this Answer answer)
+    {
+        return answer switch
+        {
+            DateTimeAnswer dateTimeAnswer => new DateTimeAnswerDto(dateTimeAnswer.Value.Year),
+            BoolAnswer boolAnswer => new BoolAnswerDto(boolAnswer.Value ? 1 : 0),
+            _ => throw new ArgumentException($"Unknown answer type: {answer.GetType().Name}")
+        };
     }
 }

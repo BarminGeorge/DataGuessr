@@ -109,11 +109,11 @@ public class GameHubTests: HubTests
     [Test]
     public async Task SubmitAnswer_CorrectRequest_ReturnSuccess()
     {
-        var answer = new BoolAnswer(true);
+        var answer = new BoolAnswerDto(true);
         
-        A.CallTo(() => GameManagerFake.SubmitAnswerAsync(gameId, questionId, playerId, answer, A<CancellationToken>._))
+        A.CallTo(() => GameManagerFake.SubmitAnswerAsync(gameId, questionId, playerId, A<Answer>._, A<CancellationToken>._))
             .Returns(OperationResult.Ok());
-        A.CallTo(() => QuestionServiceFake.SubmitAnswerAsync(gameId, questionId, playerId, answer, A<CancellationToken>._))
+        A.CallTo(() => QuestionServiceFake.SubmitAnswerAsync(gameId, questionId, playerId, A<Answer>._, A<CancellationToken>._))
             .Returns(OperationResult.Ok());
         
         await HubConnection.StartAsync();
@@ -126,11 +126,11 @@ public class GameHubTests: HubTests
     [Test]
     public async Task SubmitAnswer_WhenReturnError()
     {
-        var answer = new BoolAnswer(true);
+        var answer = new BoolAnswerDto(false);
         
-        A.CallTo(() => GameManagerFake.SubmitAnswerAsync(gameId, questionId, playerId, answer, A<CancellationToken>._))
+        A.CallTo(() => GameManagerFake.SubmitAnswerAsync(gameId, questionId, playerId, A<Answer>._, A<CancellationToken>._))
             .Returns(OperationResult.Error);
-        A.CallTo(() => QuestionServiceFake.SubmitAnswerAsync(gameId, questionId, playerId, answer, A<CancellationToken>._))
+        A.CallTo(() => QuestionServiceFake.SubmitAnswerAsync(gameId, questionId, playerId, A<Answer>._, A<CancellationToken>._))
             .Returns(OperationResult.Ok());
         
         await HubConnection.StartAsync();

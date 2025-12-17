@@ -42,7 +42,8 @@ public partial class AppHub
         if (await this.ValidateRequestAsync(request, ct) is { } error)
             return OperationResult.Error.Validation(error);
 
-        return await gameManager.SubmitAnswerAsync(request.GameId, request.QuestionId, request.PlayerId, request.Answer, ct);
+        var answer = request.Answer.ToAnswer();
+        return await gameManager.SubmitAnswerAsync(request.GameId, request.QuestionId, request.PlayerId, answer, ct);
     }
 
     public async Task<OperationResult<RoomDto>> FinishGame(FinishGameRequest request)
