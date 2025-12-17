@@ -21,6 +21,7 @@ public class GameCoreService(
         game.StartGame();
         
         var getQuestionsResult = await questionService.GetAllQuestionsAsync(game, ct);
+        Console.WriteLine(getQuestionsResult);
         if (!getQuestionsResult.Success || getQuestionsResult.ResultObj == null)
             return getQuestionsResult;
         

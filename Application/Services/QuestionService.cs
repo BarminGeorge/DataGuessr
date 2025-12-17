@@ -14,7 +14,7 @@ public class QuestionService(
     {
         if (game.Questions.Count > 0)
             return OperationResult<IEnumerable<Question>>.Ok(game.Questions);
-        
+        Console.WriteLine(game.QuestionsCount);
         var count = game.QuestionsCount;
         return await questionRepository.GetUniqQuestionsAsync(count, game.Mode, ct);
     }
