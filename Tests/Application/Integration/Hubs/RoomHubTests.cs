@@ -23,11 +23,13 @@ public class RoomHubTests: HubTests
                 RoomManagerFake.CreateRoomAsync(userId, room.Privacy, A<CancellationToken>._, room.Password,
                     maxPlayers))
             .Returns(new OperationResult<Room>(true, room));
+        A.CallTo(() => RoomManagerFake.JoinRoomAsync(room.Id, userId, A<CancellationToken>._, A<string>._))
+            .Returns(new OperationResult<Room>(true, room));
         
         var requestWithPassword = new CreateRoomRequest(userId, RoomPrivacy.Private, room.Password, maxPlayers);
         await HubConnection.StartAsync();
         var result = await HubConnection.InvokeAsync<OperationResult<RoomDto>>("CreateRoom", requestWithPassword);
-        
+        Console.WriteLine(result);
         Assert.Multiple(() =>
         {
             Assert.That(result.Success, Is.True);

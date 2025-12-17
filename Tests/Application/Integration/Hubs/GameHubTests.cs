@@ -23,7 +23,7 @@ public class GameHubTests: HubTests
     public async Task CreateGame_RequestWithoutQuestion_ReturnGame()
     {
         var questionsCount = 10;
-        var questionDuraction = TimeSpan.FromMicroseconds(1);
+        var questionDuraction = TimeSpan.FromSeconds(30);
         
         var game = new Game(roomId, gameMode, questionDuraction, questionsCount);
         A.CallTo(() =>
@@ -39,7 +39,6 @@ public class GameHubTests: HubTests
         var result = await HubConnection.InvokeAsync<OperationResult<GameDto>>("CreateGame", 
                 new CreateGameRequest(userId, roomId, gameMode, questionsCount, questionDuraction.Seconds),
             CancellationToken.None);
-        
         Assert.Multiple(() =>
         {
             Assert.That(result.ResultObj, Is.Not.Null);
