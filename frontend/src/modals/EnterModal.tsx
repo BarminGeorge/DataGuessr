@@ -70,16 +70,18 @@ export default function EnterModal(props: any) {
 
             <div className="modal-container">
                 <div className="centered-vertical-aligment">
-                    <div className="secondary-container">
+                    {/* Теперь всё находится внутри secondary-container (белой плашки) */}
+                    <div className="secondary-container" style={{ paddingBottom: '20px' }}>
 
-                        <div className="left-aligment" style={{ display: 'flex', flexDirection: 'column', alignItems: 'center', gap: '20px' }}>
+                        <div className="left-aligment" style={{ display: 'flex', flexDirection: 'column', alignItems: 'center', gap: '15px', width: '100%' }}>
 
-                            <div style={{ position: 'relative', width: '100px', height: '100px' }}>
+                            {/* Контейнер аватарки */}
+                            <div style={{ position: 'relative', width: '100px', height: '100px', marginTop: '10px' }}>
                                 <img
                                     src={avatar}
                                     alt="avatar"
                                     className="w-10 h-10 rounded-full border border-gray-300"
-                                    style={{ width: '100%', height: '100%', objectFit: 'cover' }}
+                                    style={{ width: '100%', height: '100%', objectFit: 'cover', borderRadius: '50%' }}
                                 />
 
                                 <button
@@ -87,34 +89,45 @@ export default function EnterModal(props: any) {
                                     onClick={handleChangeAvatar}
                                     style={{
                                         position: 'absolute',
-                                        bottom: '-5px',
-                                        right: '-5px',
-                                        width: '32px',
-                                        height: '32px',
+                                        bottom: '0',
+                                        right: '0',
+                                        width: '30px',
+                                        height: '30px',
                                         borderRadius: '50%',
                                         padding: 0,
                                         display: 'flex',
                                         justifyContent: 'center',
                                         alignItems: 'center',
-                                        fontSize: '18px',
-                                        lineHeight: 1,
-                                        boxShadow: '0 2px 4px rgba(0,0,0,0.2)'
+                                        fontSize: '16px',
+                                        border: '1px solid #ccc',
+                                        backgroundColor: 'white',
+                                        cursor: 'pointer',
+                                        zIndex: 10
                                     }}
                                 >
                                     ↻
                                 </button>
                             </div>
 
+                            {/* Поле ввода */}
                             <input
                                 type="text"
                                 className="text-input-primary"
                                 placeholder={"Введите имя"}
+                                value={playerName}
                                 onChange={(e) => setName(e.target.value)}
+                                style={{ width: '80%', textAlign: 'center' }}
                             />
+
+                            {/* Кнопка теперь тоже внутри белого блока */}
+                            <button
+                                className="button-primary"
+                                onClick={() => handleGuest(playerName, avatar, props.setLoggingStatus, props)}
+                                style={{ marginTop: '5px' }}
+                            >
+                                Продолжить как гость
+                            </button>
                         </div>
-                    </div>
-                    <div className="centered-aligment">
-                        <button className="button-primary" onClick={() => handleGuest(playerName, avatar, props.setLoggingStatus, props)}>Продолжить как гость</button>
                     </div>
                 </div>
             </div>
@@ -132,7 +145,7 @@ export default function EnterModal(props: any) {
                             </ul>
                         </div>
 
-                        <div className="centered-aligment">
+                        <div className="centered-aligment" style={{ marginTop: '20px' }}>
                             <button className="button-primary" onClick={() => setPage("login")}>Войти</button>
                         </div>
                     </div>
