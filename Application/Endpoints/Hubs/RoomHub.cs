@@ -45,16 +45,18 @@ public partial class AppHub
             return roomResult.ConvertToOperationResult<RoomDto>();
         
         var roomId = roomResult.ResultObj.Id;
-        var result = await roomManager.JoinRoomAsync(roomId, request.UserId, ct, request.Password);
+        var connectionServiceResult = await connectionService.AddConnection(Context.ConnectionId, request.UserId, roomId, ct);
+        if (!connectionServiceResult.Success)
+            return connectionServiceResult.ConvertToOperationResult<RoomDto>();
 
-        if (result is { Success: true, ResultObj: not null})
-        {
-            await connectionService.AddConnection(Context.ConnectionId, request.UserId, roomId, ct);
-            await Groups.AddToGroupAsync(Context.ConnectionId, $"room-{roomId}", ct);
-            return OperationResult<RoomDto>.Ok(result.ResultObj.ToDto());
-        }
-
-        return result.ConvertToOperationResult<RoomDto>();
+        await Groups.AddToGroupAsync(Context.ConnectionId, $"room-{roomId}", ct);
+        
+        var joinOperation = () => roomManager.JoinRoomAsync(roomId, request.UserId, ct, request.Password);
+        var joinResult = await joinOperation.WithRetry(delay: TimeSpan.FromSeconds(0.15));
+        if (!joinResult.Success || joinResult.ResultObj is null)
+            return joinResult.ConvertToOperationResult<RoomDto>();
+            
+        return OperationResult<RoomDto>.Ok(joinResult.ResultObj.ToDto());
     }
 
     public async Task<OperationResult> LeaveRoom(LeaveRoomRequest request)
