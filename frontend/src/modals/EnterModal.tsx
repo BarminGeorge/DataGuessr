@@ -1,12 +1,28 @@
-
 import { usePage } from "../PageContext";
-import { http } from "../api/http";
 import { useState } from "react";
-import defaultImage from './../assets/defaultavatar.png';
 import { apiService } from "../apiUtils/endPointsServices";
 import { LoggingStatus, type CurrentAppState } from "../App";
 import type { UserDto } from "../apiUtils/dto";
 
+import defaultImage from './../assets/defaultavatar.png';
+import av1 from './../assets/bulatov_avatar.png';
+import av2 from './../assets/dimas_avatar.png';
+import av3 from './../assets/gb_avatar.png';
+import av4 from './../assets/ivolzok_avatar.png';
+import av5 from './../assets/mefodii_avatar.png';
+import av6 from './../assets/ravil_avatar.png';
+import av7 from './../assets/yurlea_avarar.png';
+
+const avatarList = [
+    defaultImage,
+    av1,
+    av2,
+    av3,
+    av4,
+    av5,
+    av6,
+    av7
+];
 
 async function handleGuest(
     playerName: string,
@@ -14,7 +30,7 @@ async function handleGuest(
     setLoggingStatus: (status: any) => void,
     props: CurrentAppState) {
 
-    const avatarFile = await urlToFile(avatarUrl, "avatar.jpg");
+    const avatarFile = await urlToFile(avatarUrl, "avatar.png");
     const data = { playerName, avatar: avatarFile };
     const result = await apiService.createGuest(data);
 
@@ -23,8 +39,10 @@ async function handleGuest(
         return;
     }
     setLoggingStatus(LoggingStatus.Guest);
-    const user: UserDto = { id : result.resultObj?.id || 
-        "handleGuest error", avatarUrl, playerName
+    const user: UserDto = {
+        id: result.resultObj?.id || "handleGuest error",
+        avatarUrl,
+        playerName
     }
     props.setUser(user);
 }
@@ -38,8 +56,14 @@ async function urlToFile(url: string, filename: string): Promise<File> {
 
 export default function EnterModal(props: any) {
     const { setPage } = usePage();
-    const [avatar, setAvatar] = useState(defaultImage);
+    const [avatar, setAvatar] = useState(avatarList[0]);
     const [playerName, setName] = useState("");
+
+    const handleChangeAvatar = () => {
+        const currentIndex = avatarList.indexOf(avatar);
+        const nextIndex = (currentIndex + 1) % avatarList.length;
+        setAvatar(avatarList[nextIndex]);
+    };
 
     return (
         <div className="modal-global-container">
@@ -48,14 +72,22 @@ export default function EnterModal(props: any) {
                 <div className="centered-vertical-aligment">
                     <div className="secondary-container">
 
-                        <div className="left-aligment">
+                        <div className="left-aligment" style={{ display: 'flex', flexDirection: 'column', alignItems: 'center', gap: '10px' }}>
 
                             <img
-                                src={defaultImage}
+                                src={avatar}
                                 alt="avatar"
                                 className="w-10 h-10 rounded-full border border-gray-300"
-
+                                style={{ width: '100px', height: '100px', objectFit: 'cover' }}
                             />
+
+                            <button
+                                className="button-secondary"
+                                onClick={handleChangeAvatar}
+                                style={{ width: '40px', height: '40px', fontSize: '20px', padding: 0, display: 'flex', justifyContent: 'center', alignItems: 'center' }}
+                            >
+                                ↻
+                            </button>
 
                             <input
                                 type="text"
@@ -72,8 +104,6 @@ export default function EnterModal(props: any) {
             </div>
 
             <div className="title-text">или</div>
-
-
 
             <div className="modal-container">
                 <div className="centered-vertical-aligment">
