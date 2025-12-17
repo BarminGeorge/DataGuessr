@@ -9,9 +9,8 @@ namespace Infrastructure.ROMRepositories;
 public class ImageRepository : IImageRepository
 {
     //TODO: get path from json or .env
-    private const string BasePath = "/data";
-    private static readonly string avatarsRoot = Path.Combine(BasePath, "files", "avatars");
-    private static readonly string questionsImagesRoot = Path.Combine(BasePath, "files", "questions");
+    private static readonly string avatarsRoot = Path.Combine(Directory.GetCurrentDirectory(), "files", "avatars");
+    private static readonly string questionsImagesRoot = Path.Combine(Directory.GetCurrentDirectory(), "files", "questions");
     
     public ImageRepository()
     {
