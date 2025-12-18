@@ -144,7 +144,7 @@ export async function createGame(
         userId: userId,
         roomId,
         mode: mode,
-        countQuestions: 1,
+        countQuestions: 5,
         questionDuration: questionDuration
     });
 
