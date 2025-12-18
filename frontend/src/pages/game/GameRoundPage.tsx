@@ -7,7 +7,8 @@ import { gameHubService } from "../../apiUtils/HubServices";
 import { GameMode, type AnswerDto, type QuestionDto, type RoomDto, type PlayerDto } from "../../apiUtils/dto";
 import type { NewQuestionNotification } from "../../apiUtils/notifications";
 import fetchImageUrl from "../../components/ImageDownloader";
-
+import defaultAvatarImg from "../../assets/defaultavatar.png";
+import tronImg from "../../assets/tron.png";
 function valuetext(value: number) {
     return `${value}`;
 }
@@ -62,7 +63,7 @@ function QuestionDefaultAnswer(props: any) {
     {/* slider */ }
     if (props.correctAnswer != null) {
         return (
-            <div className="left-aligment">
+            <div className="left-container-slider">
                 <Slider
                     aria-label="Small steps"
                     defaultValue={new Date(props.correctAnswer).getFullYear()}
@@ -82,13 +83,14 @@ function QuestionDefaultAnswer(props: any) {
 
                 <span className="accent-text">{year} год</span>
                 <button className="button-primary" disabled>Ответить</button>
+                
             </div >
         );
     }
 
     return (
 
-        <div className="left-aligment">
+        <div className="left-container-slider">
             
             <Slider
                 aria-label="Small steps"
@@ -107,8 +109,8 @@ function QuestionDefaultAnswer(props: any) {
                 }}
             />
 
-                <span className="accent-text">{year} год</span>
-            
+                
+            <span className="accent-text">{year} год</span>
             <button className="button-primary"
                 onClick={() => {
                     const answer: AnswerDto = { "$type": "datetime", value: new Date(Date.UTC(year, 0, 1)) };
@@ -117,6 +119,7 @@ function QuestionDefaultAnswer(props: any) {
 
                 }}
                 disabled={isDisabled}>Ответить</button>
+            
         </div >
     );
 }
@@ -176,7 +179,7 @@ function QuestionAnswer(props: any) {
 }
 
 function QuestionScreen(props: any) {
-    const [imageSrc, setimageSrc] = useState<string>("src/assets/defaultavatar.jpg");
+    const [imageSrc, setimageSrc] = useState<string>(defaultAvatarImg);
 
     if (props.game == null) {
         return;

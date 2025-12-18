@@ -43,11 +43,6 @@ export function in_room(props: CurrentAppState) {
     const offPlayerLeaved = gameHubService.onPlayerLeaved(onPlayerLeaved);
     const offNewGame = gameHubService.onNewGame(onNewGame);
 
-
-    gameHubService.onReturnToRoom(data => {
-        console.log(data);
-    });
-
     return () => {
         offNewPlayer();
         offPlayerLeaved();
@@ -144,6 +139,7 @@ export async function createGame(
         alert("Не удалось начать игру");
         return;
     }
+
     const result = await gameHubService.createGame({
         userId: userId,
         roomId,
@@ -187,7 +183,6 @@ export async function startGame(
         return false;
     }
     return true;
-
 }
 
 export async function leaveRoom(

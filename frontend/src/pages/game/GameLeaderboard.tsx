@@ -4,7 +4,8 @@ import PlayerCard from "../../components/Cards";
 import type { CurrentAppState } from "../../App";
 import { usePage } from "../../PageContext";
 import { gameHubService } from "../../apiUtils/HubServices";
-
+import defaultAvatarImg from "../../assets/defaultavatar.png";
+import tronImg from "../../assets/tron.png";
 export default function GameLeaderboard(props: CurrentAppState) {
     const { setPage } = usePage();
 
@@ -56,7 +57,7 @@ export default function GameLeaderboard(props: CurrentAppState) {
                     <div className="down-picture row-column">
                         <div className="down-element">
                             <img
-                                src="src/assets/defaultavatar.jpg"
+                                src={defaultAvatarImg}
                                 className="default-picture"
                             />
                         </div>
@@ -75,7 +76,7 @@ export default function GameLeaderboard(props: CurrentAppState) {
                     <div className="down-picture row-column">
                         <div className="up-element">
                             <img
-                                src="src/assets/defaultavatar.jpg"
+                                src={defaultAvatarImg}
                                 className="default-picture"
                             />
                         </div>

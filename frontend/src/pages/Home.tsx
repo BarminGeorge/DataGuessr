@@ -40,6 +40,7 @@ export default function HomePage(props: CurrentAppState) {
                     : "logo-and-login-button"}
                     interact_action={() => createRoom(props.user?.id, setPage, props.room, props.setRoom)}
                     interact_label={"Create lobby"}
+                    interact_profile={() => setPage("profile")}
                     playerName={props.user?.playerName}
                     avatarUrl={props.user?.avatarUrl}
                 />
