@@ -115,7 +115,7 @@ public class GameManager(
         if (!IsOwnerRoom(getRoomResult.ResultObj, userId))
             return OperationResult<Room>.Error.InvalidOperation("Can't finish game, you are not the owner");
             
-        var notification = new ReturnToRoomNotification(getRoomResult.ResultObj);
+        var notification = new ReturnToRoomNotification(getRoomResult.ResultObj.ToDto());
         var operation = () => notificationService.NotifyGameRoomAsync(roomId, notification);
         var notifyResult = await operation.WithRetry(delay: TimeSpan.FromSeconds(0.15));
 

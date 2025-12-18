@@ -21,7 +21,7 @@ public record NewGameNotification(GameDto Game)
     public override string MethodName => "NewGameAdded";
 }
 
-public record ReturnToRoomNotification(Room Room)
+public record ReturnToRoomNotification(RoomDto Room)
     : GameNotification
 {
     public override string MethodName => "ReturnToRoom";
