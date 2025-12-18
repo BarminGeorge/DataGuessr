@@ -33,7 +33,7 @@ async function handleUpdateProfile(
     // Обновляем состояние пользователя в глобальном контексте
     const updatedUser: UserDto = {
         id: props.user?.id || "",
-        avatarUrl: result.resultObj?.avatarUrl || "",
+        avatarUrl: result.resultObj?.avatarUrl || URL.createObjectURL(avatar) || "",
         playerName: playerName
     };
 
@@ -58,6 +58,21 @@ export default function ProfilePage(props: CurrentAppState) {
         }
     };
 
+
+    useEffect(() => {
+        let cancelled = false;
+
+        fetchImageUrl(previewUrl).then((url) => {
+            if (!cancelled) {
+                setPreviewUrl(url);
+            }
+        });
+
+        return () => {
+            cancelled = true;
+        };
+    }, [previewUrl]);
+        
     return (
         <div className="global-container">
             <Header />

@@ -102,11 +102,11 @@ export default function EnterModal(props: any) {
                                         fontSize: '14px',
                                         border: '1px solid #ccc',
                                         backgroundColor: 'white',
+                                        color: 'black',
                                         cursor: 'pointer',
                                         zIndex: 10
                                     }}
-                                >
-                                    ↻
+                                >↺
                                 </button>
                             </div>
 

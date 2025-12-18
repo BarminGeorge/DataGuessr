@@ -63,7 +63,7 @@ function QuestionDefaultAnswer(props: any) {
     {/* slider */ }
     if (props.correctAnswer != null) {
         return (
-            <div className="left-aligment">
+            <div className="left-container-slider">
                 <Slider
                     aria-label="Small steps"
                     defaultValue={new Date(props.correctAnswer).getFullYear()}
@@ -83,13 +83,14 @@ function QuestionDefaultAnswer(props: any) {
 
                 <span className="accent-text">{year} год</span>
                 <button className="button-primary" disabled>Ответить</button>
+                
             </div >
         );
     }
 
     return (
 
-        <div className="left-aligment">
+        <div className="left-container-slider">
             
             <Slider
                 aria-label="Small steps"
@@ -108,8 +109,8 @@ function QuestionDefaultAnswer(props: any) {
                 }}
             />
 
-                <span className="accent-text">{year} год</span>
-            
+                
+            <span className="accent-text">{year} год</span>
             <button className="button-primary"
                 onClick={() => {
                     const answer: AnswerDto = { "$type": "datetime", value: new Date(Date.UTC(year, 0, 1)) };
@@ -118,6 +119,7 @@ function QuestionDefaultAnswer(props: any) {
 
                 }}
                 disabled={isDisabled}>Ответить</button>
+            
         </div >
     );
 }

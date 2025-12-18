@@ -57,14 +57,13 @@ function HeaderWithLogoAndAvatarAndInteractive(props: any) {
 
     const { setPage } = usePage();
     const playerName = props.playerName;
-    const avatarUrl = props.avatarUrl ?? ""
 
     const [avatar, setAvatar] = useState<string>(defaultImage);
 
     useEffect(() => {
         let cancelled = false;
 
-        fetchImageUrl(avatarUrl).then((url) => {
+        fetchImageUrl(props.avatarUrl).then((url) => {
             if (!cancelled) {
                 setAvatar(url);
             }
@@ -73,7 +72,7 @@ function HeaderWithLogoAndAvatarAndInteractive(props: any) {
         return () => {
             cancelled = true;
         };
-    }, [avatarUrl]);
+    });
 
     return (
         <div className="header-container">
@@ -86,7 +85,7 @@ function HeaderWithLogoAndAvatarAndInteractive(props: any) {
                 <div className="secondary-text">{playerName}</div>
                 <div className="flex items-center gap35">
 
-                    <img onClick={() => setPage("profile")}
+                    <img onClick={props.interact_profile}
                         src={avatar}
                         alt="avatar"
                         className="avatar-preview"

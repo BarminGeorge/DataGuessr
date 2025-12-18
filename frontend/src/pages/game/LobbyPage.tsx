@@ -51,7 +51,7 @@ function CustomizedRadiosGameTime(props: any) {
         <FormControl>
             <FormLabel id="game-time-radios">Выберите время раунда</FormLabel>
             <RadioGroup
-                defaultValue="90"
+                defaultValue="30"
                 aria-labelledby="game-time-radios"
                 name="customized-radios"
                 onChange={(_, value) => props.setDuration(Number(value))}
@@ -84,8 +84,10 @@ export default function LobbyPage(props: CurrentAppState) {
 function LobbyPageCreatorView(props: CurrentAppState) {
     const { setPage } = usePage();
     const [mode, setMode] = useState(GameMode.Default);
-    const [duration, setDuration] = useState(10);
+    const [duration, setDuration] = useState(30);
 
+
+    console.log(mode, duration);
     if (props.room == null) {
         alert("undefined error");
         setPage("home");
@@ -105,6 +107,7 @@ function LobbyPageCreatorView(props: CurrentAppState) {
                 interact_label={"Leave lobby"}
                 playerName={props.user?.playerName}
                 avatarUrl={props.user?.avatarUrl}
+                interact_profile={() => (console.log(123))}
             />
             <div className="main-container">
 
@@ -156,6 +159,8 @@ function LobbyPageGuestView(props: CurrentAppState) {
             <Header variant="logo-and-avatar-and-interactive"
                 interact_action={() => leaveRoom(props.user?.id, props.room?.id, setPage, props.setRoom)}
                 interact_label={"Leave lobby"}
+                playerName={props.user?.playerName}
+                avatarUrl={props.user?.avatarUrl}
             />
             <div className="main-container">
 

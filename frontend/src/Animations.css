@@ -7,7 +7,7 @@
 /* 1. Пружинистые кнопки (Jelly Effect) */
 .button-primary {
     position: relative;
-    overflow: hidden;
+/*    overflow: hidden;*/
     /* Пружинная физика */
     transition: transform 0.4s cubic-bezier(0.34, 1.56, 0.64, 1), background-color 0.2s ease, box-shadow 0.2s ease;
 }
